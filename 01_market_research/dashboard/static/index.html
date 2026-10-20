@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SewLuxe Studio - Etsy Market Intelligence Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', 'Poppins', sans-serif;
+            background-color: #FAF8F5;
+            color: #1C1B1A;
+        }
+        .serif-title {
+            font-family: 'Lora', serif;
+        }
+        .luxury-card {
+            background: #FFFFFF;
+            border: 1px solid #EAE5DE;
+            transition: all 0.25s ease-in-out;
+        }
+        .luxury-card:hover {
+            border-color: #1C1B1A;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+        .category-card {
+            border: 1.5px solid #E5E0D8;
+            background: #FFFFFF;
+            transition: all 0.2s ease;
+        }
+        .category-card:hover {
+            border-color: #1C1B1A;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+        }
+        .category-card.active {
+            border-color: #EF4444;
+            background: #FFFBFB;
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+        }
+        .selected-model-card {
+            border: 2px solid #10B981 !important;
+            background: #F0FDF4 !important;
+        }
+        /* Pulse loader */
+        .spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border-left-color: #1C1B1A;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Top Navigation Bar -->
+    <header class="bg-white border-b border-[#EAE5DE] sticky top-0 z-50 px-6 py-4">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-[#1C1B1A] text-white flex items-center justify-center font-bold text-lg">
+                    SL
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight text-[#1C1B1A]">SewLuxe Market Intelligence</h1>
+                    <p class="text-xs text-gray-500">لوحة الاستخبارات وفحص أفضل باترونات الخياطة مبيعاً على Etsy</p>
+                </div>
+            </div>
+
+            <!-- Active Selection Pill -->
+            <div id="topSelectedPill" class="hidden items-center gap-2 bg-emerald-50 text-emerald-800 border border-emerald-200 px-4 py-2 rounded-full text-xs font-semibold">
+                <span>✅ الموديل المختار:</span>
+                <span id="topSelectedTitle" class="truncate max-w-[220px]">...</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-6 md:p-8 space-y-8">
+
+        <!-- Direct Etsy URL Scanner Bar -->
+        <section class="bg-gradient-to-r from-neutral-900 to-[#1C1B1A] text-white p-6 rounded-2xl shadow-lg border border-neutral-800">
+            <div class="flex flex-col lg:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-3 w-full lg:w-auto">
+                    <div class="w-10 h-10 rounded-xl bg-orange-500/20 text-orange-400 flex items-center justify-center text-xl font-bold">
+                        🔗
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-white">فحص وتحليل رابط مباشر من Etsy (Direct URL Analysis)</h3>
+                        <p class="text-xs text-neutral-400">حط أي رابط ديال باترون من متجر Etsy باش نقراوه ونجبدو صور الموديل والتفاصيل كاملة</p>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row items-center gap-2 w-full lg:w-1/2">
+                    <input id="directUrlInput" 
+                           type="url" 
+                           placeholder="https://www.etsy.com/listing/..." 
+                           class="w-full bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 px-4 py-2.5 rounded-xl text-xs focus:outline-none focus:border-orange-500 transition text-left" dir="ltr">
+                    <button onclick="scanDirectUrl()" 
+                            id="directScanBtn"
+                            class="w-full sm:w-auto whitespace-nowrap bg-orange-600 hover:bg-orange-500 text-white px-5 py-2.5 rounded-xl text-xs font-bold transition shadow-sm flex items-center justify-center gap-1.5">
+                        <span>🔍 تحليل الرابط</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Direct Analysis Result Modal / Card (Hidden by default) -->
+            <div id="directResultCard" class="hidden mt-6 pt-6 border-t border-neutral-800 flex-col md:flex-row items-start gap-6 bg-neutral-800/80 p-5 rounded-2xl border border-neutral-700">
+                <div class="w-32 h-40 flex-shrink-0 bg-neutral-900 rounded-xl overflow-hidden border border-neutral-700 shadow-md">
+                    <img id="directHeroImg" src="" alt="" class="w-full h-full object-cover">
+                </div>
+                
+                <div class="flex-1 text-right space-y-2">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="bg-orange-500/20 text-orange-400 text-[11px] font-bold px-2.5 py-0.5 rounded-full border border-orange-500/30">
+                            ✓ مطابقة تامة 1:1 من سيرفر Etsy
+                        </span>
+                        <span id="directShopBadge" class="bg-neutral-700 text-gray-200 text-[11px] font-semibold px-2.5 py-0.5 rounded-full">
+                            🏪 المتجر: ...
+                        </span>
+                        <span id="directPriceBadge" class="bg-emerald-500/20 text-emerald-400 text-[11px] font-bold px-2.5 py-0.5 rounded-full">
+                            💰 ...
+                        </span>
+                    </div>
+
+                    <h4 id="directTitle" class="text-base font-bold text-white leading-snug">...</h4>
+                    <p id="directDesc" class="text-xs text-neutral-300 line-clamp-3 leading-relaxed">...</p>
+                    
+                    <!-- Gallery preview -->
+                    <div id="directGallery" class="flex items-center gap-2 pt-1 overflow-x-auto pb-1">
+                        <!-- JS injected -->
+                    </div>
+
+                    <div class="pt-2 flex flex-wrap items-center gap-3">
+                        <a id="directLink" href="#" target="_blank" class="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-semibold transition">
+                            <span>فتح الصفحة الأصلية على متجر Etsy</span>
+                            <span>↗</span>
+                        </a>
+                        <span class="text-neutral-500 text-xs">•</span>
+                        <span id="directListingIdText" class="text-xs text-neutral-400">ID: ...</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2 w-full md:w-auto self-center md:self-start">
+                    <button onclick="selectDirectModel()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-6 py-3 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                        <span>✓ اعتماد هذا الموديل للإنتاج</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- PatternFast Step & Divisions Header -->
+        <section class="bg-white p-6 rounded-2xl border border-[#EAE5DE] shadow-sm">
+            <div class="flex flex-col md:flex-row items-center justify-between gap-4 border-b border-gray-100 pb-5">
+                <div>
+                    <div class="text-xs uppercase font-semibold text-gray-400 tracking-wider">Step 1/2</div>
+                    <h2 class="text-2xl font-bold serif-title text-[#1C1B1A]">Create new design - اختار نوع القطعة</h2>
+                </div>
+                
+                <!-- Division Tabs (Matching PatternFast) -->
+                <div class="flex flex-wrap items-center gap-1.5 p-1 bg-[#F5F2EF] rounded-xl border border-[#E2DDD5] text-xs font-medium">
+                    <button class="px-4 py-2 rounded-lg bg-white text-red-600 font-bold shadow-sm border border-red-200">Womenswear</button>
+                    <button class="px-4 py-2 rounded-lg text-gray-500 hover:text-black">Menswear</button>
+                    <button class="px-4 py-2 rounded-lg text-gray-500 hover:text-black">Girlswear</button>
+                    <button class="px-4 py-2 rounded-lg text-gray-500 hover:text-black">Boyswear</button>
+                    <button class="px-4 py-2 rounded-lg text-gray-500 hover:text-black">Junior Girls</button>
+                    <button class="px-4 py-2 rounded-lg text-gray-500 hover:text-black">Junior Boys</button>
+                </div>
+            </div>
+
+            <!-- Choose Type of Garment (8 Categories Grid) -->
+            <div class="mt-6">
+                <p class="text-sm font-semibold text-gray-500 mb-4">Choose type of garment (اختر التصنيف لبدء فحص الـ Bestsellers على Etsy):</p>
+                <div id="categoriesGrid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-8 gap-3">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Category Active Header & Scan Trigger -->
+        <section class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#F5F2EF] p-5 rounded-2xl border border-[#E2DDD5]">
+            <div class="flex items-center gap-3">
+                <span id="activeCatIcon" class="text-3xl">👖</span>
+                <div>
+                    <h3 id="activeCatTitle" class="text-lg font-bold text-[#1C1B1A]">السراويل والبنطلونات (Pants)</h3>
+                    <p id="activeCatDesc" class="text-xs text-gray-500">فحص أكثر 5 موديلات مبيعاً وتقييماً على Etsy</p>
+                </div>
+            </div>
+
+            <button id="rescanBtn" onclick="triggerCurrentScan()" class="flex items-center gap-2 bg-[#1C1B1A] text-white hover:bg-black px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <span>فحص Etsy الآن (Live Scan)</span>
+            </button>
+        </section>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="hidden flex-col items-center justify-center py-16 bg-white rounded-2xl border border-dashed border-gray-300">
+            <div class="spinner mb-4"></div>
+            <p class="text-sm font-bold text-[#1C1B1A]">جاري الاتصال بسيرفرات Etsy وفحص أفضل 5 موديلات مبيعاً...</p>
+            <p class="text-xs text-gray-500 mt-1">يتم استخراج صور الموديل، العناوين، الروابط، وتفاصيل الخياطة</p>
+        </div>
+
+        <!-- Top 5 Bestsellers Results Grid -->
+        <section id="resultsSection">
+            <div class="flex items-center justify-between mb-4">
+                <h4 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Top 5 Bestsellers on Etsy</h4>
+                <span id="resultsCountBadge" class="bg-gray-100 text-gray-600 text-xs px-2.5 py-1 rounded-full font-medium">5 موديلات جاهزة</span>
+            </div>
+
+            <div id="resultsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-5">
+                <!-- Cards populated by JS -->
+            </div>
+        </section>
+
+        <!-- Bottom Action Bar for Selected Model -->
+        <div id="selectionBanner" class="hidden fixed bottom-6 left-6 right-6 max-w-4xl mx-auto bg-[#1C1B1A] text-white p-4 rounded-2xl shadow-2xl flex flex-col sm:flex-row items-center justify-between gap-4 z-50 border border-neutral-700 animate-bounce-short">
+            <div class="flex items-center gap-3">
+                <span class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-sm font-bold">✓</span>
+                <div>
+                    <div class="text-xs text-emerald-400 font-semibold">تم اختيار الموديل للإنتاج بنجاح:</div>
+                    <div id="selectedModelName" class="text-sm font-bold truncate max-w-[400px]">...</div>
+                </div>
+            </div>
+            <div class="text-xs text-gray-300 bg-neutral-800 px-4 py-2 rounded-xl border border-neutral-700">
+                💬 ارجع للشات وقولي: <strong class="text-white">"اخترت هذا الموديل"</strong> ونبداو فوراً فـ PatternFast و Tailornova!
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="bg-white border-t border-[#EAE5DE] py-4 text-center text-xs text-gray-400 mt-auto">
+        SewLuxe Patterns Studio © 2026 • Argon Benchmark Pipeline
+    </footer>
+
+    <script>
+        let currentCategory = 'pants';
+        let categoriesData = [];
+        let selectedModel = null;
+
+        const ICONS_MAP = {
+            'jackets': '🧥',
+            'dresses': '👗',
+            'tops': '👚',
+            'jumpsuits': '🩱',
+            'pants': '👖',
+            'skirts': '🩱',
+            'sweatshirts': '🧥',
+            'tshirts': '👕'
+        };
+
+        // Initialize
+        async function init() {
+            await loadCategories();
+            await checkSelected();
+            await loadResults(currentCategory);
+        }
+
+        async function loadCategories() {
+            try {
+                const res = await fetch('/api/categories');
+                categoriesData = await res.json();
+                renderCategoriesGrid();
+            } catch (err) {
+                console.error("Error loading categories:", err);
+            }
+        }
+
+        function renderCategoriesGrid() {
+            const grid = document.getElementById('categoriesGrid');
+            grid.innerHTML = '';
+
+            categoriesData.forEach(cat => {
+                const isActive = cat.id === currentCategory;
+                const icon = ICONS_MAP[cat.id] || '🧵';
+                
+                const card = document.createElement('div');
+                card.className = `category-card p-3 rounded-xl flex flex-col items-center justify-center cursor-pointer text-center relative ${isActive ? 'active' : ''}`;
+                card.onclick = () => selectCategory(cat.id);
+
+                card.innerHTML = `
+                    <div class="text-2xl mb-1.5">${icon}</div>
+                    <span class="text-xs font-bold text-[#1C1B1A] truncate w-full">${cat.title_en}</span>
+                    <span class="text-[10px] text-gray-400 truncate w-full">${cat.title_ar.split('(')[0].trim()}</span>
+                    ${isActive ? '<div class="absolute -top-1.5 -right-1.5 w-3 h-3 bg-red-500 rounded-full border-2 border-white"></div>' : ''}
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function selectCategory(catId) {
+            currentCategory = catId;
+            const cat = categoriesData.find(c => c.id === catId);
+            if (cat) {
+                document.getElementById('activeCatTitle').innerText = `${cat.title_en} - ${cat.title_ar}`;
+                document.getElementById('activeCatDesc').innerText = cat.desc;
+                document.getElementById('activeCatIcon').innerText = ICONS_MAP[cat.id] || '🧵';
+            }
+            renderCategoriesGrid();
+            loadResults(catId);
+        }
+
+        async function loadResults(catId) {
+            showLoading(true);
+            try {
+                const res = await fetch(`/api/results/${catId}`);
+                const data = await res.json();
+                
+                if (data.results && data.results.length > 0) {
+                    renderResults(data.results);
+                } else {
+                    // Trigger scan automatically if empty
+                    await triggerCurrentScan();
+                }
+            } catch (e) {
+                console.error(e);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        async function triggerCurrentScan() {
+            showLoading(true);
+            try {
+                const res = await fetch(`/api/scan/${currentCategory}`, { method: 'POST' });
+                const data = await res.json();
+                renderResults(data.results || []);
+            } catch (err) {
+                console.error(err);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function renderResults(results) {
+            const grid = document.getElementById('resultsGrid');
+            grid.innerHTML = '';
+            document.getElementById('resultsCountBadge').innerText = `${results.length} موديلات جاهزة`;
+
+            if (results.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-gray-400">
+                        لا توجد نتائج محفوظة بعد لهذا التصنيف. اضغط على "فحص Etsy الآن" للبدء.
+                    </div>
+                `;
+                return;
+            }
+
+            results.forEach((item, idx) => {
+                const isSelected = selectedModel && selectedModel.title === item.title;
+                const card = document.createElement('div');
+                card.className = `luxury-card rounded-2xl overflow-hidden flex flex-col justify-between p-4 ${isSelected ? 'selected-model-card' : ''}`;
+
+                card.innerHTML = `
+                    <div>
+                        <!-- Rank Badge & Category -->
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="bg-[#1C1B1A] text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
+                                #${item.rank || (idx + 1)} Bestseller
+                            </span>
+                            <span class="text-[10px] text-gray-400 font-medium">${item.style_name || item.tag}</span>
+                        </div>
+
+                        <!-- Hero Image -->
+                        <div class="w-full aspect-[4/5] bg-gray-100 rounded-xl overflow-hidden mb-3.5 border border-gray-100 relative group">
+                            <img src="${item.image_url || item.original_image}" 
+                                 alt="${item.title}" 
+                                 class="w-full h-full object-cover group-hover:scale-105 transition duration-300"
+                                 onerror="this.src='https://placehold.co/400x500/FAF8F5/1C1B1A?text=Pattern+Image'">
+                        </div>
+
+                        <!-- Title -->
+                        <h5 class="text-xs font-bold text-[#1C1B1A] line-clamp-2 mb-2" title="${item.title}">
+                            ${item.title}
+                        </h5>
+
+                        <!-- Etsy Listing Link -->
+                        <a href="${item.etsy_url}" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-800 mb-4">
+                            <span>عرض على متجر Etsy ↗</span>
+                        </a>
+                    </div>
+
+                    <!-- Select for Production Button -->
+                    <button onclick="selectThisPattern(${idx})" class="w-full mt-2 py-2.5 px-3 rounded-xl font-bold text-xs flex items-center justify-center gap-2 transition ${isSelected ? 'bg-emerald-600 text-white' : 'bg-[#1C1B1A] text-white hover:bg-black'}">
+                        ${isSelected ? '✓ تم اختيار هذا الموديل' : 'اختيار للإنتاج 🧵'}
+                    </button>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        async function selectThisPattern(index) {
+            const res = await fetch(`/api/results/${currentCategory}`);
+            const data = await res.json();
+            const pattern = data.results[index];
+
+            if (!pattern) return;
+
+            const payload = {
+                category_id: currentCategory,
+                rank: pattern.rank || (index + 1),
+                title: pattern.title,
+                image_url: pattern.image_url || pattern.original_image,
+                etsy_url: pattern.etsy_url,
+                style_name: pattern.style_name || pattern.tag,
+                features: []
+            };
+
+            const postRes = await fetch('/api/select', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            selectedModel = payload;
+            updateSelectedUI();
+            renderResults(data.results);
+        }
+
+        async function checkSelected() {
+            try {
+                const res = await fetch('/api/selected');
+                const data = await res.json();
+                if (data && data.title) {
+                    selectedModel = data;
+                    updateSelectedUI();
+                }
+            } catch (err) {}
+        }
+
+        function updateSelectedUI() {
+            if (selectedModel) {
+                document.getElementById('topSelectedPill').classList.remove('hidden');
+                document.getElementById('topSelectedPill').classList.add('flex');
+                document.getElementById('topSelectedTitle').innerText = selectedModel.title;
+
+                document.getElementById('selectionBanner').classList.remove('hidden');
+                document.getElementById('selectionBanner').classList.add('flex');
+                document.getElementById('selectedModelName').innerText = selectedModel.title;
+            }
+        }
+
+        let currentDirectData = null;
+
+        async function scanDirectUrl() {
+            const input = document.getElementById('directUrlInput');
+            const url = input.value.trim();
+            if (!url) {
+                alert("يرجى لصق رابط منتج Etsy أولاً");
+                return;
+            }
+
+            const btn = document.getElementById('directScanBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner inline-block w-3.5 h-3.5 border-2 border-white/20 border-l-white mr-1.5"></span> جاري الفحص...`;
+
+            try {
+                const res = await fetch('/api/scan-url', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url: url })
+                });
+                const data = await res.json();
+                
+                if (data.status === 'success' && data.data) {
+                    currentDirectData = data.data;
+                    document.getElementById('directHeroImg').src = currentDirectData.image_url;
+                    document.getElementById('directTitle').innerText = currentDirectData.title;
+                    document.getElementById('directDesc').innerText = currentDirectData.desc;
+                    document.getElementById('directLink').href = currentDirectData.etsy_url;
+                    
+                    // Shop badge
+                    const shopBadge = document.getElementById('directShopBadge');
+                    shopBadge.innerText = currentDirectData.shop_name ? `🏪 المتجر: ${currentDirectData.shop_name}` : '🏪 متجر Etsy';
+
+                    // Price badge
+                    const priceBadge = document.getElementById('directPriceBadge');
+                    if (currentDirectData.price) {
+                        priceBadge.innerText = `💰 السعر: ${currentDirectData.price}`;
+                        priceBadge.classList.remove('hidden');
+                    } else {
+                        priceBadge.classList.add('hidden');
+                    }
+
+                    // Listing ID text
+                    document.getElementById('directListingIdText').innerText = `ID: ${currentDirectData.listing_id || 'N/A'}`;
+
+                    // Gallery thumbnails
+                    const galContainer = document.getElementById('directGallery');
+                    galContainer.innerHTML = '';
+                    if (currentDirectData.gallery_images && currentDirectData.gallery_images.length > 1) {
+                        currentDirectData.gallery_images.slice(0, 6).forEach((imgUrl, gIdx) => {
+                            const thumb = document.createElement('img');
+                            thumb.src = imgUrl;
+                            thumb.className = 'w-12 h-14 object-cover rounded-lg border border-neutral-700 cursor-pointer hover:border-orange-500 hover:scale-105 transition';
+                            thumb.onclick = () => {
+                                document.getElementById('directHeroImg').src = imgUrl;
+                                currentDirectData.image_url = imgUrl;
+                            };
+                            galContainer.appendChild(thumb);
+                        });
+                    }
+                    
+                    const card = document.getElementById('directResultCard');
+                    card.classList.remove('hidden');
+                    card.classList.add('flex');
+                } else {
+                    alert("تعذر قراءة بيانات هذا الرابط، يرجى التأكد من الرابط والمحاولة مجدداً.");
+                }
+            } catch (err) {
+                console.error(err);
+                alert("حدث خطأ أثناء فحص الرابط");
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<span>🔍 تحليل الرابط</span>`;
+            }
+        }
+
+        async function selectDirectModel() {
+            if (!currentDirectData) return;
+
+            const payload = {
+                category_id: currentCategory || 'custom',
+                rank: 1,
+                title: currentDirectData.title,
+                image_url: currentDirectData.image_url,
+                etsy_url: currentDirectData.etsy_url,
+                style_name: currentDirectData.style_name,
+                features: []
+            };
+
+            await fetch('/api/select', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            selectedModel = payload;
+            updateSelectedUI();
+            alert("✓ تم اختيار الموديل بنجاح وحفظه للإنتاج!");
+        }
+
+        function showLoading(show) {
+            const l = document.getElementById('loadingState');
+            const r = document.getElementById('resultsSection');
+            if (show) {
+                l.classList.remove('hidden');
+                l.classList.add('flex');
+                r.classList.add('opacity-40');
+            } else {
+                l.classList.add('hidden');
+                l.classList.remove('flex');
+                r.classList.remove('opacity-40');
+            }
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>

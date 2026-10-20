@@ -1,0 +1,32 @@
+{
+  "wide_leg": [
+    {
+      "tag": "wide_leg",
+      "rank": 1,
+      "filename": "wide_leg.jpg",
+      "title": "Wide Leg Pants Sewing Pattern: Elastic Waistband (PDF Pattern) - Etsy",
+      "etsy_page": "https://www.etsy.com/listing/1778037149/wide-leg-pants-sewing-pattern-elastic",
+      "img_url": "https://i.etsystatic.com/53117075/r/il/f61eb7/6499066779/il_1080xN.6499066779_nizf.jpg"
+    }
+  ],
+  "cargo_pants": [
+    {
+      "tag": "cargo_pants",
+      "rank": 1,
+      "filename": "cargo_pants.jpg",
+      "title": "Straight Leg Cargo Pants Sewing Pattern: Ladies Sizes 2-30 (PDF Pattern ...",
+      "etsy_page": "https://www.etsy.com/listing/1579229710/straight-leg-cargo-pants-sewing-pattern",
+      "img_url": "https://i.etsystatic.com/40339442/r/il/91fa8c/5425077112/il_1080xN.5425077112_k16l.jpg"
+    }
+  ],
+  "paperbag_pants": [
+    {
+      "tag": "paperbag_pants",
+      "rank": 1,
+      "filename": "paperbag_pants.jpg",
+      "title": "High Waist Paperbag Pants Sewing Pattern: Wide Leg Trousers (A4 & A0 ...",
+      "etsy_page": "https://www.etsy.com/listing/4383315509/high-waist-paperbag-pants-sewing-pattern",
+      "img_url": "https://i.etsystatic.com/62068474/r/il/0d6eae/7314856431/il_1080xN.7314856431_i9ow.jpg"
+    }
+  ]
+}
