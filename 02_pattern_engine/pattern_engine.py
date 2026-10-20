@@ -17,7 +17,9 @@ if sys.stdout.encoding and sys.stdout.encoding.lower() != 'utf-8':
         pass
 
 class PatternFastEngine:
-    def __init__(self, email: str = "lefavoy394@proguidex.com", password: str = "Elyousfi1993@"):
+    def __init__(self, email: Optional[str] = None, password: Optional[str] = None):
+        self.email = email or os.environ.get("PATTERNFAST_EMAIL", "benemeb244@moravita.com")
+        self.password = password or os.environ.get("PATTERNFAST_PASSWORD", "Elyousfi1993@")
         self.email = email
         self.password = password
         self.token: Optional[str] = None
