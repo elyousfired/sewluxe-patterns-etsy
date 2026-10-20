@@ -75,18 +75,18 @@ class BookletAuditor:
         self.audit_page_6_cutting_guide(self.doc[5])
         self.audit_page_7_pieces_guide(self.doc[6])
         self.audit_page_8_videos(self.doc[7])
-        self.audit_instruction_pages(self.doc[8:15])
-        self.audit_page_16_final(self.doc[15])
+        self.audit_instruction_pages(self.doc[8:-1])
+        self.audit_final_page(self.doc[-1], len(self.doc))
         
         return self.generate_report()
 
-    # ---------------- Check 1: Page Count ----------------
+    # ---------------- Check 1: Page Count (Flexible Step-Driven Standard: 16+ Pages) ----------------
     def audit_page_count(self):
         count = len(self.doc)
-        if count == 16:
-            self.add_pass(0, "Page Count", "Document has exactly 16 pages (Luxury standard).")
+        if count >= 16:
+            self.add_pass(0, "Page Count", f"Document has {count} pages (Step-driven flexible luxury standard: 16+ pages).")
         else:
-            self.add_issue(0, "Page Count", f"Expected exactly 16 pages, but found {count} pages.")
+            self.add_issue(0, "Page Count", f"Expected at least 16 pages, but found {count} pages.")
 
     # ---------------- Check 2: Cover Page (Page 1) ----------------
     def audit_cover_page(self, page):
@@ -289,18 +289,18 @@ class BookletAuditor:
             else:
                 self.add_pass(page_num, "Layout Density", f"Page {page_num} diagram dynamically fills vertical space harmoniously.")
 
-    # ---------------- Check 11: Page 16 (Final Page & Garment Matching) ----------------
-    def audit_page_16_final(self, page):
+    # ---------------- Check 11: Final Outro Page (Celebration & Garment Matching) ----------------
+    def audit_final_page(self, page, page_num):
         text = page.get_text()
         if "Enjoy Your" not in text:
-            self.add_issue(16, "Final Celebration", "Kicker 'Enjoy Your...' missing on Page 16.")
+            self.add_issue(page_num, "Final Celebration", f"Kicker 'Enjoy Your...' missing on Page {page_num}.")
             
         # Verify images: must have 2 images side by side
         images = page.get_images()
         if len(images) < 2:
-            self.add_issue(16, "Dual Showcase", f"Expected 2 showcase images on Page 16, found {len(images)}.")
+            self.add_issue(page_num, "Dual Showcase", f"Expected 2 showcase images on Page {page_num}, found {len(images)}.")
         else:
-            self.add_pass(16, "Dual Showcase", "Page 16 features dual Front + Back showcase.")
+            self.add_pass(page_num, "Dual Showcase", f"Page {page_num} features dual Front + Back showcase.")
 
         # Ensure no mismatched garment model photo (e.g. check if right image has white background or mismatch)
         pix = page.get_pixmap(dpi=150)
@@ -314,9 +314,9 @@ class BookletAuditor:
         pure_white_count = np.sum((arr_right[:, :, 0] > 253) & (arr_right[:, :, 1] > 253) & (arr_right[:, :, 2] > 253))
         white_pct = pure_white_count / float(arr_right.shape[0] * arr_right.shape[1])
         if white_pct > 0.15:
-            self.add_issue(16, "Model Photo Transparency", f"Opaque white box detected on Page 16 right showcase ({white_pct*100:.1f}%). Must be transparent.")
+            self.add_issue(page_num, "Model Photo Transparency", f"Opaque white box detected on Page {page_num} right showcase ({white_pct*100:.1f}%). Must be transparent.")
         else:
-            self.add_pass(16, "Model Showcase Integrity", "Page 16 showcase has clean transparent blending.")
+            self.add_pass(page_num, "Model Showcase Integrity", f"Page {page_num} showcase has clean transparent blending.")
 
     # ---------------- Report Summary & Self-Healing Export ----------------
     def generate_report(self, report_json_path=None):
