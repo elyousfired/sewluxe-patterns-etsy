@@ -1,0 +1,62 @@
+{
+  "garment_name": "Margot",
+  "garment_type": "Wide-Leg Pants",
+  "full_title": "Margot Elastic Wide-Leg Pants",
+  "subtitle": "High-rise relaxed wide-leg pull-on trousers with elasticated casing waistband and concealed in-seam pockets.",
+  "category_code": "wm_pants",
+  "division": "womenswear",
+  "silhouette": "High-rise relaxed wide straight leg with fluid drape",
+  "closure": "Pull-on continuous elasticated waistband casing (No zipper, no fly)",
+  "pockets": {
+    "front": "Concealed in-seam side pockets anchored cleanly into side seams",
+    "back": "Clean unadorned back with continuous drape"
+  },
+  "hem": "Deep 3 cm (1 1/8 in) clean topstitched hem",
+  "seam_allowance": "1 cm (3/8 in)",
+  "suggested_fabrics": "Lightweight to medium-weight woven fabrics with fluid drape: washed linen, linen blends, cotton twill, tencel modal, chambray, or viscose rayon.",
+  "lining_fabric": "Self-fabric or lightweight cotton batiste for pocket bags.",
+  "palette_theme": "Olive Linen & Cream",
+  "colors": {
+    "primary": "#2D3728",
+    "secondary": "#58694B",
+    "page_bg": "#FAF8F5",
+    "table_head": "#2D3728",
+    "table_alt": "#F2F4F0",
+    "rule_line": "#E2DDD5",
+    "text_body": "#1A1918",
+    "muted": "#6E6862"
+  },
+  "features": [
+    "High-rise wide-leg silhouette with relaxed fluid fall",
+    "Continuous pull-on elasticated waistband casing",
+    "Concealed in-seam pockets nested cleanly into side seams",
+    "Zero zippers, zero buttons, and zero darts for accessible sewing",
+    "Deep 3 cm (1 1/8 in) hem for weighted drape and stability"
+  ],
+  "pieces": [
+    {
+      "index": 1,
+      "name": "Pants Front",
+      "material": "Main Fabric",
+      "cut": "Cut 2"
+    },
+    {
+      "index": 2,
+      "name": "Pants Back",
+      "material": "Main Fabric",
+      "cut": "Cut 2"
+    },
+    {
+      "index": 3,
+      "name": "Waistband",
+      "material": "Main Fabric",
+      "cut": "Cut 1"
+    },
+    {
+      "index": 4,
+      "name": "Pocket Bag",
+      "material": "Lining",
+      "cut": "Cut 4"
+    }
+  ]
+}

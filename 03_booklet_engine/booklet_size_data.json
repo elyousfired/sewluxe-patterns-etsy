@@ -1,0 +1,301 @@
+{
+  "00": {
+    "size": "00",
+    "body": {
+      "height_cm": 167.75,
+      "bust_cm": 80.0,
+      "waist_cm": 63.5,
+      "hips_cm": 87.75,
+      "waist_in": 25.0,
+      "hips_in": 34.5
+    },
+    "finished": {
+      "hips_cm": 92.5,
+      "hips_in": 36.4,
+      "leg_opening_cm": 56.9,
+      "leg_opening_in": 22.4,
+      "inseam_cm": 75.5,
+      "inseam_in": 29.7,
+      "side_seam_cm": 101.2,
+      "side_seam_in": 39.8,
+      "elastic_length_cm": 53.2,
+      "elastic_length_in": 20.9
+    }
+  },
+  "0": {
+    "size": "0",
+    "body": {
+      "height_cm": 167.75,
+      "bust_cm": 82.5,
+      "waist_cm": 66.0,
+      "hips_cm": 90.25,
+      "waist_in": 26.0,
+      "hips_in": 35.5
+    },
+    "finished": {
+      "hips_cm": 95.0,
+      "hips_in": 37.4,
+      "leg_opening_cm": 58.6,
+      "leg_opening_in": 23.1,
+      "inseam_cm": 75.2,
+      "inseam_in": 29.6,
+      "side_seam_cm": 101.1,
+      "side_seam_in": 39.8,
+      "elastic_length_cm": 55.2,
+      "elastic_length_in": 21.7
+    }
+  },
+  "2": {
+    "size": "2",
+    "body": {
+      "height_cm": 167.75,
+      "bust_cm": 85.0,
+      "waist_cm": 68.75,
+      "hips_cm": 92.75,
+      "waist_in": 27.1,
+      "hips_in": 36.5
+    },
+    "finished": {
+      "hips_cm": 97.5,
+      "hips_in": 38.4,
+      "leg_opening_cm": 60.0,
+      "leg_opening_in": 23.6,
+      "inseam_cm": 74.8,
+      "inseam_in": 29.4,
+      "side_seam_cm": 101.1,
+      "side_seam_in": 39.8,
+      "elastic_length_cm": 57.4,
+      "elastic_length_in": 22.6
+    }
+  },
+  "4": {
+    "size": "4",
+    "body": {
+      "height_cm": 167.75,
+      "bust_cm": 87.75,
+      "waist_cm": 71.25,
+      "hips_cm": 95.25,
+      "waist_in": 28.1,
+      "hips_in": 37.5
+    },
+    "finished": {
+      "hips_cm": 100.0,
+      "hips_in": 39.4,
+      "leg_opening_cm": 61.5,
+      "leg_opening_in": 24.2,
+      "inseam_cm": 74.4,
+      "inseam_in": 29.3,
+      "side_seam_cm": 101.0,
+      "side_seam_in": 39.8,
+      "elastic_length_cm": 59.4,
+      "elastic_length_in": 23.4
+    }
+  },
+  "6": {
+    "size": "6",
+    "body": {
+      "height_cm": 167.75,
+      "bust_cm": 90.25,
+      "waist_cm": 73.75,
+      "hips_cm": 98.0,
+      "waist_in": 29.0,
+      "hips_in": 38.6
+    },
+    "finished": {
+      "hips_cm": 102.7,
+      "hips_in": 40.4,
+      "leg_opening_cm": 63.2,
+      "leg_opening_in": 24.9,
+      "inseam_cm": 74.0,
+      "inseam_in": 29.1,
+      "side_seam_cm": 101.0,
+      "side_seam_in": 39.8,
+      "elastic_length_cm": 61.4,
+      "elastic_length_in": 24.2
+    }
+  },
+  "8": {
+    "size": "8",
+    "body": {
+      "height_cm": 167.75,
+      "bust_cm": 92.75,
+      "waist_cm": 76.25,
+      "hips_cm": 100.25,
+      "waist_in": 30.0,
+      "hips_in": 39.5
+    },
+    "finished": {
+      "hips_cm": 104.9,
+      "hips_in": 41.3,
+      "leg_opening_cm": 64.6,
+      "leg_opening_in": 25.4,
+      "inseam_cm": 73.6,
+      "inseam_in": 29.0,
+      "side_seam_cm": 100.9,
+      "side_seam_in": 39.7,
+      "elastic_length_cm": 63.4,
+      "elastic_length_in": 25.0
+    }
+  },
+  "10": {
+    "size": "10",
+    "body": {
+      "height_cm": 167.75,
+      "bust_cm": 95.25,
+      "waist_cm": 78.75,
+      "hips_cm": 102.75,
+      "waist_in": 31.0,
+      "hips_in": 40.5
+    },
+    "finished": {
+      "hips_cm": 107.4,
+      "hips_in": 42.3,
+      "leg_opening_cm": 66.0,
+      "leg_opening_in": 26.0,
+      "inseam_cm": 73.2,
+      "inseam_in": 28.8,
+      "side_seam_cm": 100.9,
+      "side_seam_in": 39.7,
+      "elastic_length_cm": 65.4,
+      "elastic_length_in": 25.7
+    }
+  },
+  "12": {
+    "size": "12",
+    "body": {
+      "height_cm": 167.75,
+      "bust_cm": 99.25,
+      "waist_cm": 82.75,
+      "hips_cm": 106.5,
+      "waist_in": 32.6,
+      "hips_in": 41.9
+    },
+    "finished": {
+      "hips_cm": 111.1,
+      "hips_in": 43.7,
+      "leg_opening_cm": 67.9,
+      "leg_opening_in": 26.7,
+      "inseam_cm": 72.7,
+      "inseam_in": 28.6,
+      "side_seam_cm": 100.8,
+      "side_seam_in": 39.7,
+      "elastic_length_cm": 68.6,
+      "elastic_length_in": 27.0
+    }
+  },
+  "14": {
+    "size": "14",
+    "body": {
+      "height_cm": 167.75,
+      "bust_cm": 104.25,
+      "waist_cm": 87.5,
+      "hips_cm": 111.0,
+      "waist_in": 34.4,
+      "hips_in": 43.7
+    },
+    "finished": {
+      "hips_cm": 115.6,
+      "hips_in": 45.5,
+      "leg_opening_cm": 70.2,
+      "leg_opening_in": 27.6,
+      "inseam_cm": 72.0,
+      "inseam_in": 28.3,
+      "side_seam_cm": 100.7,
+      "side_seam_in": 39.6,
+      "elastic_length_cm": 72.4,
+      "elastic_length_in": 28.5
+    }
+  },
+  "16": {
+    "size": "16",
+    "body": {
+      "height_cm": 167.75,
+      "bust_cm": 109.25,
+      "waist_cm": 93.25,
+      "hips_cm": 115.5,
+      "waist_in": 36.7,
+      "hips_in": 45.5
+    },
+    "finished": {
+      "hips_cm": 120.0,
+      "hips_in": 47.2,
+      "leg_opening_cm": 72.6,
+      "leg_opening_in": 28.6,
+      "inseam_cm": 71.3,
+      "inseam_in": 28.1,
+      "side_seam_cm": 100.5,
+      "side_seam_in": 39.6,
+      "elastic_length_cm": 77.0,
+      "elastic_length_in": 30.3
+    }
+  },
+  "18": {
+    "size": "18",
+    "body": {
+      "height_cm": 167.75,
+      "bust_cm": 114.25,
+      "waist_cm": 99.0,
+      "hips_cm": 120.75,
+      "waist_in": 39.0,
+      "hips_in": 47.5
+    },
+    "finished": {
+      "hips_cm": 125.1,
+      "hips_in": 49.3,
+      "leg_opening_cm": 75.1,
+      "leg_opening_in": 29.6,
+      "inseam_cm": 70.5,
+      "inseam_in": 27.8,
+      "side_seam_cm": 100.4,
+      "side_seam_in": 39.5,
+      "elastic_length_cm": 81.6,
+      "elastic_length_in": 32.1
+    }
+  },
+  "20": {
+    "size": "20",
+    "body": {
+      "height_cm": 167.75,
+      "bust_cm": 119.25,
+      "waist_cm": 104.75,
+      "hips_cm": 125.75,
+      "waist_in": 41.2,
+      "hips_in": 49.5
+    },
+    "finished": {
+      "hips_cm": 130.0,
+      "hips_in": 51.2,
+      "leg_opening_cm": 77.7,
+      "leg_opening_in": 30.6,
+      "inseam_cm": 69.8,
+      "inseam_in": 27.5,
+      "side_seam_cm": 100.2,
+      "side_seam_in": 39.4,
+      "elastic_length_cm": 86.2,
+      "elastic_length_in": 33.9
+    }
+  },
+  "22": {
+    "size": "22",
+    "body": {
+      "height_cm": 167.75,
+      "bust_cm": 124.25,
+      "waist_cm": 110.5,
+      "hips_cm": 130.75,
+      "waist_in": 43.5,
+      "hips_in": 51.5
+    },
+    "finished": {
+      "hips_cm": 134.9,
+      "hips_in": 53.1,
+      "leg_opening_cm": 80.1,
+      "leg_opening_in": 31.5,
+      "inseam_cm": 69.1,
+      "inseam_in": 27.2,
+      "side_seam_cm": 100.0,
+      "side_seam_in": 39.4,
+      "elastic_length_cm": 90.8,
+      "elastic_length_in": 35.7
+    }
+  }
+}
