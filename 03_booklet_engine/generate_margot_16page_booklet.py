@@ -112,24 +112,28 @@ def draw_section_kicker(c, y, kicker, title):
 
 def draw_tip_box(c, x, y, width, height, title, body_text):
     c.saveState()
-    c.setFillColor(TINT_BOX)
-    c.rect(x, y - height, width, height, fill=1, stroke=0)
-    c.setFillColor(SECONDARY)
-    c.rect(x, y - height, 3, height, fill=1, stroke=0)
-    c.setFont("Poppins-Bold", 8.6)
-    c.drawString(x + 12, y - 14, title)
-    
     style = ParagraphStyle(
-        name=f"TipStyle_{x}_{y}",
+        name=f"TipStyle_{x}_{y}_{len(body_text)}",
         fontName="Poppins",
-        fontSize=8.0,
-        leading=11.5,
+        fontSize=7.8,
+        leading=11.2,
         textColor=TEXT_BODY
     )
     p = Paragraph(body_text, style)
-    p.wrapOn(c, width - 24, height - 24)
-    p.drawOn(c, x + 12, y - height + 10)
+    w, h = p.wrap(width - 24, 200)
+    box_h = max(height, h + 28.0)
+    
+    c.setFillColor(TINT_BOX)
+    c.rect(x, y - box_h, width, box_h, fill=1, stroke=0)
+    c.setFillColor(SECONDARY)
+    c.rect(x, y - box_h, 3.5, box_h, fill=1, stroke=0)
+    
+    c.setFont("Poppins-Bold", 8.4)
+    c.setFillColor(SECONDARY)
+    c.drawString(x + 12, y - 13.5, title)
+    p.drawOn(c, x + 12, y - 13.5 - 5 - h)
     c.restoreState()
+    return box_h
 
 def build_pdf():
     os.makedirs(DESKTOP_DIR, exist_ok=True)
@@ -163,16 +167,25 @@ def build_pdf():
     sub_p.wrapOn(c, W - 2*M - 40, 40)
     sub_p.drawOn(c, M + 20, H - 150)
     
-    cover_img_path = os.path.join(ENGINE_DIR, "margot_cover_model.jpg")
+    cover_img_path = os.path.join(ENGINE_DIR, "margot_cover_clean_sq.jpg")
     img_size = 405.0
     img_x = (W - img_size) / 2.0
     img_y = H - 575.0
     
     if os.path.exists(cover_img_path):
+        c.setFillColor(WHITE)
+        c.rect(img_x - 6, img_y - 6, img_size + 12, img_size + 12, fill=1, stroke=0)
         c.setStrokeColor(RULE_LINE)
         c.setLineWidth(1)
-        c.rect(img_x - 4, img_y - 4, img_size + 8, img_size + 8, fill=0, stroke=1)
+        c.rect(img_x - 6, img_y - 6, img_size + 12, img_size + 12, fill=0, stroke=1)
         c.drawImage(cover_img_path, img_x, img_y, width=img_size, height=img_size, preserveAspectRatio=True)
+        
+    # Overlapping front flat sketch sticker on bottom-left of photo for true designer look
+    sketch_sticker = os.path.join(ENGINE_DIR, "flat_sketch_transparent.png")
+    if os.path.exists(sketch_sticker):
+        stk_w = 115.0
+        stk_h = 155.0
+        c.drawImage(sketch_sticker, img_x - 15, img_y - 20, width=stk_w, height=stk_h, preserveAspectRatio=True, mask='auto')
         
     y_meta = img_y - 30.0
     col_w = (W - 2*M) / 4.0
@@ -467,9 +480,9 @@ def build_pdf():
         np.drawOn(c, M, y - np.height)
         y -= (np.height + 6)
         
-    y -= 10
+    y -= 16
     draw_tip_box(
-        c, M, y, W - 2*M, 44.0,
+        c, M, y, W - 2*M, 48.0,
         "Lining & Interfacing Piece Allocation",
         "• <b>Pocket Lining:</b> Cut 4 from lightweight cotton batiste or self fabric (Piece 4: Pocket Bag).<br/>• <b>Fusible Interfacing:</b> None required for this relaxed continuous pull-on elastic casing construction."
     )
@@ -549,7 +562,7 @@ def build_pdf():
     draw_page_base(c, 7)
     y = draw_section_kicker(c, H - 64, "PIECES GUIDE", "Pattern Pieces & Markings Guide")
     
-    p_diagram = os.path.join(ENGINE_DIR, "pieces_overview.png")
+    p_diagram = os.path.join(ENGINE_DIR, "authentic_pieces_overview.png")
     dw = 240.0
     dh = 260.0
     if os.path.exists(p_diagram):
@@ -562,7 +575,7 @@ def build_pdf():
     c.setFont("Poppins-Bold", 9.0)
     c.setFillColor(SECONDARY)
     c.drawString(rx, ry, "Understanding Pattern Markings")
-    ry -= 16
+    ry -= 20
     
     markings_info = [
         ("Pocket Placement Notches", "Single triangle notches on Pants Front (1) and Pants Back (2) indicating exact alignment for pocket bags."),
@@ -575,9 +588,9 @@ def build_pdf():
     mark_style = ParagraphStyle("MarkStyle", fontName="Poppins", fontSize=7.4, leading=10.6, textColor=TEXT_BODY)
     for m_title, m_desc in markings_info:
         mp = Paragraph(f"<b>• {m_title}:</b> {m_desc}", mark_style)
-        mp.wrapOn(c, rw, 40)
-        mp.drawOn(c, rx, ry - 20)
-        ry -= 26
+        w, h = mp.wrap(rw, 100)
+        mp.drawOn(c, rx, ry - h)
+        ry -= (h + 10)
     c.showPage()
 
     # ---------------- PAGE 8: HELPFUL VIDEO GUIDES HUB ----------------
@@ -760,90 +773,56 @@ def build_pdf():
         draw_tip_box(c, M, tip_y, W - 2*M, tip_h, tip_title, tip_body)
         c.showPage()
 
-    # ---------------- PAGE 16: HEM & ENJOY YOUR GARMENT ----------------
+    # ---------------- PAGE 16: STANDALONE ENJOY YOUR GARMENT ----------------
     draw_page_base(c, 16)
-    y = H - 64
+    y = draw_section_kicker(c, H - 64, "YOU MADE IT", f"Enjoy Your {FULL_TITLE}!")
     
-    c.saveState()
-    c.setFont("Poppins-Medium", 7.6)
-    c.setFillColor(SECONDARY)
-    c.drawString(M, y, "F I N A L   S T E P")
-    y -= 24
-    
-    c.setFillColor(PRIMARY)
-    c.circle(M + 11, y + 7, 11, fill=1, stroke=0)
-    c.setFont("Poppins-Bold", 10.0)
-    c.setFillColor(WHITE)
-    c.drawCentredString(M + 11, y + 3.8, "8")
-    
-    c.setFont("Lora", 18)
-    c.setFillColor(PRIMARY)
-    c.drawString(M + 30, y, "Turn up deep hem & final press")
-    
-    c.setFont("Poppins", 7.4)
-    c.setFillColor(MUTED)
-    c.drawRightString(W - M, y + 2, "Whole trousers · pictures 1")
-    
-    y -= 8
-    c.setStrokeColor(RULE_LINE)
-    c.setLineWidth(0.8)
-    c.line(M, y, W - M, y)
-    c.restoreState()
-    y -= 12
-    
-    hem_p = Paragraph(
-        "• <b>Hemming:</b> Turn up the lower hem exactly <b>1 cm</b> to the wrong side and press. Then turn up an additional <b>2 cm</b> to form a clean, weighted double-fold 3 cm (1 1/8 in) hem. Pin or hand-baste in place.<br/>"
-        "• <b>Stitching:</b> Stitch 2.8 cm from the lower folded edge using a straight machine stitch. Press hem flat with a damp pressing cloth.<br/>"
-        "• <b>Final Steam Press:</b> Give your Margot pants a luxurious final steam press. Press side seams flat, pocket bags forward, and waistband casing smooth.",
-        ParagraphStyle("HemStyle", fontName="Poppins", fontSize=8.0, leading=11.6, textColor=TEXT_BODY)
+    congrats_p = Paragraph(
+        f"Congratulations on sewing your very own <b>{FULL_TITLE}</b>! We hope you love wearing them as much as you loved making them. "
+        "Take a moment to admire the relaxed fluid wide-leg silhouette, clean in-seam pockets, and comfortable elasticated waistband.",
+        ParagraphStyle("CongratsStyle", fontName="Poppins", fontSize=8.4, leading=12.2, textColor=TEXT_BODY)
     )
-    hem_p.wrapOn(c, W - 2*M, 60)
-    hem_p.drawOn(c, M, y - hem_p.height)
-    y -= (hem_p.height + 16)
+    congrats_p.wrapOn(c, W - 2*M, 40)
+    congrats_p.drawOn(c, M, y - congrats_p.height)
+    y -= (congrats_p.height + 18)
     
-    c.setFont("Poppins-Medium", 7.4)
-    c.setFillColor(SECONDARY)
-    c.drawString(M, y, "Y O U   M A D E   I T")
-    y -= 22
-    
-    c.setFont("Lora", 24)
-    c.setFillColor(PRIMARY)
-    c.drawString(M, y, f"Enjoy Your {FULL_TITLE}!")
-    y -= 6
-    c.setStrokeColor(SECONDARY)
-    c.setLineWidth(1.4)
-    c.line(M, y, M + 90, y)
-    y -= 14
-    
-    p_front = os.path.join(ENGINE_DIR, "margot_cover_model.jpg")
+    p_front = os.path.join(ENGINE_DIR, "margot_cover_clean.jpg")
     p_back = os.path.join(ENGINE_DIR, "flat_sketch_back_transparent.png")
     
-    img_size = 185.0
-    gap = 24.0
-    img_x1 = M + (W - 2*M - 2*img_size - gap) / 2.0
-    img_x2 = img_x1 + img_size + gap
+    img_h = 240.0
+    img_w1 = 165.0
+    img_w2 = 175.0
+    gap = 36.0
+    total_w = img_w1 + img_w2 + gap
+    img_x1 = M + (W - 2*M - total_w) / 2.0
+    img_x2 = img_x1 + img_w1 + gap
     
     if os.path.exists(p_front):
-        c.drawImage(p_front, img_x1, y - img_size, width=img_size, height=img_size, preserveAspectRatio=True)
+        c.setFillColor(WHITE)
+        c.rect(img_x1 - 4, y - img_h - 4, img_w1 + 8, img_h + 8, fill=1, stroke=0)
+        c.setStrokeColor(RULE_LINE)
+        c.setLineWidth(1)
+        c.rect(img_x1 - 4, y - img_h - 4, img_w1 + 8, img_h + 8, fill=0, stroke=1)
+        c.drawImage(p_front, img_x1, y - img_h, width=img_w1, height=img_h, preserveAspectRatio=True)
     if os.path.exists(p_back):
-        c.drawImage(p_back, img_x2, y - img_size, width=img_size, height=img_size, preserveAspectRatio=True, mask='auto')
-    y -= (img_size + 16)
+        c.drawImage(p_back, img_x2, y - img_h, width=img_w2, height=img_h, preserveAspectRatio=True, mask='auto')
+    y -= (img_h + 22)
     
-    c.setFont("Poppins-Bold", 8.8)
+    c.setFont("Poppins-Bold", 9.2)
     c.setFillColor(SECONDARY)
-    c.drawString(M, y, "Styling ideas & fabric care")
-    y -= 12
+    c.drawString(M, y, "Styling Ideas & Fabric Care")
+    y -= 14
     
     style_care_p = Paragraph(
         "• <b>Styling:</b> Pair your Margot Wide-Leg Pants with a relaxed linen shirt, ribbed tank, or cropped knit top for effortless summer elegance. Style with leather slide sandals or minimalist sneakers.<br/>"
         "• <b>Care:</b> Machine wash cold on gentle cycle with mild detergent. Hang to dry or tumble dry low. Press with a warm steam iron while slightly damp for the signature crisp linen texture.",
-        ParagraphStyle("CareStyle", fontName="Poppins", fontSize=7.8, leading=11.2, textColor=TEXT_BODY)
+        ParagraphStyle("CareStyle", fontName="Poppins", fontSize=8.0, leading=11.6, textColor=TEXT_BODY)
     )
     style_care_p.wrapOn(c, W - 2*M, 50)
     style_care_p.drawOn(c, M, y - style_care_p.height)
-    y -= (style_care_p.height + 12)
+    y -= (style_care_p.height + 16)
     
-    draw_tip_box(c, M, 56.0 + 48.0, W - 2*M, 48.0, "Need help with your sewing?",
+    draw_tip_box(c, M, 56.0 + 52.0, W - 2*M, 52.0, "Need help with your sewing?",
                  "If any step is unclear, send us a message via our Etsy shop <b>SewLuxePatterns</b>. We are thrilled to help you create your dream garment! © SewLuxePatterns. For personal home-sewing use only.")
     c.showPage()
     
