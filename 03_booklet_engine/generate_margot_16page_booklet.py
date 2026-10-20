@@ -167,7 +167,7 @@ def build_pdf():
     sub_p.wrapOn(c, W - 2*M - 40, 40)
     sub_p.drawOn(c, M + 20, H - 150)
     
-    cover_img_path = os.path.join(ENGINE_DIR, "margot_cover_clean_sq.jpg")
+    cover_img_path = os.path.join(ENGINE_DIR, "margot_photoshoot_01_front.jpg")
     img_size = 405.0
     img_x = (W - img_size) / 2.0
     img_y = H - 575.0
@@ -181,7 +181,7 @@ def build_pdf():
         c.drawImage(cover_img_path, img_x, img_y, width=img_size, height=img_size, preserveAspectRatio=True)
         
     # Overlapping front flat sketch sticker on bottom-left of photo for true designer look
-    sketch_sticker = os.path.join(ENGINE_DIR, "flat_sketch_transparent.png")
+    sketch_sticker = os.path.join(ENGINE_DIR, "flat_sketch_front_transparent.png")
     if os.path.exists(sketch_sticker):
         stk_w = 115.0
         stk_h = 155.0
@@ -786,12 +786,12 @@ def build_pdf():
     congrats_p.drawOn(c, M, y - congrats_p.height)
     y -= (congrats_p.height + 18)
     
-    p_front = os.path.join(ENGINE_DIR, "margot_cover_clean.jpg")
+    p_front = os.path.join(ENGINE_DIR, "margot_photoshoot_01_front.jpg")
     p_back = os.path.join(ENGINE_DIR, "flat_sketch_back_transparent.png")
     
-    img_h = 240.0
-    img_w1 = 165.0
-    img_w2 = 175.0
+    img_h = 210.0
+    img_w1 = 150.0
+    img_w2 = 160.0
     gap = 36.0
     total_w = img_w1 + img_w2 + gap
     img_x1 = M + (W - 2*M - total_w) / 2.0
@@ -806,21 +806,53 @@ def build_pdf():
         c.drawImage(p_front, img_x1, y - img_h, width=img_w1, height=img_h, preserveAspectRatio=True)
     if os.path.exists(p_back):
         c.drawImage(p_back, img_x2, y - img_h, width=img_w2, height=img_h, preserveAspectRatio=True, mask='auto')
-    y -= (img_h + 22)
+    y -= (img_h + 14)
     
-    c.setFont("Poppins-Bold", 9.2)
+    c.setFont("Poppins-Bold", 8.8)
     c.setFillColor(SECONDARY)
     c.drawString(M, y, "Styling Ideas & Fabric Care")
-    y -= 14
+    y -= 11
     
     style_care_p = Paragraph(
         "• <b>Styling:</b> Pair your Margot Wide-Leg Pants with a relaxed linen shirt, ribbed tank, or cropped knit top for effortless summer elegance. Style with leather slide sandals or minimalist sneakers.<br/>"
         "• <b>Care:</b> Machine wash cold on gentle cycle with mild detergent. Hang to dry or tumble dry low. Press with a warm steam iron while slightly damp for the signature crisp linen texture.",
-        ParagraphStyle("CareStyle", fontName="Poppins", fontSize=8.0, leading=11.6, textColor=TEXT_BODY)
+        ParagraphStyle("CareStyle", fontName="Poppins", fontSize=7.4, leading=10.5, textColor=TEXT_BODY)
     )
-    style_care_p.wrapOn(c, W - 2*M, 50)
+    style_care_p.wrapOn(c, W - 2*M, 36)
     style_care_p.drawOn(c, M, y - style_care_p.height)
-    y -= (style_care_p.height + 16)
+    y -= (style_care_p.height + 12)
+    
+    # 360° Fit Gallery Title
+    c.setFont("Poppins-Bold", 8.8)
+    c.setFillColor(SECONDARY)
+    c.drawString(M, y, "360° Fit & Editorial Showcase")
+    y -= 11
+    
+    gal_w = (W - 2*M - 24.0) / 3.0
+    gal_h = 104.0
+    gal_photos = [
+        (os.path.join(ENGINE_DIR, "margot_photoshoot_01_front.jpg"), "1. FRONT: CONTINUOUS CASING"),
+        (os.path.join(ENGINE_DIR, "margot_photoshoot_02_side.jpg"), "2. SIDE 45°: IN-SEAM POCKET"),
+        (os.path.join(ENGINE_DIR, "margot_photoshoot_03_back.jpg"), "3. BACK: FLUID LINEN DRAPE"),
+    ]
+    
+    for idx, (p_path, cap) in enumerate(gal_photos):
+        gx = M + idx * (gal_w + 12.0)
+        gy = y - gal_h
+        if os.path.exists(p_path):
+            c.setFillColor(WHITE)
+            c.rect(gx - 3, gy - 3, gal_w + 6, gal_h + 6, fill=1, stroke=0)
+            c.setStrokeColor(RULE_LINE)
+            c.setLineWidth(0.8)
+            c.rect(gx - 3, gy - 3, gal_w + 6, gal_h + 6, fill=0, stroke=1)
+            c.drawImage(p_path, gx, gy, width=gal_w, height=gal_h, preserveAspectRatio=True)
+            
+            # Caption pill
+            c.setFillColor(PRIMARY)
+            c.rect(gx, gy, gal_w, 13, fill=1, stroke=0)
+            c.setFont("Poppins-Bold", 5.8)
+            c.setFillColor(WHITE)
+            c.drawCentredString(gx + gal_w/2.0, gy + 3.5, cap)
     
     draw_tip_box(c, M, 56.0 + 52.0, W - 2*M, 52.0, "Need help with your sewing?",
                  "If any step is unclear, send us a message via our Etsy shop <b>SewLuxePatterns</b>. We are thrilled to help you create your dream garment! © SewLuxePatterns. For personal home-sewing use only.")
