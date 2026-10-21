@@ -16,3 +16,11 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 .DS_Store
+
+# Temporary scratch & test files
+test_*.py
+test_*.pdf
+*.html
+fetch_*.py
+etsy_listing_extracted.json
+

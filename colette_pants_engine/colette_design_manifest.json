@@ -1,0 +1,36 @@
+{
+  "garment_name": "Colette",
+  "garment_type": "Palazzo Pants",
+  "full_title": "Colette Double-Pleated Palazzo Trousers",
+  "subtitle": "High-rise tailored palazzo wide-leg trousers with double front pleats, sharp pressed creases, concealed waist closure, and slant pockets.",
+  "closure_type": "Concealed Trouser Hook & Bar (Inside Waistband) + Front Fly Zipper",
+  "closure_has_exterior_button": false,
+  "belt_loops_count": 5,
+  "belt_loops_placement": "2 over front main pleats, 2 over pocket tops at side seams, 1 at center back",
+  "front_pleats": "Double forward pleats per leg (4 total)",
+  "crease_lines": "Sharp pressed vertical center creases running from main pleats to hem",
+  "pockets": "Slanted hip pockets (Italian slant pockets) with stay-tape reinforcement",
+  "back_construction": "4 waist darts (2 per leg), center back seam, zero back pockets, pocketless clean rear",
+  "hem": "Deep 5.0 cm (2.0 in) weighted fold-up hem",
+  "silhouette": "Ultra-Wide Palazzo Leg Sweep (hem circumference 68–74 cm)",
+  "recommended_fabric": "Washed Linen-Viscose / Tencel Melange (Sand Beige / Oatmeal)",
+  "notions": {
+    "zipper": "18 cm (7 in) closed-end trouser zipper",
+    "closure": "1x heavy-duty metal trouser hook & bar (concealed inside) + optional 12mm flat inside anchor button",
+    "interfacing": "0.40 m medium-weight fusible interfacing for waistband & fly",
+    "stay_tape": "0.50 m bias stay-tape for slant pocket edges",
+    "thread": "1 spool 100% polyester all-purpose thread matching fabric"
+  },
+  "fabric_requirements": {
+    "150cm_width": {
+      "US_00_08": "2.60 m (2.85 yards)",
+      "US_10_14": "2.85 m (3.10 yards)",
+      "US_16_22": "3.20 m (3.50 yards)"
+    },
+    "115cm_width": {
+      "US_00_08": "3.40 m (3.75 yards)",
+      "US_10_14": "3.70 m (4.05 yards)",
+      "US_16_22": "4.10 m (4.50 yards)"
+    }
+  }
+}
