@@ -480,11 +480,52 @@ def build_pdf():
         np.drawOn(c, M, y - np.height)
         y -= (np.height + 6)
         
-    y -= 16
-    draw_tip_box(
-        c, M, y, W - 2*M, 48.0,
+    y -= 14
+    tb1_h = draw_tip_box(
+        c, M, y, W - 2*M, 42.0,
         "Lining & Interfacing Piece Allocation",
         "• <b>Pocket Lining:</b> Cut 4 from lightweight cotton batiste or self fabric (Piece 4: Pocket Bag).<br/>• <b>Fusible Interfacing:</b> None required for this relaxed continuous pull-on elastic casing construction."
+    )
+    y -= (tb1_h + 16)
+    
+    # Directional Prints, Nap & Narrow Fabric Advisory
+    c.setFont("Poppins-Bold", 8.8)
+    c.setFillColor(PRIMARY)
+    c.drawString(M, y, "DIRECTIONAL PRINTS, FABRIC NAP & NARROW WIDTHS (115 CM / 45 IN)")
+    y -= 12
+    
+    narrow_table = [
+        ("US 00 – US 4", "3.20 m (3.50 yards)", "Front & back leg panels stacked lengthwise along grainline"),
+        ("US 6 – US 12", "3.50 m (3.85 yards)", "Front & back leg panels stacked lengthwise along grainline"),
+        ("US 14 – US 22", "3.85 m (4.25 yards)", "Front & back leg panels stacked lengthwise along grainline")
+    ]
+    nw_cols = [95, 130, 268]
+    c.setFillColor(TABLE_HEAD)
+    c.rect(M, y - 14, sum(nw_cols), 14, fill=1, stroke=0)
+    c.setFont("Poppins-Bold", 6.8)
+    c.setFillColor(WHITE)
+    c.drawString(M + 8, y - 9.5, "SIZE TIER")
+    c.drawString(M + nw_cols[0] + 8, y - 9.5, "NARROW FABRIC (115 cm / 45 in)")
+    c.drawString(M + nw_cols[0] + nw_cols[1] + 8, y - 9.5, "CUTTING LAYOUT NOTE")
+    y -= 14
+    
+    for idx, (tier, n_yd, note) in enumerate(narrow_table):
+        bg = TABLE_ALT if idx % 2 == 1 else WHITE
+        c.setFillColor(bg)
+        c.rect(M, y - 14, sum(nw_cols), 14, fill=1, stroke=0)
+        c.setFont("Poppins-Bold", 6.8)
+        c.setFillColor(TEXT_BODY)
+        c.drawString(M + 8, y - 9.5, tier)
+        c.setFont("Poppins", 6.8)
+        c.drawString(M + nw_cols[0] + 8, y - 9.5, n_yd)
+        c.drawString(M + nw_cols[0] + nw_cols[1] + 8, y - 9.5, note)
+        y -= 14
+        
+    y -= 12
+    draw_tip_box(
+        c, M, y, W - 2*M, 46.0,
+        "Fabrics With Nap, Directional Motifs & Pre-Washing Buffer",
+        "• <b>Directional Prints & Nap:</b> For corduroy, velvet, directional florals, or plaids where all pieces must face a single direction, add <b>+0.30 m to +0.50 m (+1/4 to +1/2 yard)</b>.<br/>• <b>Pre-Washing & Shrinkage:</b> Always pre-wash and press fabric before cutting. Pure linen and rayon can shrink 5%–10% during first wash."
     )
     c.showPage()
 
@@ -556,6 +597,30 @@ def build_pdf():
         c.setFont("Poppins", 7.2)
         c.drawString(M + sow[0] + 8, y - 11.5, desc)
         y -= 16
+        
+    y -= 20
+    c.setFont("Poppins-Bold", 8.8)
+    c.setFillColor(PRIMARY)
+    c.drawString(M, y, "SEAM ALLOWANCE & HEM PROTOCOL")
+    y -= 12
+
+    tb_sa = draw_tip_box(
+        c, M, y, W - 2*M, 50.0,
+        "Standard 1.0 cm (3/8 in) Seam Allowance Included Throughout",
+        "• <b>Included Seam Allowance:</b> Standard 1.0 cm (3/8 in) seam allowance is already incorporated into all pattern pieces (pocket openings, inseams, crotch curves, and side seams). Cut directly along lines—do NOT add extra seam allowance.<br/>• <b>Bottom Leg Hem:</b> Generous 3.0 cm (1 1/8 in) fold-up hem is included on both Pants Front and Back.<br/>• <b>Waistband Casing:</b> Sized for 3.3 cm (1 1/4 in) wide non-roll elastic with 1.0 cm seam allowance."
+    )
+    y -= (tb_sa + 14)
+
+    c.setFont("Poppins-Bold", 8.8)
+    c.setFillColor(PRIMARY)
+    c.drawString(M, y, "FABRIC CUTTING & GRAINLINE ESSENTIALS")
+    y -= 12
+
+    draw_tip_box(
+        c, M, y, W - 2*M, 46.0,
+        "Mirror Cutting & Grainline Alignment Rules",
+        "• <b>Straight Grainline:</b> Pin all pattern pieces strictly parallel to fabric selvedges. Misaligned grainlines cause trouser legs to twist inward when walking.<br/>• <b>Cut In Pairs (Mirroring):</b> Fold fabric right sides together lengthwise before pinning. Cutting Piece 1 and Piece 2 yields matched Left and Right leg panels."
+    )
     c.showPage()
 
     # ---------------- PAGE 7: AUTHENTIC PIECES OVERVIEW & MARKINGS ----------------
@@ -591,6 +656,74 @@ def build_pdf():
         w, h = mp.wrap(rw, 100)
         mp.drawOn(c, rx, ry - h)
         ry -= (h + 10)
+        
+    # How to Lengthen or Shorten (Height Adjustment Guide)
+    y = y - dh - 24
+    c.setFont("Poppins-Bold", 8.8)
+    c.setFillColor(PRIMARY)
+    c.drawString(M, y, "HOW TO LENGTHEN OR SHORTEN YOUR PANTS (HEIGHT ADJUSTMENT GUIDE)")
+    y -= 12
+    
+    intro_p = Paragraph(
+        "Margot is drafted for an average height of 165–170 cm (5'5\"–5'7\") with a finished inseam of 77 cm (30 1/4 in). To adjust length for your height or preferred footwear, modify pattern pieces 1 & 2 before cutting fabric:",
+        ParagraphStyle("LenIntro", fontName="Poppins", fontSize=7.2, leading=10.4, textColor=TEXT_BODY)
+    )
+    intro_p.wrapOn(c, W - 2*M, 28)
+    intro_p.drawOn(c, M, y - intro_p.height)
+    y -= (intro_p.height + 10)
+    
+    col_w = (W - 2*M - 14) / 2.0
+    box_h = 96.0
+    c.saveState()
+    
+    # Left Box: TO LENGTHEN
+    c.setFillColor(TINT_BOX)
+    c.rect(M, y - box_h, col_w, box_h, fill=1, stroke=0)
+    c.setFillColor(SECONDARY)
+    c.rect(M, y - box_h, 3.5, box_h, fill=1, stroke=0)
+    c.setFont("Poppins-Bold", 8.0)
+    c.setFillColor(SECONDARY)
+    c.drawString(M + 12, y - 13, "TO LENGTHEN (+) — FOR TALLER FIT")
+    
+    len_text = (
+        "<b>1. Locate Guideline:</b> Find horizontal lengthen/shorten line at mid-thigh on Pieces 1 & 2.<br/>"
+        "<b>2. Cut Across:</b> Cut straight along line through both Front & Back pattern pieces.<br/>"
+        "<b>3. Spread Evenly:</b> Separate top and bottom pieces in parallel by your desired amount (e.g. +3 to +5 cm / +1 to +2 in).<br/>"
+        "<b>4. True Seamlines:</b> Tape paper behind gap and blend side and inner leg seams smoothly."
+    )
+    lp = Paragraph(len_text, ParagraphStyle("LenStyle", fontName="Poppins", fontSize=6.8, leading=9.8, textColor=TEXT_BODY))
+    lp.wrapOn(c, col_w - 20, box_h - 22)
+    lp.drawOn(c, M + 12, y - 20 - lp.height)
+    
+    # Right Box: TO SHORTEN
+    rx2 = M + col_w + 14
+    c.setFillColor(TINT_BOX)
+    c.rect(rx2, y - box_h, col_w, box_h, fill=1, stroke=0)
+    c.setFillColor(SECONDARY)
+    c.rect(rx2, y - box_h, 3.5, box_h, fill=1, stroke=0)
+    c.setFont("Poppins-Bold", 8.0)
+    c.setFillColor(SECONDARY)
+    c.drawString(rx2 + 12, y - 13, "TO SHORTEN (-) — FOR PETITE FIT")
+    
+    short_text = (
+        "<b>1. Measure Guideline:</b> Draw a new parallel line above lengthen/shorten line by desired reduction.<br/>"
+        "<b>2. Cut & Slide:</b> Cut along original lengthen/shorten line on Pieces 1 & 2.<br/>"
+        "<b>3. Overlap & Tape:</b> Slide lower pattern section upward to align with guideline, overlapping excess.<br/>"
+        "<b>4. Re-true Edges:</b> Tape in place securely and re-smooth side seam and inseam curves."
+    )
+    sp = Paragraph(short_text, ParagraphStyle("ShortStyle", fontName="Poppins", fontSize=6.8, leading=9.8, textColor=TEXT_BODY))
+    sp.wrapOn(c, col_w - 20, box_h - 22)
+    sp.drawOn(c, rx2 + 12, y - 20 - sp.height)
+    c.restoreState()
+    
+    y -= (box_h + 10)
+    
+    # Golden Rule Banner
+    draw_tip_box(
+        c, M, y, W - 2*M, 36.0,
+        "Golden Rule for Accurate Fit & Straight Hang",
+        "• <b>Symmetry:</b> Always make identical length adjustments to <b>BOTH Pants Front (1) and Pants Back (2)</b>.<br/>• <b>Grainline Integrity:</b> Ensure the vertical grainline arrow remains strictly parallel across both sections after taping."
+    )
     c.showPage()
 
     # ---------------- PAGE 8: HELPFUL VIDEO GUIDES HUB ----------------
