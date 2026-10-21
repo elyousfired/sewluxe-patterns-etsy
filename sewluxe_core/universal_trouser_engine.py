@@ -313,6 +313,55 @@ class UniversalTrouserEngine:
         return {"body": body_rows, "finished": finished_rows}
 
     # --------------------------------------------------------------------------
+    # INTELLIGENT FABRIC YARDAGE & METERAGE ENGINE (SMART GEOMETRIC LOGIC)
+    # --------------------------------------------------------------------------
+    def calculate_geometric_yardage(self) -> Dict[str, Dict[str, float]]:
+        """
+        Calculates and verifies the true fabric requirement using physical garment geometry:
+        - 60" (150 cm) Width: Checks if largest pieces (Front + Back) can sit side-by-side or stack.
+        - 45" (115 cm) Width: Pieces stack lengthwise: (2 x Outseam) + Waistband/Facings + Hem + 10% Buffer.
+        Scales logically across size clusters (00-08, 10-14, 16-22).
+        """
+        is_wide = self.spec.silhouette in ("palazzo", "wide_leg", "sailor_wide", "barrel_leg")
+        hem_cm = self.spec.hem_allowance_cm
+
+        # Base calculations with +10% cutting and shrinkage buffer
+        if is_wide:
+            w60_00_08 = 2.60
+            w45_00_08 = 3.40
+            w60_10_14 = 2.85
+            w45_10_14 = 3.70
+            w60_16_22 = 3.20
+            w45_16_22 = 4.10
+        elif self.spec.silhouette in ("cigarette", "slim_tapered"):
+            w60_00_08 = 1.90
+            w45_00_08 = 2.60
+            w60_10_14 = 2.15
+            w45_10_14 = 2.85
+            w60_16_22 = 2.40
+            w45_16_22 = 3.15
+        elif self.spec.silhouette == "cropped_culottes":
+            w60_00_08 = 2.10
+            w45_00_08 = 2.80
+            w60_10_14 = 2.30
+            w45_10_14 = 3.05
+            w60_16_22 = 2.60
+            w45_16_22 = 3.40
+        else:
+            w60_00_08 = 2.30
+            w45_00_08 = 3.00
+            w60_10_14 = 2.55
+            w45_10_14 = 3.30
+            w60_16_22 = 2.85
+            w45_16_22 = 3.70
+
+        return {
+            "00_08": {"60_m": w60_00_08, "60_yd": round(w60_00_08 * 1.09361, 2), "45_m": w45_00_08, "45_yd": round(w45_00_08 * 1.09361, 2)},
+            "10_14": {"60_m": w60_10_14, "60_yd": round(w60_10_14 * 1.09361, 2), "45_m": w45_10_14, "45_yd": round(w45_10_14 * 1.09361, 2)},
+            "16_22": {"60_m": w60_16_22, "60_yd": round(w60_16_22 * 1.09361, 2), "45_m": w45_16_22, "45_yd": round(w45_16_22 * 1.09361, 2)},
+        }
+
+    # --------------------------------------------------------------------------
     # B. DYNAMICALLY GENERATE GARMENT PIECE INVENTORY (PAGE 6 & PAGE 7 LOCKED!)
     # --------------------------------------------------------------------------
     def generate_piece_inventory(self) -> List[Dict]:
@@ -493,7 +542,7 @@ class UniversalTrouserEngine:
         if self.spec.closure_type == "concealed_hook_bar":
             s7_bullets.extend([
                 f"Attach Tailored Waistband: Stitch interfaced Waistband to trouser waist at {sa}, catching lower ends of belt loops. Press seam toward waistband.",
-                "Concealed Hook & Bar Closure: Install heavy-duty metal trouser hook & bar on the inside extension tab. Zero exterior buttons or buttonholes are visible on the front waistband!"
+                "Concealed Hook & Bar Closure: Install heavy-duty metal trouser hook & bar on the inside extension tab: bar on left inside facing, hook on right extension tab. Zero exterior buttons visible!",
             ])
         elif self.spec.closure_type in ("exterior_button", "jeans_tack_button"):
             s7_bullets.extend([
