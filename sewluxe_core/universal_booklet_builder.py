@@ -143,7 +143,8 @@ class UniversalBookletBuilder:
             c.setFont("Poppins-Medium", 7.0)
             c.setFillColor(TEXT_MUTED)
             c.drawString(M_L, H - 34, f"{self.spec.model_name.upper()}  ·  SEWING GUIDE")
-            c.drawRightString(M_R, H - 34, "SIZES US 00–22")
+            sz_range_str = "SIZES XXS–10XL" if self.spec.size_standard == "PATTERNFAST_XXS_10XL" else "SIZES US 00–22"
+            c.drawRightString(M_R, H - 34, sz_range_str)
             c.setStrokeColor(RULE_LINE)
             c.setLineWidth(0.6)
             c.line(M_L, H - 40, M_R, H - 40)
@@ -245,6 +246,8 @@ class UniversalBookletBuilder:
         photo_placed = False
         if assets_dir and os.path.exists(assets_dir):
             for candidate in [
+                os.path.join(assets_dir, "01_Model_Photos", "vivienne_photo_01_front.jpg"),
+                os.path.join(assets_dir, "vivienne_photo_01_front.jpg"),
                 os.path.join(assets_dir, "01_Model_Photos", "trendy_photo_01_front.jpg"),
                 os.path.join(assets_dir, "trendy_photo_01_front.jpg"),
                 os.path.join(assets_dir, "01_Model_Photos", f"{self.spec.silhouette}_photo_01.jpg"),
@@ -423,10 +426,15 @@ class UniversalBookletBuilder:
         # Table 1: Body Measurements
         c.setFont("Poppins-Bold", 8.8)
         c.setFillColor(BURGUNDY)
-        c.drawString(M_L, y, "BODY SIZE CHART (ALVANON NORTH AMERICA STANDARD)")
+        ute_tables = self.engine.generate_size_tables()
+        if self.spec.size_standard == "PATTERNFAST_XXS_10XL":
+            c.drawString(M_L, y, "BODY SIZE CHART (PATTERNFAST / EUROPEAN STANDARD)")
+            b_heads = ["SIZE", "EU CODE", "BUST (CM)", "WAIST (CM)", "HIPS (CM)", "WAIST (IN)", "HIPS (IN)"]
+        else:
+            c.drawString(M_L, y, "BODY SIZE CHART (ALVANON NORTH AMERICA STANDARD)")
+            b_heads = ["US SIZE", "LETTER", "BUST (CM)", "WAIST (CM)", "HIPS (CM)", "WAIST (IN)", "HIPS (IN)"]
         y -= 14
 
-        b_heads = ["US SIZE", "LETTER", "BUST (CM)", "WAIST (CM)", "HIPS (CM)", "WAIST (IN)", "HIPS (IN)"]
         b_widths = [55, 45, 65, 75, 75, 75, 95]
 
         c.setFillColor(TABLE_HEAD)
@@ -440,40 +448,39 @@ class UniversalBookletBuilder:
         y -= 13
 
         body_rows = [
-            ("00", "XXS", "80.0", "63.5", "87.75", "25\"", "34 1/2\""),
-            ("0",  "XS",  "82.5", "66.0", "90.25", "26\"", "35 1/2\""),
-            ("2",  "XS",  "85.0", "68.75", "92.75", "27 1/8\"", "36 1/2\""),
-            ("4",  "S",   "87.75", "71.25", "95.25", "28\"", "37 1/2\""),
-            ("6",  "S",   "90.25", "73.75", "98.0", "29\"", "38 5/8\""),
-            ("8",  "M",   "92.75", "76.25", "100.25", "30\"", "39 1/2\""),
-            ("10", "M",   "95.25", "78.75", "102.75", "31\"", "40 1/2\""),
-            ("12", "L",   "99.25", "82.75", "106.5", "32 5/8\"", "41 7/8\""),
-            ("14", "L",   "104.25", "87.5", "111.0", "34 1/2\"", "43 3/4\""),
-            ("16", "XL",  "109.25", "93.25", "115.5", "36 3/4\"", "45 1/2\""),
-            ("18", "2XL", "114.25", "99.0", "120.75", "39\"", "47 1/2\""),
-            ("20", "3XL", "119.25", "104.75", "125.75", "41 1/4\"", "49 1/2\""),
-            ("22", "4XL", "124.25", "110.5", "130.75", "43 1/2\"", "51 1/2\""),
+            (
+                r["size"],
+                r["alt"],
+                r["bust_cm"],
+                r["waist_cm"],
+                r["hips_cm"],
+                r["waist_in"],
+                r["hips_in"]
+            )
+            for r in ute_tables["body"]
         ]
+        row_h = 9.5 if len(body_rows) > 13 else 11.0
         for r_idx, r_data in enumerate(body_rows):
             bg = TABLE_ALT if r_idx % 2 == 1 else WHITE
             c.setFillColor(bg)
-            c.rect(M_L, y - 11.0, sum(b_widths), 11.0, fill=1, stroke=0)
-            c.setFont("Poppins", 6.2)
+            c.rect(M_L, y - row_h, sum(b_widths), row_h, fill=1, stroke=0)
+            c.setFont("Poppins", 6.0 if len(body_rows) > 13 else 6.2)
             c.setFillColor(TEXT_BODY)
             cur_x = M_L
             for val, hw in zip(r_data, b_widths):
-                c.drawString(cur_x + 6, y - 8.0, val)
+                c.drawString(cur_x + 6, y - (row_h - 3.0), val)
                 cur_x += hw
-            y -= 11.0
+            y -= row_h
 
-        y -= 14
+        y -= 12
         # Table 2: Finished Garment Measurements
         c.setFont("Poppins-Bold", 8.8)
         c.setFillColor(BURGUNDY)
         c.drawString(M_L, y, "FINISHED GARMENT MEASUREMENTS")
         y -= 14
 
-        f_heads = ["US SIZE", "FINISHED WAIST", "FINISHED HIPS*", "LEG SWEEP (CIRC.)", "INSEAM / OUTSEAM"]
+        size_col_name = "SIZE" if self.spec.size_standard == "PATTERNFAST_XXS_10XL" else "US SIZE"
+        f_heads = [size_col_name, "FINISHED WAIST", "FINISHED HIPS*", "LEG SWEEP (CIRC.)", "INSEAM / OUTSEAM"]
         f_widths = [60, 100, 100, 110, 115]
 
         c.setFillColor(TABLE_HEAD)
@@ -486,7 +493,6 @@ class UniversalBookletBuilder:
             cur_x += hw
         y -= 13
 
-        ute_tables = self.engine.generate_size_tables()
         fin_rows = [
             (
                 r["size"],
@@ -497,17 +503,18 @@ class UniversalBookletBuilder:
             )
             for r in ute_tables["finished"]
         ]
+        f_row_h = 9.5 if len(fin_rows) > 13 else 11.0
         for r_idx, r_data in enumerate(fin_rows):
             bg = TABLE_ALT if r_idx % 2 == 1 else WHITE
             c.setFillColor(bg)
-            c.rect(M_L, y - 11.0, sum(f_widths), 11.0, fill=1, stroke=0)
-            c.setFont("Poppins", 6.2)
+            c.rect(M_L, y - f_row_h, sum(f_widths), f_row_h, fill=1, stroke=0)
+            c.setFont("Poppins", 6.0 if len(fin_rows) > 13 else 6.2)
             c.setFillColor(TEXT_BODY)
             cur_x = M_L
             for val, hw in zip(r_data, f_widths):
-                c.drawString(cur_x + 6, y - 8.0, val)
+                c.drawString(cur_x + 6, y - (f_row_h - 3.0), val)
                 cur_x += hw
-            y -= 11.0
+            y -= f_row_h
 
         y -= 8
         c.setFont("Poppins-Italic", 6.5)
@@ -858,6 +865,16 @@ class UniversalBookletBuilder:
         photos_placed = False
         if assets_dir and os.path.exists(assets_dir):
             cands_options = [
+                [
+                    os.path.join(assets_dir, "01_Model_Photos", "vivienne_photo_01_front.jpg"),
+                    os.path.join(assets_dir, "01_Model_Photos", "vivienne_photo_02_side.jpg"),
+                    os.path.join(assets_dir, "01_Model_Photos", "vivienne_photo_03_back.jpg")
+                ],
+                [
+                    os.path.join(assets_dir, "vivienne_photo_01_front.jpg"),
+                    os.path.join(assets_dir, "vivienne_photo_02_side.jpg"),
+                    os.path.join(assets_dir, "vivienne_photo_03_back.jpg")
+                ],
                 [
                     os.path.join(assets_dir, "01_Model_Photos", "trendy_photo_01_front.jpg"),
                     os.path.join(assets_dir, "01_Model_Photos", "trendy_photo_02_side.jpg"),
