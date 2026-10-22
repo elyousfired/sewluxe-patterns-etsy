@@ -24,3 +24,7 @@ test_*.pdf
 fetch_*.py
 etsy_listing_extracted.json
 
+# Individual Garment Projects & Customer Packages (STRICTLY LOCAL ON PC - NEVER PUSH TO GIT)
+projects/
+
+
