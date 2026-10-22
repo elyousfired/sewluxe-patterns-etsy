@@ -245,6 +245,9 @@ class UniversalBookletBuilder:
         photo_placed = False
         if assets_dir and os.path.exists(assets_dir):
             for candidate in [
+                os.path.join(assets_dir, "01_Model_Photos", "trendy_photo_01_front.jpg"),
+                os.path.join(assets_dir, "trendy_photo_01_front.jpg"),
+                os.path.join(assets_dir, "01_Model_Photos", f"{self.spec.silhouette}_photo_01.jpg"),
                 os.path.join(assets_dir, "model_photos", f"01_{self.spec.silhouette}_front.jpg"),
                 os.path.join(assets_dir, f"{self.spec.silhouette}_photo_01.jpg"),
                 os.path.join(assets_dir, f"01_{self.spec.silhouette}_pants.jpg"),
@@ -854,25 +857,39 @@ class UniversalBookletBuilder:
         # Try to locate editorial photos or render CAD showcases
         photos_placed = False
         if assets_dir and os.path.exists(assets_dir):
-            cands = [
-                os.path.join(assets_dir, f"{self.spec.silhouette}_photo_01.jpg"),
-                os.path.join(assets_dir, f"{self.spec.silhouette}_photo_02.jpg"),
-                os.path.join(assets_dir, f"{self.spec.silhouette}_photo_03.jpg")
+            cands_options = [
+                [
+                    os.path.join(assets_dir, "01_Model_Photos", "trendy_photo_01_front.jpg"),
+                    os.path.join(assets_dir, "01_Model_Photos", "trendy_photo_02_side.jpg"),
+                    os.path.join(assets_dir, "01_Model_Photos", "trendy_photo_03_back.jpg")
+                ],
+                [
+                    os.path.join(assets_dir, "trendy_photo_01_front.jpg"),
+                    os.path.join(assets_dir, "trendy_photo_02_side.jpg"),
+                    os.path.join(assets_dir, "trendy_photo_03_back.jpg")
+                ],
+                [
+                    os.path.join(assets_dir, f"{self.spec.silhouette}_photo_01.jpg"),
+                    os.path.join(assets_dir, f"{self.spec.silhouette}_photo_02.jpg"),
+                    os.path.join(assets_dir, f"{self.spec.silhouette}_photo_03.jpg")
+                ]
             ]
-            if all(os.path.exists(p) for p in cands):
-                photos_placed = True
-                caps = ["1. FRONT VIEW", "2. 45° PROFILE", "3. BACK VIEW"]
-                for i, (p_path, cap) in enumerate(zip(cands, caps)):
-                    gx = M_L + i * (gal_w + 10.0)
-                    gy = y - gal_h
-                    c.setFillColor(WHITE)
-                    c.rect(gx - 3, gy - 3, gal_w + 6, gal_h + 6, fill=1, stroke=0)
-                    c.drawImage(p_path, gx, gy, width=gal_w, height=gal_h, preserveAspectRatio=True)
-                    c.setFillColor(TABLE_HEAD)
-                    c.rect(gx, gy, gal_w, 14, fill=1, stroke=0)
-                    c.setFont("Poppins-Bold", 5.6)
-                    c.setFillColor(WHITE)
-                    c.drawCentredString(gx + gal_w/2.0, gy + 4.0, cap)
+            for cands in cands_options:
+                if all(os.path.exists(p) for p in cands):
+                    photos_placed = True
+                    caps = ["1. FRONT VIEW", "2. 45° PROFILE", "3. BACK VIEW"]
+                    for i, (p_path, cap) in enumerate(zip(cands, caps)):
+                        gx = M_L + i * (gal_w + 10.0)
+                        gy = y - gal_h
+                        c.setFillColor(WHITE)
+                        c.rect(gx - 3, gy - 3, gal_w + 6, gal_h + 6, fill=1, stroke=0)
+                        c.drawImage(p_path, gx, gy, width=gal_w, height=gal_h, preserveAspectRatio=True)
+                        c.setFillColor(TABLE_HEAD)
+                        c.rect(gx, gy, gal_w, 14, fill=1, stroke=0)
+                        c.setFont("Poppins-Bold", 5.6)
+                        c.setFillColor(WHITE)
+                        c.drawCentredString(gx + gal_w/2.0, gy + 4.0, cap)
+                    break
 
         if not photos_placed:
             # Render 3 pristine CAD visual perspectives
