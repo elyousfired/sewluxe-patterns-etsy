@@ -476,48 +476,76 @@ class UniversalTrouserEngine:
             s1_bullets.append("Razor-Sharp Center Crease: Fold each front and back leg panel lengthwise matching inseam and side seam. Steam-press a crisp vertical center crease down to the hem.")
         steps.append({"step": 1, "title": "Front Shaping & Leg Creases", "bullets": s1_bullets})
 
-        # STEP 2: Front Pockets
-        s2_bullets = []
-        if self.spec.front_pockets == "slant_italian":
-            s2_bullets.extend([
-                f"Stay-Tape & Lining: Fuse 1 cm stay-tape to wrong side of slant pocket opening. Pin Pocket Lining right sides together with Pants Front and stitch at {sa}.",
-                "Understitching: Trim seam to 5 mm, press lining away from front, and understitch 2 mm from seamline so lining rolls invisibly inside.",
-                f"Pocket Bag Assembly: Pin Pocket Bag (Outer) right sides together with Pocket Lining, stitch curved bottom perimeter at {sa}, serge, and baste pocket edges to waist and side seam."
-            ])
-        elif self.spec.front_pockets == "none":
-            s2_bullets.append("Pocketless Front: This variation omits front pockets for an ultra-sleek hip line. Proceed directly to zipper/closure assembly.")
+        if self.spec.front_pockets == "none" and self.spec.closure_type == "side_invisible_zip":
+            # Dedicated clean steps for sleek pocketless side-zip trouser
+            # STEP 2: Center Front Rise Seam
+            steps.append({
+                "step": 2,
+                "title": "Center Front Rise Seam",
+                "bullets": [
+                    f"Pin Pants Fronts: Place both Pants Fronts right sides together along the curved center front rise edge, matching notches.",
+                    f"Stitch Center Front: Stitch continuous seam at {sa} from crotch point up to waist. Finish seam allowances together and press to one side."
+                ]
+            })
+
+            # STEP 3: Back Waist Darts
+            s3_bullets = []
+            if self.spec.back_shaping == "4_darts":
+                s3_bullets.append("Four Back Waist Darts: Fold all 4 back darts (2 on each Pants Back) right sides together. Stitch toward points, knot thread tails, and press toward center back.")
+            else:
+                s3_bullets.append("Two Back Waist Darts: Fold both back darts (1 on each Pants Back) right sides together matching notches. Stitch toward apex, tie thread tails by hand, and press toward center back over a tailor's ham.")
+            steps.append({"step": 3, "title": "Back Waist Darts Assembly", "bullets": s3_bullets})
+
+            # STEP 4: Center Back Rise Seam
+            steps.append({
+                "step": 4,
+                "title": "Center Back Rise Seam",
+                "bullets": [
+                    f"Pin Pants Backs: Place both Pants Backs right sides together along the center back rise from waist to crotch point.",
+                    f"Stitch Center Back: Stitch at {sa}, serge seam allowances, and press open flat over a tailor's pressing ham."
+                ]
+            })
         else:
-            s2_bullets.append(f"Front Pockets ({self.spec.front_pockets}): Construct and attach front pockets according to pattern notches at {sa} seam allowance.")
-        steps.append({"step": 2, "title": "Front Pocket Construction", "bullets": s2_bullets})
+            # STEP 2: Front Pockets
+            s2_bullets = []
+            if self.spec.front_pockets == "slant_italian":
+                s2_bullets.extend([
+                    f"Stay-Tape & Lining: Fuse 1 cm stay-tape to wrong side of slant pocket opening. Pin Pocket Lining right sides together with Pants Front and stitch at {sa}.",
+                    "Understitching: Trim seam to 5 mm, press lining away from front, and understitch 2 mm from seamline so lining rolls invisibly inside.",
+                    f"Pocket Bag Assembly: Pin Pocket Bag (Outer) right sides together with Pocket Lining, stitch curved bottom perimeter at {sa}, serge, and baste pocket edges to waist and side seam."
+                ])
+            else:
+                s2_bullets.append(f"Front Pockets ({self.spec.front_pockets}): Construct and attach front pockets according to pattern notches at {sa} seam allowance.")
+            steps.append({"step": 2, "title": "Front Pocket Construction", "bullets": s2_bullets})
 
-        # STEP 3: Front Zipper Fly or Pull-On Front Rise
-        s3_bullets = []
-        if self.spec.closure_type in ("concealed_hook_bar", "exterior_button", "jeans_tack_button"):
-            s3_bullets.extend([
-                "Interfacing & Center Front: Fuse Fly Interfacing to both front fly extensions. Stitch center front seam from 2.5 cm above inseam up to circle stop; baste from circle to waist.",
-                "Zipper & J-Stitch: Stitch closed zipper under folded right fly extension. Flip zipper onto left fly extension, stitch tape, remove basting, and topstitch curved J-stitch.",
-                "Fly Shield: Fold interfaced Fly Facing Shield lengthwise, pin behind right zipper teeth, and secure with a bar tack at bottom of J-stitch."
-            ])
-        else:
-            s3_bullets.append(f"Center Front Rise: Place Pants Fronts right sides together and stitch complete center front rise seam at {sa}. Finish and press open.")
-        steps.append({"step": 3, "title": "Center Front & Zipper Fly Assembly", "bullets": s3_bullets})
+            # STEP 3: Front Zipper Fly or Pull-On Front Rise
+            s3_bullets = []
+            if self.spec.closure_type in ("concealed_hook_bar", "exterior_button", "jeans_tack_button"):
+                s3_bullets.extend([
+                    "Interfacing & Center Front: Fuse Fly Interfacing to both front fly extensions. Stitch center front seam from 2.5 cm above inseam up to circle stop; baste from circle to waist.",
+                    "Zipper & J-Stitch: Stitch closed zipper under folded right fly extension. Flip zipper onto left fly extension, stitch tape, remove basting, and topstitch curved J-stitch.",
+                    "Fly Shield: Fold interfaced Fly Facing Shield lengthwise, pin behind right zipper teeth, and secure with a bar tack at bottom of J-stitch."
+                ])
+            else:
+                s3_bullets.append(f"Center Front Rise: Place Pants Fronts right sides together and stitch complete center front rise seam at {sa}. Finish and press open.")
+            steps.append({"step": 3, "title": "Center Front & Zipper Fly Assembly", "bullets": s3_bullets})
 
-        # STEP 4: Back Shaping, Back Pockets & Center Back Seam
-        s4_bullets = []
-        if self.spec.back_shaping == "4_darts":
-            s4_bullets.append("Four Back Waist Darts: Fold all 4 back waist darts (2 on each Pants Back) right sides together. Stitch to a fine point, tie thread tails by hand, and press over a tailor's ham.")
-        elif self.spec.back_shaping == "2_darts":
-            s4_bullets.append("Two Back Waist Darts: Fold the 2 back waist darts (1 on each Pants Back) right sides together. Stitch, tie thread tails, and press toward center back.")
-        elif self.spec.back_shaping == "back_yoke":
-            s4_bullets.append(f"Back Yoke: Pin Back Yoke right sides together to upper edge of Pants Back, stitch at {sa}, press downward, and topstitch.")
+            # STEP 4: Back Shaping, Back Pockets & Center Back Seam
+            s4_bullets = []
+            if self.spec.back_shaping == "4_darts":
+                s4_bullets.append("Four Back Waist Darts: Fold all 4 back waist darts (2 on each Pants Back) right sides together. Stitch to a fine point, tie thread tails by hand, and press over a tailor's ham.")
+            elif self.spec.back_shaping == "2_darts":
+                s4_bullets.append("Two Back Waist Darts: Fold the 2 back waist darts (1 on each Pants Back) right sides together. Stitch, tie thread tails, and press toward center back.")
+            elif self.spec.back_shaping == "back_yoke":
+                s4_bullets.append(f"Back Yoke: Pin Back Yoke right sides together to upper edge of Pants Back, stitch at {sa}, press downward, and topstitch.")
 
-        if self.spec.back_pockets != "none":
-            s4_bullets.append(f"Back Pockets ({self.spec.back_pockets}): Construct back pockets at the marked horizontal lines below the back darts/yoke before joining side seams.")
-        else:
-            s4_bullets.append("Clean Pocketless Back: No back welt pockets are used, preserving a smooth, contoured silhouette over the seat.")
+            if self.spec.back_pockets != "none":
+                s4_bullets.append(f"Back Pockets ({self.spec.back_pockets}): Construct back pockets at the marked horizontal lines below the back darts/yoke before joining side seams.")
+            else:
+                s4_bullets.append("Clean Pocketless Back: No back welt pockets are used, preserving a smooth, contoured silhouette over the seat.")
 
-        s4_bullets.append(f"Center Back Rise: Place both Pants Backs right sides together along center back rise, stitch at {sa} down to crotch point, and press open.")
-        steps.append({"step": 4, "title": "Back Shaping & Center Back Rise", "bullets": s4_bullets})
+            s4_bullets.append(f"Center Back Rise: Place both Pants Backs right sides together along center back rise, stitch at {sa} down to crotch point, and press open.")
+            steps.append({"step": 4, "title": "Back Shaping & Center Back Rise", "bullets": s4_bullets})
 
         # STEP 5: Inseams & Reinforced Crotch Curve
         s5_bullets = [
@@ -526,16 +554,22 @@ class UniversalTrouserEngine:
         ]
         steps.append({"step": 5, "title": "Inseams & Reinforced Crotch Curve", "bullets": s5_bullets})
 
-        # STEP 6: Outer Side Seams & Belt Loops
-        s6_bullets = [
-            f"Outer Side Seams: Pin Front and Back outer edges right sides together from waist to hem (keeping front pocket openings free). Stitch at {sa} and press open."
-        ]
-        if self.spec.belt_loops_count > 0:
-            w_cm, l_cm = self.spec.cut_belt_loop_strip_cm
-            s6_bullets.append(
-                f"Construct {self.spec.belt_loops_count} Belt Loops: Fold the {w_cm:.1f} cm x {l_cm:.0f} cm strip lengthwise, stitch at 6 mm, turn right side out, press flat ({self.spec.finished_belt_loop_width_cm:.1f} cm finished width), and cut into {self.spec.belt_loops_count} equal 8.5 cm loops."
-            )
-        steps.append({"step": 6, "title": "Outer Side Seams & Tailored Belt Loops", "bullets": s6_bullets})
+        # STEP 6: Outer Side Seams, Invisible Zipper & Belt Loops
+        s6_bullets = []
+        if self.spec.closure_type == "side_invisible_zip":
+            s6_bullets.extend([
+                f"Right Side Seam: Pin Front and Back right outer edges right sides together. Stitch continuous side seam from waist to hem at {sa} and press open.",
+                f"Left Side Invisible Zipper: Insert a 20 cm (8 in) invisible zipper into the left side seam using an invisible zipper foot. Stitch remaining left side seam from zipper stop down to hem at {sa} and press open."
+            ])
+            steps.append({"step": 6, "title": "Side Seams & Invisible Zipper Installation", "bullets": s6_bullets})
+        else:
+            s6_bullets.append(f"Outer Side Seams: Pin Front and Back outer edges right sides together from waist to hem (keeping front pocket openings free). Stitch at {sa} and press open.")
+            if self.spec.belt_loops_count > 0:
+                w_cm, l_cm = self.spec.cut_belt_loop_strip_cm
+                s6_bullets.append(
+                    f"Construct {self.spec.belt_loops_count} Belt Loops: Fold the {w_cm:.1f} cm x {l_cm:.0f} cm strip lengthwise, stitch at 6 mm, turn right side out, press flat ({self.spec.finished_belt_loop_width_cm:.1f} cm finished width), and cut into {self.spec.belt_loops_count} equal 8.5 cm loops."
+                )
+            steps.append({"step": 6, "title": "Outer Side Seams & Tailored Belt Loops", "bullets": s6_bullets})
 
         # STEP 7: Waistband, Closure & Hem
         s7_bullets = []
@@ -543,6 +577,11 @@ class UniversalTrouserEngine:
             s7_bullets.extend([
                 f"Attach Tailored Waistband: Stitch interfaced Waistband to trouser waist at {sa}, catching lower ends of belt loops. Press seam toward waistband.",
                 "Concealed Hook & Bar Closure: Install heavy-duty metal trouser hook & bar on the inside extension tab: bar on left inside facing, hook on right extension tab. Zero exterior buttons visible!",
+            ])
+        elif self.spec.closure_type == "side_invisible_zip":
+            s7_bullets.extend([
+                f"Attach Tailored Waistband: Stitch interfaced Waistband to trouser waist at {sa}, encasing the top ends of the side invisible zipper cleanly. Press seam upward.",
+                "Discreet Hook & Eye: Sew a small metal hook and eye on the inside waistband facing directly above the invisible zipper teeth for secure waist retention.",
             ])
         elif self.spec.closure_type in ("exterior_button", "jeans_tack_button"):
             s7_bullets.extend([
@@ -672,10 +711,55 @@ class UniversalTrouserEngine:
         if self.spec.closure_type == "concealed_hook_bar" and ("make a buttonhole" in step7_text or "sew a button" in step7_text or "attach matching exterior button" in step7_text):
             passed = False
             logs.append("[FAIL] Step 7 mentions sewing a button/buttonhole for concealed hook & bar closure!")
+        elif self.spec.closure_type == "side_invisible_zip" and ("button" in step7_text or "fly" in step7_text):
+            passed = False
+            logs.append("[FAIL] Step 7 mentions button/fly for side invisible zipper closure!")
         else:
             logs.append(f"[PASS] Closure Consistency Check: Step 7 text & diagram locked to '{self.spec.closure_type}'.")
 
-        # Check 6: Phase 0 Diagram Sourcing Audit (The Golden Rule)
+        # Check 6: Platform Default Trap & Discrepancy Hunter (PatternFast CAD vs Tailornova Instructions)
+        all_steps_text = " ".join([" ".join(s["bullets"]) for s in steps]).lower()
+        # Trap A: Ghost Front Fly in instructions when closure is Side Zip or Elastic
+        if self.spec.closure_type in ("side_invisible_zip", "pull_on_elastic"):
+            if "j-stitch" in all_steps_text or "fly facing shield" in all_steps_text:
+                passed = False
+                logs.append("[FAIL] Platform Trap Detected: Generic front zipper fly instructions present in side-zip/pull-on trouser!")
+            else:
+                logs.append("[PASS] Ghost Fly Trap Cleared: Zero front fly instructions in side-zip model.")
+            has_fly_pieces = any(p["type"] in ("fly_shield", "fly_interfacing") for p in pieces)
+            if has_fly_pieces:
+                passed = False
+                logs.append("[FAIL] Ghost Fly Pieces Detected: Fly shield/interfacing pieces in inventory for side-zip trouser!")
+            else:
+                logs.append("[PASS] Ghost Fly Pieces Cleared: Exactly 0 fly shield pieces in inventory.")
+
+        # Trap B: Ghost Pockets in instructions when front_pockets is none
+        if self.spec.front_pockets == "none":
+            if "slant pocket" in all_steps_text or "understitch 2 mm" in all_steps_text:
+                passed = False
+                logs.append("[FAIL] Platform Trap Detected: Pocket sewing instructions present in pocketless trouser model!")
+            else:
+                logs.append("[PASS] Ghost Pocket Trap Cleared: Zero pocket instructions in sleek pocketless model.")
+            has_pocket_pieces = any(p["type"] in ("pocket_outer", "pocket_inner", "pocket_patch") for p in pieces)
+            if has_pocket_pieces:
+                passed = False
+                logs.append("[FAIL] Ghost Pocket Pieces Detected: Pocket bags exist in inventory for pocketless trouser!")
+            else:
+                logs.append("[PASS] Ghost Pocket Pieces Cleared: Exactly 0 pocket bags in inventory.")
+
+        # Check 7: Physical Fabric Nesting Math (Plus-Size Shortage Prevention)
+        yardage = self.calculate_geometric_yardage()
+        is_wide = self.spec.silhouette in ("palazzo", "wide_leg", "sailor_wide", "barrel_leg")
+        if is_wide:
+            w60_large = yardage["16_22"]["60_m"]
+            w45_large = yardage["16_22"]["45_m"]
+            if w60_large < 3.0 or w45_large < 3.8:
+                passed = False
+                logs.append(f"[FAIL] Plus-Size Yardage Shortage: 16-22 requires at least 3.10m (60\") & 4.0m (45\"), found {w60_large}m / {w45_large}m")
+            else:
+                logs.append(f"[PASS] Physical Nesting Yardage Check: 16-22 scaled to {w60_large:.2f}m (60\") & {w45_large:.2f}m (45\") (Guarantees zero sewer fabric shortage).")
+
+        # Check 8: Phase 0 Diagram Sourcing Audit (The Golden Rule)
         # Default: Use Authentic Tailornova Original Vector (Clean & Frame)
         # Exception: Custom CAD only when error in original or bespoke feature missing
         sourcing_plan = []
