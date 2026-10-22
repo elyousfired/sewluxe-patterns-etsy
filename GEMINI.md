@@ -6,6 +6,11 @@
 - **Language Invariance**: Regardless of the language the user writes in (French, English, Latin Arabizi, etc.), you MUST ALWAYS formulate your text responses in Arabic letters from right to left.
 - **Technical Integrity**: Code blocks, terminal commands, file paths, and identifiers stay in their original syntax (English/programming code), but all explanations, summaries, and chat interaction must be in Arabic letters.
 
+# Git Repository Scope & Local PC Rule (قاعدة الحفاظ على سرية المشاريع)
+
+- **SYSTEM ONLY on GitHub**: The Git repository (`origin/master`) is strictly and exclusively reserved for core engine code, generators, shared skills, and pipeline tools (`sewluxe_core/`, engine scripts, customizations).
+- **PROJECTS STRICTLY LOCAL ON PC**: All individual garment projects (`projects/`), buyer deliveries, photoshoots, flat sketches, and compiled PDF packages stay 100% locally on the user's PC (and Desktop). They MUST NEVER be committed or pushed to GitHub under any circumstances (enforced permanently via `.gitignore`).
+
 # Mandatory Etsy Sewing Pattern Pipeline Rules (Argon Benchmark)
 
 Whenever building a sewing pattern product package for Etsy (e.g. Odette Vest, Colette Trousers, Camille Coat, Margot Pants):
