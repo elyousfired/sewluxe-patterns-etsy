@@ -363,7 +363,8 @@ class UniversalCADBlueprintEngine:
         # ---------------------------------------------------------------------
         d.add(Line(rx, 110, rx + 258, 110, strokeColor=colors.HexColor('#D5D0C8'), strokeWidth=0.5))
         d.add(String(rx, 98, f'SEWLUXE PATTERNS  •  CAD PATTERN INVENTORY', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#111111')))
-        d.add(String(rx, 88, f'Model: {spec.model_name}  •  Sizes: US 00–22', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#444444')))
+        sizes_str = "Sizes: XXS–10XL (15 Sizes)" if spec.size_standard == "PATTERNFAST_XXS_10XL" else "Sizes: US 00–22"
+        d.add(String(rx, 88, f'Model: {spec.model_name}  •  {sizes_str}', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#444444')))
         d.add(String(rx, 78, f'Seam Allowance: {spec.seam_allowance_cm:.1f} cm Included  •  Hem: {spec.hem_allowance_cm:.1f} cm', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#444444')))
         closure_label = "Concealed Trouser Hook & Bar" if spec.closure_type == "concealed_hook_bar" else ("Pull-On Continuous Elastic" if is_elastic_waist else "Tailored Button Closure")
         d.add(String(rx, 68, f'{closure_label}  •  Pocketless Back  •  Zero AI Clutter', fontName='Helvetica-Bold', fontSize=5.5, fillColor=colors.HexColor('#8B2635')))
@@ -406,32 +407,50 @@ class UniversalCADBlueprintEngine:
 
         # Dynamically render step graphics based on step_num & spec
         if step_num == 1:
-            # Step 1: Front Shaping & Crease
-            # Panel 1: Double Forward Pleats
-            pw1 = 12 + box_w / 2
-            d.add(String(50, height - 28, "Fold & Baste Front Pleats", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor('#222222')))
-            d.add(Polygon([40, 40, 40, 160, 200, 160, 200, 40], fillColor=colors.white, strokeColor=c_cut, strokeWidth=1.0))
-            # Main Pleat
-            d.add(Line(90, 160, 90, 80, strokeColor=c_cut, strokeWidth=1.0))
-            d.add(Line(105, 160, 105, 80, strokeColor=c_cut, strokeWidth=1.0))
-            d.add(Line(105, 140, 80, 140, strokeColor=c_accent, strokeWidth=1.2))
-            d.add(Polygon([83, 137, 77, 140, 83, 143], fillColor=c_accent, strokeColor=None))
-            # Secondary Pleat
-            d.add(Line(140, 160, 140, 90, strokeColor=c_cut, strokeWidth=1.0))
-            d.add(Line(152, 160, 152, 90, strokeColor=c_cut, strokeWidth=1.0))
-            d.add(Line(152, 140, 132, 140, strokeColor=c_accent, strokeWidth=1.2))
-            d.add(Polygon([135, 137, 129, 140, 135, 143], fillColor=c_accent, strokeColor=None))
-            # Basting line across waist
-            d.add(Line(40, 152, 200, 152, strokeColor=c_stitch, strokeWidth=0.8, strokeDashArray=[3, 2]))
-            d.add(String(50, 22, "Machine-baste waist edge at 6 mm (1/4 in)", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor('#555555')))
+            if spec.front_shaping in ("flat_front", "front_darts"):
+                # Panel 1: Flat Front Shaping & Staystitching
+                d.add(String(50, height - 28, "Staystitch Waist & Front Darts", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor('#222222')))
+                d.add(Polygon([40, 40, 40, 160, 200, 160, 200, 40], fillColor=colors.white, strokeColor=c_cut, strokeWidth=1.0))
+                # Front waist dart
+                d.add(Polygon([115, 160, 120, 95, 125, 160], fillColor=c_wrong, strokeColor=c_cut, strokeWidth=0.8))
+                d.add(Line(120, 160, 120, 95, strokeColor=c_stitch, strokeWidth=1.0, strokeDashArray=[3, 2]))
+                # Staystitch line
+                d.add(Line(40, 154, 200, 154, strokeColor=c_accent, strokeWidth=0.8, strokeDashArray=[3, 2]))
+                d.add(String(50, 22, "Staystitch waist curve at 6 mm; stitch front darts (zero pleats)", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor('#555555')))
 
-            # Panel 2: Razor-Sharp Pressed Center Crease
-            d.add(String(width / 2 + 44, height - 28, "Press Center Leg Crease", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor('#222222')))
-            d.add(Polygon([290, 40, 290, 160, 450, 160, 450, 40], fillColor=colors.white, strokeColor=c_cut, strokeWidth=1.0))
-            d.add(Line(370, 40, 370, 160, strokeColor=c_accent, strokeWidth=1.4, strokeDashArray=[6, 3]))
-            d.add(Rect(325, 95, 90, 22, rx=4, ry=4, fillColor=colors.white, strokeColor=c_accent, strokeWidth=0.8))
-            d.add(String(332, 102, "STEAM & CLAPPER", fontName="Helvetica-Bold", fontSize=6.5, fillColor=c_accent))
-            d.add(String(290, 22, "Press crease from main pleat straight to hem", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor('#555555')))
+                # Panel 2: Razor-Sharp Pressed Center Crease
+                d.add(String(width / 2 + 44, height - 28, "Press Center Leg Crease", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor('#222222')))
+                d.add(Polygon([290, 40, 290, 160, 450, 160, 450, 40], fillColor=colors.white, strokeColor=c_cut, strokeWidth=1.0))
+                d.add(Line(370, 40, 370, 160, strokeColor=c_accent, strokeWidth=1.4, strokeDashArray=[6, 3]))
+                d.add(Rect(325, 95, 90, 22, rx=4, ry=4, fillColor=colors.white, strokeColor=c_accent, strokeWidth=0.8))
+                d.add(String(332, 102, "STEAM & CLAPPER", fontName="Helvetica-Bold", fontSize=6.5, fillColor=c_accent))
+                d.add(String(290, 22, "Press crease from waistline straight down to hem", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor('#555555')))
+            else:
+                # Panel 1: Double Forward Pleats
+                pw1 = 12 + box_w / 2
+                d.add(String(50, height - 28, "Fold & Baste Front Pleats", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor('#222222')))
+                d.add(Polygon([40, 40, 40, 160, 200, 160, 200, 40], fillColor=colors.white, strokeColor=c_cut, strokeWidth=1.0))
+                # Main Pleat
+                d.add(Line(90, 160, 90, 80, strokeColor=c_cut, strokeWidth=1.0))
+                d.add(Line(105, 160, 105, 80, strokeColor=c_cut, strokeWidth=1.0))
+                d.add(Line(105, 140, 80, 140, strokeColor=c_accent, strokeWidth=1.2))
+                d.add(Polygon([83, 137, 77, 140, 83, 143], fillColor=c_accent, strokeColor=None))
+                # Secondary Pleat
+                d.add(Line(140, 160, 140, 90, strokeColor=c_cut, strokeWidth=1.0))
+                d.add(Line(152, 160, 152, 90, strokeColor=c_cut, strokeWidth=1.0))
+                d.add(Line(152, 140, 132, 140, strokeColor=c_accent, strokeWidth=1.2))
+                d.add(Polygon([135, 137, 129, 140, 135, 143], fillColor=c_accent, strokeColor=None))
+                # Basting line across waist
+                d.add(Line(40, 152, 200, 152, strokeColor=c_stitch, strokeWidth=0.8, strokeDashArray=[3, 2]))
+                d.add(String(50, 22, "Machine-baste waist edge at 6 mm (1/4 in)", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor('#555555')))
+
+                # Panel 2: Razor-Sharp Pressed Center Crease
+                d.add(String(width / 2 + 44, height - 28, "Press Center Leg Crease", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor('#222222')))
+                d.add(Polygon([290, 40, 290, 160, 450, 160, 450, 40], fillColor=colors.white, strokeColor=c_cut, strokeWidth=1.0))
+                d.add(Line(370, 40, 370, 160, strokeColor=c_accent, strokeWidth=1.4, strokeDashArray=[6, 3]))
+                d.add(Rect(325, 95, 90, 22, rx=4, ry=4, fillColor=colors.white, strokeColor=c_accent, strokeWidth=0.8))
+                d.add(String(332, 102, "STEAM & CLAPPER", fontName="Helvetica-Bold", fontSize=6.5, fillColor=c_accent))
+                d.add(String(290, 22, "Press crease from main pleat straight to hem", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor('#555555')))
 
         elif step_num == 4:
             # Step 4: Back Darts & Center Back Rise
@@ -453,27 +472,48 @@ class UniversalCADBlueprintEngine:
             d.add(String(310, 22, "Stitch center back rise at 1.0 cm (3/8 in); serge and press open", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor('#555555')))
 
         elif step_num == 7:
-            # Step 7: Concealed Hook & Bar & Deep Hem
-            d.add(String(50, height - 28, "Install Concealed Hook & Bar", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor('#222222')))
-            d.add(Rect(45, 75, 150, 50, rx=4, ry=4, fillColor=colors.white, strokeColor=c_cut, strokeWidth=1.0))
-            # Left Inside Bar
-            d.add(Line(80, 85, 80, 115, strokeColor=colors.black, strokeWidth=4.0))
-            d.add(String(74, 122, "BAR", fontName="Helvetica-Bold", fontSize=7, fillColor=c_accent))
-            # Right Extension Hook
-            d.add(Line(150, 85, 150, 115, strokeColor=colors.black, strokeWidth=4.0))
-            d.add(Line(150, 100, 160, 100, strokeColor=colors.black, strokeWidth=3.0))
-            d.add(String(142, 122, "HOOK", fontName="Helvetica-Bold", fontSize=7, fillColor=c_accent))
-            d.add(String(45, 22, "Concealed inside extension tab; ZERO exterior buttons!", fontName="Helvetica-Bold", fontSize=6.5, fillColor=c_accent))
+            if spec.closure_type in ("exterior_button", "jeans_tack_button"):
+                d.add(String(50, height - 28, "Attach Waistband & Buttonhole", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor('#222222')))
+                d.add(Rect(45, 75, 150, 50, rx=4, ry=4, fillColor=colors.white, strokeColor=c_cut, strokeWidth=1.0))
+                # Buttonhole & Button
+                d.add(Line(70, 100, 95, 100, strokeColor=c_accent, strokeWidth=2.0))
+                d.add(Circle(150, 100, 10, fillColor=colors.HexColor('#F8F6F2'), strokeColor=c_cut, strokeWidth=1.2))
+                d.add(Circle(150, 100, 2, fillColor=c_cut, strokeColor=None))
+                d.add(String(65, 122, "BUTTONHOLE", fontName="Helvetica-Bold", fontSize=6.5, fillColor=c_accent))
+                d.add(String(138, 122, "BUTTON", fontName="Helvetica-Bold", fontSize=6.5, fillColor=colors.black))
+                d.add(String(45, 22, "Waistband attached over fly zipper with buttonhole & horn button", fontName="Helvetica", fontSize=6.2, fillColor=colors.HexColor('#555555')))
 
-            # Panel 2: Deep 5.0 cm Weighted Hem
-            d.add(String(width / 2 + 44, height - 28, "Deep 5.0 cm Weighted Hem", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor('#222222')))
-            d.add(Polygon([290, 40, 290, 160, 450, 160, 450, 40], fillColor=colors.white, strokeColor=c_cut, strokeWidth=1.0))
-            # Hem fold line
-            d.add(Line(290, 80, 450, 80, strokeColor=c_accent, strokeWidth=1.2))
-            d.add(Line(290, 60, 450, 60, strokeColor=c_stitch, strokeWidth=0.8, strokeDashArray=[3, 2]))
-            d.add(String(340, 84, "5.0 cm (2.0 in) Hem Fold", fontName="Helvetica-Bold", fontSize=6.5, fillColor=c_accent))
-            d.add(String(340, 64, "Blind-stitch along inner edge", fontName="Helvetica", fontSize=6.0, fillColor=colors.HexColor('#444444')))
-            d.add(String(290, 22, "Provides waterfall drape and gravity over footwear", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor('#555555')))
+                # Panel 2: Deep Weighted Hem
+                d.add(String(width / 2 + 44, height - 28, f"Deep {spec.hem_allowance_cm:.1f} cm Weighted Hem", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor('#222222')))
+                d.add(Polygon([290, 40, 290, 160, 450, 160, 450, 40], fillColor=colors.white, strokeColor=c_cut, strokeWidth=1.0))
+                # Hem fold line
+                d.add(Line(290, 80, 450, 80, strokeColor=c_accent, strokeWidth=1.2))
+                d.add(Line(290, 60, 450, 60, strokeColor=c_stitch, strokeWidth=0.8, strokeDashArray=[3, 2]))
+                d.add(String(330, 84, f"{spec.hem_allowance_cm:.1f} cm ({spec.hem_allowance_cm/2.54:.1f} in) Hem Fold", fontName="Helvetica-Bold", fontSize=6.5, fillColor=c_accent))
+                d.add(String(340, 64, "Blind-stitch along inner edge", fontName="Helvetica", fontSize=6.0, fillColor=colors.HexColor('#444444')))
+                d.add(String(290, 22, "Provides waterfall drape and gravity over footwear", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor('#555555')))
+            else:
+                # Step 7: Concealed Hook & Bar & Deep Hem
+                d.add(String(50, height - 28, "Install Concealed Hook & Bar", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor('#222222')))
+                d.add(Rect(45, 75, 150, 50, rx=4, ry=4, fillColor=colors.white, strokeColor=c_cut, strokeWidth=1.0))
+                # Left Inside Bar
+                d.add(Line(80, 85, 80, 115, strokeColor=colors.black, strokeWidth=4.0))
+                d.add(String(74, 122, "BAR", fontName="Helvetica-Bold", fontSize=7, fillColor=c_accent))
+                # Right Extension Hook
+                d.add(Line(150, 85, 150, 115, strokeColor=colors.black, strokeWidth=4.0))
+                d.add(Line(150, 100, 160, 100, strokeColor=colors.black, strokeWidth=3.0))
+                d.add(String(142, 122, "HOOK", fontName="Helvetica-Bold", fontSize=7, fillColor=c_accent))
+                d.add(String(45, 22, "Concealed inside extension tab; ZERO exterior buttons!", fontName="Helvetica-Bold", fontSize=6.5, fillColor=c_accent))
+
+                # Panel 2: Deep 5.0 cm Weighted Hem
+                d.add(String(width / 2 + 44, height - 28, "Deep 5.0 cm Weighted Hem", fontName="Helvetica-Bold", fontSize=8, fillColor=colors.HexColor('#222222')))
+                d.add(Polygon([290, 40, 290, 160, 450, 160, 450, 40], fillColor=colors.white, strokeColor=c_cut, strokeWidth=1.0))
+                # Hem fold line
+                d.add(Line(290, 80, 450, 80, strokeColor=c_accent, strokeWidth=1.2))
+                d.add(Line(290, 60, 450, 60, strokeColor=c_stitch, strokeWidth=0.8, strokeDashArray=[3, 2]))
+                d.add(String(340, 84, "5.0 cm (2.0 in) Hem Fold", fontName="Helvetica-Bold", fontSize=6.5, fillColor=c_accent))
+                d.add(String(340, 64, "Blind-stitch along inner edge", fontName="Helvetica", fontSize=6.0, fillColor=colors.HexColor('#444444')))
+                d.add(String(290, 22, "Provides waterfall drape and gravity over footwear", fontName="Helvetica", fontSize=6.5, fillColor=colors.HexColor('#555555')))
 
         elif step_num == 2:
             # Step 2: Slanted Hip Pockets

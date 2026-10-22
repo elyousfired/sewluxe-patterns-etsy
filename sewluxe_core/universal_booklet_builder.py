@@ -112,6 +112,8 @@ class UniversalBookletBuilder:
         panels_dir = os.path.join(core_dir, "assets", "master_panels")
 
         if step_num == 1:
+            if self.spec.front_shaping in ("flat_front", "front_darts"):
+                return os.path.join(panels_dir, "step1_flat_front_and_crease.png")
             return os.path.join(panels_dir, "step1_pleats_and_crease.png")
         elif step_num == 2:
             return os.path.join(panels_dir, "step2_slant_pockets.png")
@@ -129,6 +131,8 @@ class UniversalBookletBuilder:
         elif step_num == 7:
             if self.spec.closure_type == "concealed_hook_bar":
                 return os.path.join(panels_dir, "step7_hook_and_hem.png")
+            elif self.spec.closure_type in ("exterior_button", "jeans_tack_button"):
+                return os.path.join(panels_dir, "step7_trouser_fly_and_waistband.png")
             else:
                 return os.path.join(panels_dir, "step7_button_and_hem.png")
         return None
@@ -143,7 +147,7 @@ class UniversalBookletBuilder:
             c.setFont("Poppins-Medium", 7.0)
             c.setFillColor(TEXT_MUTED)
             c.drawString(M_L, H - 34, f"{self.spec.model_name.upper()}  ·  SEWING GUIDE")
-            sz_range_str = "SIZES XXS–10XL" if self.spec.size_standard == "PATTERNFAST_XXS_10XL" else "SIZES US 00–22"
+            sz_range_str = "SIZES XXS–10XL (15 SIZES)" if self.spec.size_standard == "PATTERNFAST_XXS_10XL" else "SIZES US 00–22"
             c.drawRightString(M_R, H - 34, sz_range_str)
             c.setStrokeColor(RULE_LINE)
             c.setLineWidth(0.6)
@@ -236,7 +240,8 @@ class UniversalBookletBuilder:
 
         c.setFont("Lora-Italic", 9.8)
         c.setFillColor(TEXT_BODY)
-        c.drawString(M_L, H - 136, f"Sizes US 00–22  ·  Skill Level: Intermediate  ·  {self.spec.seam_allowance_cm:.1f} cm (3/8 in) Seam Allowance Included")
+        sz_sub_str = "Sizes XXS–10XL (15 Sizes)" if self.spec.size_standard == "PATTERNFAST_XXS_10XL" else "Sizes US 00–22"
+        c.drawString(M_L, H - 136, f"{sz_sub_str}  ·  Skill Level: Intermediate  ·  {self.spec.seam_allowance_cm:.1f} cm (3/8 in) Seam Allowance Included")
 
         # Hero Container / Photo
         hero_sz = 390.0
@@ -281,8 +286,9 @@ class UniversalBookletBuilder:
         c.line(M_L, y_spec, M_R, y_spec)
 
         cols_x = [M_L, M_L + 100, M_L + 230, M_L + 370]
+        sizes_cover_val = "XXS – 10XL (15 sizes)" if self.spec.size_standard == "PATTERNFAST_XXS_10XL" else "US 00 – 22 (13 sizes)"
         specs_cover = [
-            ("S I Z E S", "US 00 – 22 (13 sizes)"),
+            ("S I Z E S", sizes_cover_val),
             ("L E V E L", "Intermediate"),
             ("S E A M   A L L O W A N C E", f"{self.spec.seam_allowance_cm:.1f} cm (3/8 in) included"),
             ("F O R M A T S", "A4 · US Letter · A0 · Projector"),
@@ -345,7 +351,7 @@ class UniversalBookletBuilder:
 
         inc_items = [
             "This complete 16-page illustrated luxury sewing instruction booklet.",
-            "Full printable pattern suite in A4, US Letter, and A0 CopyShop across all 13 sizes (US 00 to 22).",
+            f"Full printable pattern suite in A4, US Letter, and A0 CopyShop {'across all 15 sizes (XXS to 10XL)' if self.spec.size_standard == 'PATTERNFAST_XXS_10XL' else 'across all 13 sizes (US 00 to 22)'}.",
             "Dedicated Multi-Size Layered A0 PDF and Projector File with individual size toggle layers.",
             "Interactive Video Guides Hub with clickable links and direct QR codes (Page 8)."
         ]
@@ -548,11 +554,18 @@ class UniversalBookletBuilder:
 
         # Dynamic physical yardage from universal engine
         yardage_data = self.engine.calculate_geometric_yardage()
-        req_rows = [
-            ("Sizes US 00 – 08", f"{yardage_data['00_08']['60_m']:.2f} m ({yardage_data['00_08']['60_yd']:.2f} yards)", f"{yardage_data['00_08']['45_m']:.2f} m ({yardage_data['00_08']['45_yd']:.2f} yards)"),
-            ("Sizes US 10 – 14", f"{yardage_data['10_14']['60_m']:.2f} m ({yardage_data['10_14']['60_yd']:.2f} yards)", f"{yardage_data['10_14']['45_m']:.2f} m ({yardage_data['10_14']['45_yd']:.2f} yards)"),
-            ("Sizes US 16 – 22", f"{yardage_data['16_22']['60_m']:.2f} m ({yardage_data['16_22']['60_yd']:.2f} yards)", f"{yardage_data['16_22']['45_m']:.2f} m ({yardage_data['16_22']['45_yd']:.2f} yards)"),
-        ]
+        if self.spec.size_standard == "PATTERNFAST_XXS_10XL":
+            req_rows = [
+                ("Sizes XXS – L (EU 32–40)", f"{yardage_data['00_08']['60_m']:.2f} m ({yardage_data['00_08']['60_yd']:.2f} yards)", f"{yardage_data['00_08']['45_m']:.2f} m ({yardage_data['00_08']['45_yd']:.2f} yards)"),
+                ("Sizes XL – 3XL (EU 42–46)", f"{yardage_data['10_14']['60_m']:.2f} m ({yardage_data['10_14']['60_yd']:.2f} yards)", f"{yardage_data['10_14']['45_m']:.2f} m ({yardage_data['10_14']['45_yd']:.2f} yards)"),
+                ("Sizes 4XL – 10XL (EU 48–60)", f"{yardage_data['16_22']['60_m']:.2f} m ({yardage_data['16_22']['60_yd']:.2f} yards)", f"{yardage_data['16_22']['45_m']:.2f} m ({yardage_data['16_22']['45_yd']:.2f} yards)"),
+            ]
+        else:
+            req_rows = [
+                ("Sizes US 00 – 08", f"{yardage_data['00_08']['60_m']:.2f} m ({yardage_data['00_08']['60_yd']:.2f} yards)", f"{yardage_data['00_08']['45_m']:.2f} m ({yardage_data['00_08']['45_yd']:.2f} yards)"),
+                ("Sizes US 10 – 14", f"{yardage_data['10_14']['60_m']:.2f} m ({yardage_data['10_14']['60_yd']:.2f} yards)", f"{yardage_data['10_14']['45_m']:.2f} m ({yardage_data['10_14']['45_yd']:.2f} yards)"),
+                ("Sizes US 16 – 22", f"{yardage_data['16_22']['60_m']:.2f} m ({yardage_data['16_22']['60_yd']:.2f} yards)", f"{yardage_data['16_22']['45_m']:.2f} m ({yardage_data['16_22']['45_yd']:.2f} yards)"),
+            ]
         for r_idx, (sc, w60, w45) in enumerate(req_rows):
             bg = TABLE_ALT if r_idx % 2 == 1 else WHITE
             c.setFillColor(bg)
@@ -570,7 +583,16 @@ class UniversalBookletBuilder:
         c.drawString(M_L, y, "REQUIRED NOTIONS & HARDWARE")
         y -= 12
 
-        closure_txt = "Concealed heavy-duty trouser hook & bar for inside extension tab." if self.spec.closure_type == "concealed_hook_bar" else ("Continuous elastic 3.5 cm (1.4 in) wide." if self.spec.closure_type == "pull_on_elastic" else "Tailored horn button 20 mm + buttonhole.")
+        if self.spec.closure_type in ("exterior_button", "jeans_tack_button"):
+            closure_txt = "7–8 in (18–20 cm) trouser zipper fly + 20 mm tailored horn button & buttonhole."
+        elif self.spec.closure_type == "concealed_hook_bar":
+            closure_txt = "Concealed heavy-duty trouser hook & bar for inside extension tab + 7–8 in (18–20 cm) trouser zipper fly."
+        elif self.spec.closure_type == "side_invisible_zip":
+            closure_txt = "8–9 in (20–22 cm) invisible zipper for left hip seam."
+        elif self.spec.closure_type == "pull_on_elastic":
+            closure_txt = "Continuous elastic 3.5 cm (1.4 in) wide."
+        else:
+            closure_txt = "Tailored horn button 20 mm + buttonhole."
         notions_list = [
             ("Waistband Closure", closure_txt),
             ("Fusible Interfacing", "0.50 m (1/2 yard) lightweight woven fusible interfacing."),
@@ -749,11 +771,20 @@ class UniversalBookletBuilder:
         p_hub.drawOn(c, M_L, y - h)
         y -= (h + 20)
 
+        v1_title = "Sewing Front Pleats & Center Crease" if "pleat" in self.spec.front_shaping else "Flat Front Waist Shaping & Creases"
+        if self.spec.closure_type in ("exterior_button", "jeans_tack_button"):
+            v7_title = "Waistband Button Closure & Hemming"
+        elif self.spec.closure_type == "concealed_hook_bar":
+            v7_title = "Concealed Hook & Bar Waistband Closure"
+        elif self.spec.closure_type == "side_invisible_zip":
+            v7_title = "Invisible Zipper & Waistband Finishing"
+        else:
+            v7_title = "Waistband Construction & Hemming"
         video_cards = [
-            ("Sewing Front Pleats & Center Crease", "Step 1 Technique Guide", "https://www.youtube.com/watch?v=kYJvM9x0b0Q"),
+            (v1_title, "Step 1 Technique Guide", "https://www.youtube.com/watch?v=kYJvM9x0b0Q"),
             ("Sewing Slanted Trouser Pockets", "Step 2 Technique Guide", "https://www.youtube.com/watch?v=rZvkl2069sQ"),
             ("Front Zipper Fly & Shield Installation", "Step 3 Technique Guide", "https://www.youtube.com/watch?v=Y3rAmHE7CZs"),
-            ("Concealed Hook & Bar Waistband Closure", "Step 7 Technique Guide", "https://www.youtube.com/watch?v=DPpF3kAP_oo")
+            (v7_title, "Step 7 Technique Guide", "https://www.youtube.com/watch?v=DPpF3kAP_oo")
         ]
 
         c_w = (CONTENT_W - 20) / 2.0

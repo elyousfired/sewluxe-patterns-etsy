@@ -470,11 +470,12 @@ class UniversalTrouserEngine:
         elif self.spec.front_shaping == "front_darts":
             s1_bullets.append("Front Waist Darts: Fold each front dart right sides together, stitch from waist to dart point, tie thread tails, and press toward side seams.")
         else:
-            s1_bullets.append("Flat Front Preparation: Staystitch the curved front waist edge at 6 mm (1/4 in) to prevent stretching during handling.")
+            s1_bullets.append("Flat Front Waist Preparation: Staystitch the curved front waist edge at 6 mm (1/4 in) to stabilize the waistline curve. On the wrong side of each Pants Front, stitch front waist darts tapering smoothly to points and press toward side seams. Keep the front completely flat with zero pleats.")
 
         if self.spec.center_crease:
-            s1_bullets.append("Razor-Sharp Center Crease: Fold each front and back leg panel lengthwise matching inseam and side seam. Steam-press a crisp vertical center crease down to the hem.")
-        steps.append({"step": 1, "title": "Front Shaping & Leg Creases", "bullets": s1_bullets})
+            s1_bullets.append("Razor-Sharp Center Creases: Fold each front and back leg panel lengthwise matching inseam and side seam at knee and hem. Steam-press a crisp vertical center crease down to the hem.")
+        step1_title = "Front Pleats & Center Creases" if "pleat" in self.spec.front_shaping else "Flat Front Shaping & Leg Creases"
+        steps.append({"step": 1, "title": step1_title, "bullets": s1_bullets})
 
         if self.spec.front_pockets == "none" and self.spec.closure_type == "side_invisible_zip":
             # Dedicated clean steps for sleek pocketless side-zip trouser
@@ -585,8 +586,9 @@ class UniversalTrouserEngine:
             ])
         elif self.spec.closure_type in ("exterior_button", "jeans_tack_button"):
             s7_bullets.extend([
-                f"Attach Waistband: Stitch interfaced Waistband to trouser waist at {sa} and finish short ends.",
-                "Button & Buttonhole Closure: Sew a horizontal buttonhole on the left waistband end and attach matching exterior button on the right extension."
+                f"Attach Waistband to Trouser & Zipper Fly: Pin interfaced Waistband right sides together to trouser waist at {sa}, catching belt loop lower ends. Align left waistband end flush with fly shield; overlap extension tab on the right.",
+                "Encase Fly & Secure Facing: Fold waistband facing right sides together at short ends, stitch across ends encasing the zipper top, turn right side out, press crisp corners, and stitch-in-the-ditch along the waistband lower seam.",
+                "Waistband Buttonhole & Closure: Work a neat horizontal buttonhole on the left waistband extension directly centered above the fly zipper line. Securely sew matching horn button on the right underlap extension."
             ])
         elif self.spec.closure_type == "pull_on_elastic":
             s7_bullets.append("Elastic Waistband Casing: Attach waistband casing, insert elastic through opening, overlap ends securely, and topstitch rows through elastic.")
