@@ -53,6 +53,14 @@ class UniversalCADBlueprintEngine:
         d.add(Rect(0, 0, width, height, fillColor=colors.HexColor('#FFFFFF'), strokeColor=colors.HexColor('#1A1A1A'), strokeWidth=1.0))
         d.add(Rect(8, 8, width - 16, height - 16, fillColor=None, strokeColor=colors.HexColor('#D5D0C8'), strokeWidth=0.5))
 
+        # Proportional Content Scaling Group (Base: 540x360)
+        # Guarantees all CAD pattern pieces and technical blocks scale smoothly
+        # and fit comfortably within ANY canvas dimensions without border collisions.
+        g = Group()
+        sx = width / 540.0
+        sy = height / 360.0
+        g.scale(sx, sy)
+
         # Precision Color Palette
         c_cut = colors.HexColor('#000000')         # Solid cutting line (0.8pt)
         c_seam = colors.HexColor('#777777')        # Seam allowance line (0.4pt dashed)
@@ -96,7 +104,7 @@ class UniversalCADBlueprintEngine:
             p2.lineTo(bx_right_knee, 130)
         p2.lineTo(bx_right_hem, 30)                                   # Side to hem
         p2.closePath()
-        d.add(p2)
+        g.add(p2)
 
         # Inner Seam Allowance Line Piece 2
         p2_in = Path(fillColor=None, strokeColor=c_seam, strokeWidth=0.4, strokeDashArray=[4, 2])
@@ -110,36 +118,36 @@ class UniversalCADBlueprintEngine:
         p2_in.lineTo(bx_right_knee - 4, 130)
         p2_in.lineTo(bx_right_hem - 4, 30 + hem_allowance_pt)
         p2_in.closePath()
-        d.add(p2_in)
+        g.add(p2_in)
 
         # Guides Piece 2
-        d.add(Line(bx_left_knee, 130, bx_right_knee, 130, strokeColor=c_guide, strokeWidth=0.4, strokeDashArray=[4, 2])) # Kneeline
-        d.add(Line(bx_center - 56, 220, bx_center + 47, 220, strokeColor=c_guide, strokeWidth=0.4, strokeDashArray=[4, 2])) # Hipline
+        g.add(Line(bx_left_knee, 130, bx_right_knee, 130, strokeColor=c_guide, strokeWidth=0.4, strokeDashArray=[4, 2])) # Kneeline
+        g.add(Line(bx_center - 56, 220, bx_center + 47, 220, strokeColor=c_guide, strokeWidth=0.4, strokeDashArray=[4, 2])) # Hipline
 
         # Back Darts (If back_shaping == "4_darts")
         if spec.back_shaping == "4_darts":
-            d.add(Polygon([bx_center - 6, 332, bx_center - 3, 275, bx_center, 332], fillColor=None, strokeColor=c_cut, strokeWidth=0.6))
-            d.add(Polygon([bx_center + 18, 330, bx_center + 21, 280, bx_center + 24, 330], fillColor=None, strokeColor=c_cut, strokeWidth=0.6))
+            g.add(Polygon([bx_center - 6, 332, bx_center - 3, 275, bx_center, 332], fillColor=None, strokeColor=c_cut, strokeWidth=0.6))
+            g.add(Polygon([bx_center + 18, 330, bx_center + 21, 280, bx_center + 24, 330], fillColor=None, strokeColor=c_cut, strokeWidth=0.6))
         elif spec.back_shaping == "2_darts":
-            d.add(Polygon([bx_center + 6, 331, bx_center + 9, 275, bx_center + 12, 331], fillColor=None, strokeColor=c_cut, strokeWidth=0.6))
+            g.add(Polygon([bx_center + 6, 331, bx_center + 9, 275, bx_center + 12, 331], fillColor=None, strokeColor=c_cut, strokeWidth=0.6))
         elif is_elastic_waist:
             # Wavy gathered indication at waist
             for wx in range(int(bx_center - 20), int(bx_center + 40), 6):
-                d.add(Line(wx, 332, wx + 3, 328, strokeColor=c_seam, strokeWidth=0.5))
+                g.add(Line(wx, 332, wx + 3, 328, strokeColor=c_seam, strokeWidth=0.5))
 
         # Precision Notches Piece 2
-        d.add(Line(bx_left_knee - 2, 130, bx_left_knee + 4, 130, strokeColor=c_cut, strokeWidth=0.7))
-        d.add(Line(bx_right_knee - 4, 130, bx_right_knee + 2, 130, strokeColor=c_cut, strokeWidth=0.7))
-        d.add(Line(bx_center + 45, 260, bx_center + 49, 260, strokeColor=c_cut, strokeWidth=0.7))
+        g.add(Line(bx_left_knee - 2, 130, bx_left_knee + 4, 130, strokeColor=c_cut, strokeWidth=0.7))
+        g.add(Line(bx_right_knee - 4, 130, bx_right_knee + 2, 130, strokeColor=c_cut, strokeWidth=0.7))
+        g.add(Line(bx_center + 45, 260, bx_center + 49, 260, strokeColor=c_cut, strokeWidth=0.7))
 
         # Grainline Piece 2
-        d.add(Line(bx_center + 2, 48, bx_center + 2, 295, strokeColor=c_grain, strokeWidth=0.5))
-        d.add(Polygon([bx_center, 52, bx_center + 2, 45, bx_center + 4, 52], fillColor=c_grain, strokeColor=None))
-        d.add(Polygon([bx_center, 291, bx_center + 2, 298, bx_center + 4, 291], fillColor=c_grain, strokeColor=None))
+        g.add(Line(bx_center + 2, 48, bx_center + 2, 295, strokeColor=c_grain, strokeWidth=0.5))
+        g.add(Polygon([bx_center, 52, bx_center + 2, 45, bx_center + 4, 52], fillColor=c_grain, strokeColor=None))
+        g.add(Polygon([bx_center, 291, bx_center + 2, 298, bx_center + 4, 291], fillColor=c_grain, strokeColor=None))
 
         # Typography Piece 2
-        d.add(String(bx_center - 4, 175, '2', fontName='Helvetica-Bold', fontSize=18, fillColor=colors.black))
-        d.add(String(bx_left_hem, 16, 'PANTS BACK  |  Cut 2 (Mirrored)', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
+        g.add(String(bx_center - 4, 175, '2', fontName='Helvetica-Bold', fontSize=18, fillColor=colors.black))
+        g.add(String(bx_left_hem, 16, 'PANTS BACK  |  Cut 2 (Mirrored)', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
 
         # =====================================================================
         # 2. PIECE 1: PANTS FRONT (Middle)
@@ -165,7 +173,7 @@ class UniversalCADBlueprintEngine:
         p1.curveTo(fx_center + 46, 195, fx_right_knee, 165, fx_right_knee, 130)  # Inseam to knee
         p1.lineTo(fx_right_hem, 30)                                   # Inseam to hem
         p1.closePath()
-        d.add(p1)
+        g.add(p1)
 
         # Inner Seam Allowance Line Piece 1
         p1_in = Path(fillColor=None, strokeColor=c_seam, strokeWidth=0.4, strokeDashArray=[4, 2])
@@ -183,43 +191,43 @@ class UniversalCADBlueprintEngine:
         p1_in.curveTo(fx_center + 42, 195, fx_right_knee - 4, 165, fx_right_knee - 4, 130)
         p1_in.lineTo(fx_right_hem - 4, 30 + hem_allowance_pt)
         p1_in.closePath()
-        d.add(p1_in)
+        g.add(p1_in)
 
         # Guides Piece 1
-        d.add(Line(fx_left_knee, 130, fx_right_knee, 130, strokeColor=c_guide, strokeWidth=0.4, strokeDashArray=[4, 2])) # Kneeline
-        d.add(Line(fx_left_knee, 218, fx_center + 51, 218, strokeColor=c_guide, strokeWidth=0.4, strokeDashArray=[4, 2])) # Hipline
+        g.add(Line(fx_left_knee, 130, fx_right_knee, 130, strokeColor=c_guide, strokeWidth=0.4, strokeDashArray=[4, 2])) # Kneeline
+        g.add(Line(fx_left_knee, 218, fx_center + 51, 218, strokeColor=c_guide, strokeWidth=0.4, strokeDashArray=[4, 2])) # Hipline
 
         # Front Pleats / Shaping
         if spec.front_shaping == "double_pleats":
             for px in [fx_center - 2, fx_center + 4]: # Main Pleat (4 cm)
-                d.add(Line(px, 332, px, 295, strokeColor=c_cut, strokeWidth=0.6))
+                g.add(Line(px, 332, px, 295, strokeColor=c_cut, strokeWidth=0.6))
             for px in [fx_center + 16, fx_center + 21]: # Secondary Pleat (2.5 cm)
-                d.add(Line(px, 332, px, 298, strokeColor=c_cut, strokeWidth=0.6))
+                g.add(Line(px, 332, px, 298, strokeColor=c_cut, strokeWidth=0.6))
         elif spec.front_shaping == "single_pleat":
             for px in [fx_center + 2, fx_center + 8]:
-                d.add(Line(px, 332, px, 295, strokeColor=c_cut, strokeWidth=0.6))
+                g.add(Line(px, 332, px, 295, strokeColor=c_cut, strokeWidth=0.6))
         elif spec.front_shaping == "front_darts":
-            d.add(Polygon([fx_center, 332, fx_center + 3, 280, fx_center + 6, 332], fillColor=None, strokeColor=c_cut, strokeWidth=0.6))
+            g.add(Polygon([fx_center, 332, fx_center + 3, 280, fx_center + 6, 332], fillColor=None, strokeColor=c_cut, strokeWidth=0.6))
         elif is_elastic_waist:
             for wx in range(int(fx_left_knee + 15), int(fx_center + 35), 6):
-                d.add(Line(wx, 332, wx + 3, 328, strokeColor=c_seam, strokeWidth=0.5))
+                g.add(Line(wx, 332, wx + 3, 328, strokeColor=c_seam, strokeWidth=0.5))
 
         # Center Crease & Grainline Piece 1
-        d.add(Line(fx_center + 1, 48, fx_center + 1, 328, strokeColor=c_grain, strokeWidth=0.5))
-        d.add(Polygon([fx_center - 1, 52, fx_center + 1, 45, fx_center + 3, 52], fillColor=c_grain, strokeColor=None))
-        d.add(Polygon([fx_center - 1, 324, fx_center + 1, 331, fx_center + 3, 324], fillColor=c_grain, strokeColor=None))
+        g.add(Line(fx_center + 1, 48, fx_center + 1, 328, strokeColor=c_grain, strokeWidth=0.5))
+        g.add(Polygon([fx_center - 1, 52, fx_center + 1, 45, fx_center + 3, 52], fillColor=c_grain, strokeColor=None))
+        g.add(Polygon([fx_center - 1, 324, fx_center + 1, 331, fx_center + 3, 324], fillColor=c_grain, strokeColor=None))
 
         # Notches Piece 1
-        d.add(Line(fx_left_knee - 2, 130, fx_left_knee + 4, 130, strokeColor=c_cut, strokeWidth=0.7))
-        d.add(Line(fx_right_knee - 4, 130, fx_right_knee + 2, 130, strokeColor=c_cut, strokeWidth=0.7))
+        g.add(Line(fx_left_knee - 2, 130, fx_left_knee + 4, 130, strokeColor=c_cut, strokeWidth=0.7))
+        g.add(Line(fx_right_knee - 4, 130, fx_right_knee + 2, 130, strokeColor=c_cut, strokeWidth=0.7))
         if spec.front_pockets == "slant_italian":
-            d.add(Line(fx_left_knee - 2, 265, fx_left_knee + 4, 265, strokeColor=c_cut, strokeWidth=0.7))
+            g.add(Line(fx_left_knee - 2, 265, fx_left_knee + 4, 265, strokeColor=c_cut, strokeWidth=0.7))
         if not is_elastic_waist:
-            d.add(Line(fx_center + 36, 255, fx_center + 40, 255, strokeColor=c_cut, strokeWidth=0.7)) # Fly stop notch
+            g.add(Line(fx_center + 36, 255, fx_center + 40, 255, strokeColor=c_cut, strokeWidth=0.7)) # Fly stop notch
 
         # Typography Piece 1
-        d.add(String(fx_center - 4, 175, '1', fontName='Helvetica-Bold', fontSize=18, fillColor=colors.black))
-        d.add(String(fx_left_hem, 16, 'PANTS FRONT  |  Cut 2 (Mirrored)', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
+        g.add(String(fx_center - 4, 175, '1', fontName='Helvetica-Bold', fontSize=18, fillColor=colors.black))
+        g.add(String(fx_left_hem, 16, 'PANTS FRONT  |  Cut 2 (Mirrored)', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
 
         # =====================================================================
         # 3. ACCESSORIES STACK (Right Side) - DYNAMIC TO SPEC
@@ -239,16 +247,16 @@ class UniversalCADBlueprintEngine:
         else:
             pw_wb.lineTo(rx, 334)  # Straight rectangular waistband
         pw_wb.closePath()
-        d.add(pw_wb)
+        g.add(pw_wb)
 
-        d.add(Line(rx + 2, 318, rx + 256, 318, strokeColor=c_seam, strokeWidth=0.4, strokeDashArray=[3, 2]))
+        g.add(Line(rx + 2, 318, rx + 256, 318, strokeColor=c_seam, strokeWidth=0.4, strokeDashArray=[3, 2]))
         for nx in [rx + 65, rx + 130, rx + 195]:
-            d.add(Line(nx, 300, nx, 304, strokeColor=c_cut, strokeWidth=0.7))
-            d.add(Line(nx, 332, nx, 336, strokeColor=c_cut, strokeWidth=0.7))
+            g.add(Line(nx, 300, nx, 304, strokeColor=c_cut, strokeWidth=0.7))
+            g.add(Line(nx, 332, nx, 336, strokeColor=c_cut, strokeWidth=0.7))
 
         wb_label = "3. TAILORED WAISTBAND  |  Cut 1 Main + 1 Interfacing" if not is_elastic_waist else "3. ELASTIC CASING WAISTBAND  |  Cut 1 Main"
-        d.add(String(rx + 124, 323, '3', fontName='Helvetica-Bold', fontSize=13, fillColor=colors.black))
-        d.add(String(rx + 28, 307, wb_label, fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
+        g.add(String(rx + 124, 323, '3', fontName='Helvetica-Bold', fontSize=13, fillColor=colors.black))
+        g.add(String(rx + 28, 307, wb_label, fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
 
         # ---------------------------------------------------------------------
         # POCKETS (Pieces 6 & 4 or In-seam or None)
@@ -262,7 +270,7 @@ class UniversalCADBlueprintEngine:
             p6.curveTo(rx + 35, 175, rx + 15, 175, rx + 6, 185)
             p6.lineTo(rx, 225)
             p6.closePath()
-            d.add(p6)
+            g.add(p6)
 
             p6_in = Path(fillColor=None, strokeColor=c_seam, strokeWidth=0.4, strokeDashArray=[3, 2])
             p6_in.moveTo(rx + 4, 268)
@@ -271,11 +279,11 @@ class UniversalCADBlueprintEngine:
             p6_in.curveTo(rx + 34, 179, rx + 17, 179, rx + 10, 189)
             p6_in.lineTo(rx + 4, 225)
             p6_in.closePath()
-            d.add(p6_in)
+            g.add(p6_in)
 
-            d.add(String(rx + 24, 222, '6', fontName='Helvetica-Bold', fontSize=12, fillColor=colors.black))
-            d.add(String(rx, 166, '6. POCKET LINING', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
-            d.add(String(rx, 157, 'Cut 2 Lining Fabric', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#666666')))
+            g.add(String(rx + 24, 222, '6', fontName='Helvetica-Bold', fontSize=12, fillColor=colors.black))
+            g.add(String(rx, 166, '6. POCKET LINING', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
+            g.add(String(rx, 157, 'Cut 2 Lining Fabric', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#666666')))
 
             # Piece 4: Pocket Bag
             p4 = Path(fillColor=c_fill_main, strokeColor=c_cut, strokeWidth=0.7)
@@ -285,7 +293,7 @@ class UniversalCADBlueprintEngine:
             p4.curveTo(rx + 107, 175, rx + 87, 175, rx + 78, 185)
             p4.lineTo(rx + 72, 225)
             p4.closePath()
-            d.add(p4)
+            g.add(p4)
 
             p4_in = Path(fillColor=None, strokeColor=c_seam, strokeWidth=0.4, strokeDashArray=[3, 2])
             p4_in.moveTo(rx + 76, 268)
@@ -294,11 +302,11 @@ class UniversalCADBlueprintEngine:
             p4_in.curveTo(rx + 106, 179, rx + 89, 179, rx + 82, 189)
             p4_in.lineTo(rx + 76, 225)
             p4_in.closePath()
-            d.add(p4_in)
+            g.add(p4_in)
 
-            d.add(String(rx + 96, 222, '4', fontName='Helvetica-Bold', fontSize=12, fillColor=colors.black))
-            d.add(String(rx + 72, 166, '4. POCKET BAG', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
-            d.add(String(rx + 72, 157, 'Cut 2 Main Fabric', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#666666')))
+            g.add(String(rx + 96, 222, '4', fontName='Helvetica-Bold', fontSize=12, fillColor=colors.black))
+            g.add(String(rx + 72, 166, '4. POCKET BAG', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
+            g.add(String(rx + 72, 157, 'Cut 2 Main Fabric', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#666666')))
         elif spec.front_pockets == "in_seam":
             # In-Seam Pocket Bag
             p_in = Path(fillColor=c_fill_main, strokeColor=c_cut, strokeWidth=0.7)
@@ -307,10 +315,10 @@ class UniversalCADBlueprintEngine:
             p_in.curveTo(rx + 105, 235, rx + 95, 195, rx + 75, 185)
             p_in.curveTo(rx + 60, 178, rx + 38, 182, rx + 30, 200)
             p_in.closePath()
-            d.add(p_in)
-            d.add(String(rx + 56, 222, '4', fontName='Helvetica-Bold', fontSize=12, fillColor=colors.black))
-            d.add(String(rx + 30, 166, '4. IN-SEAM POCKET BAG', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
-            d.add(String(rx + 30, 157, 'Cut 4 Main Fabric', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#666666')))
+            g.add(p_in)
+            g.add(String(rx + 56, 222, '4', fontName='Helvetica-Bold', fontSize=12, fillColor=colors.black))
+            g.add(String(rx + 30, 166, '4. IN-SEAM POCKET BAG', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
+            g.add(String(rx + 30, 157, 'Cut 4 Main Fabric', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#666666')))
 
         # ---------------------------------------------------------------------
         # FLY PIECES (5 & 7) - Only if front fly closure!
@@ -325,11 +333,11 @@ class UniversalCADBlueprintEngine:
             p5.lineTo(rx + 162, 180)
             p5.lineTo(rx + 148, 195)
             p5.closePath()
-            d.add(p5)
-            d.add(Line(rx + 162, 272, rx + 162, 182, strokeColor=c_seam, strokeWidth=0.4, strokeDashArray=[2, 2]))
-            d.add(String(rx + 158, 224, '5', fontName='Helvetica-Bold', fontSize=11, fillColor=colors.black))
-            d.add(String(rx + 144, 166, '5. FLY SHIELD', fontName='Helvetica-Bold', fontSize=6, fillColor=colors.HexColor('#222222')))
-            d.add(String(rx + 144, 157, 'Cut 2 Main', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#666666')))
+            g.add(p5)
+            g.add(Line(rx + 162, 272, rx + 162, 182, strokeColor=c_seam, strokeWidth=0.4, strokeDashArray=[2, 2]))
+            g.add(String(rx + 158, 224, '5', fontName='Helvetica-Bold', fontSize=11, fillColor=colors.black))
+            g.add(String(rx + 144, 166, '5. FLY SHIELD', fontName='Helvetica-Bold', fontSize=6, fillColor=colors.HexColor('#222222')))
+            g.add(String(rx + 144, 157, 'Cut 2 Main', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#666666')))
 
             # Piece 7: Fly Facing
             p7 = Path(fillColor=c_fill_fus, strokeColor=c_cut, strokeWidth=0.7)
@@ -338,20 +346,20 @@ class UniversalCADBlueprintEngine:
             p7.lineTo(rx + 214, 202)
             p7.curveTo(rx + 214, 188, rx + 202, 180, rx + 192, 180)
             p7.closePath()
-            d.add(p7)
-            d.add(String(rx + 200, 224, '7', fontName='Helvetica-Bold', fontSize=11, fillColor=colors.black))
-            d.add(String(rx + 188, 166, '7. FLY FACING', fontName='Helvetica-Bold', fontSize=6, fillColor=colors.HexColor('#222222')))
-            d.add(String(rx + 188, 157, 'Cut 2 Interfacing', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#666666')))
+            g.add(p7)
+            g.add(String(rx + 200, 224, '7', fontName='Helvetica-Bold', fontSize=11, fillColor=colors.black))
+            g.add(String(rx + 188, 166, '7. FLY FACING', fontName='Helvetica-Bold', fontSize=6, fillColor=colors.HexColor('#222222')))
+            g.add(String(rx + 188, 157, 'Cut 2 Interfacing', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#666666')))
         elif spec.closure_type == "side_invisible_zip" and spec.front_pockets == "none":
             # Clean Pocketless & Side-Zip Blueprint Legend Block
             box_x = rx + 6
             box_y = 138
             box_w = 246
             box_h = 146
-            d.add(Rect(box_x, box_y, box_w, box_h, fillColor=colors.HexColor('#F8F7F4'), strokeColor=colors.HexColor('#D5D0C8'), strokeWidth=0.8, rx=4, ry=4))
-            d.add(Rect(box_x, box_y + box_h - 18, box_w, 18, fillColor=colors.HexColor('#1A4D54'), strokeColor=None, rx=4, ry=4))
-            d.add(Rect(box_x, box_y + box_h - 18, box_w, 4, fillColor=colors.HexColor('#1A4D54'), strokeColor=None))
-            d.add(String(box_x + 8, box_y + box_h - 12.5, "TECHNICAL BLUEPRINT SPECIFICATIONS", fontName='Helvetica-Bold', fontSize=6.8, fillColor=colors.white))
+            g.add(Rect(box_x, box_y, box_w, box_h, fillColor=colors.HexColor('#F8F7F4'), strokeColor=colors.HexColor('#D5D0C8'), strokeWidth=0.8, rx=4, ry=4))
+            g.add(Rect(box_x, box_y + box_h - 18, box_w, 18, fillColor=colors.HexColor('#1A4D54'), strokeColor=None, rx=4, ry=4))
+            g.add(Rect(box_x, box_y + box_h - 18, box_w, 4, fillColor=colors.HexColor('#1A4D54'), strokeColor=None))
+            g.add(String(box_x + 8, box_y + box_h - 12.5, "TECHNICAL BLUEPRINT SPECIFICATIONS", fontName='Helvetica-Bold', fontSize=6.8, fillColor=colors.white))
 
             specs_lines = [
                 ("Pattern Piece Count:", "3 Essential Garment Pieces (Clean Minimalist Silhouette)"),
@@ -365,9 +373,9 @@ class UniversalCADBlueprintEngine:
             ]
             cur_sy = box_y + box_h - 32
             for s_label, s_val in specs_lines:
-                d.add(Circle(box_x + 10, cur_sy + 2, 1.5, fillColor=colors.HexColor('#1A4D54'), strokeColor=None))
-                d.add(String(box_x + 16, cur_sy, s_label, fontName='Helvetica-Bold', fontSize=5.6, fillColor=colors.HexColor('#1E1A19')))
-                d.add(String(box_x + 90, cur_sy, s_val, fontName='Helvetica', fontSize=5.4, fillColor=colors.HexColor('#444444')))
+                g.add(Circle(box_x + 10, cur_sy + 2, 1.5, fillColor=colors.HexColor('#1A4D54'), strokeColor=None))
+                g.add(String(box_x + 16, cur_sy, s_label, fontName='Helvetica-Bold', fontSize=5.6, fillColor=colors.HexColor('#1E1A19')))
+                g.add(String(box_x + 90, cur_sy, s_val, fontName='Helvetica', fontSize=5.4, fillColor=colors.HexColor('#444444')))
                 cur_sy -= 13.5
 
         # ---------------------------------------------------------------------
@@ -375,37 +383,38 @@ class UniversalCADBlueprintEngine:
         # ---------------------------------------------------------------------
         if spec.belt_loops_count > 0:
             bw, bl = spec.cut_belt_loop_strip_cm
-            d.add(Rect(rx, 134, 258, 20, fillColor=c_fill_main, strokeColor=c_cut, strokeWidth=0.7))
-            d.add(Rect(rx + 3, 137, 252, 14, fillColor=None, strokeColor=c_seam, strokeWidth=0.4, strokeDashArray=[3, 2]))
-            d.add(Line(rx + 15, 144, rx + 100, 144, strokeColor=c_grain, strokeWidth=0.4))
-            d.add(Polygon([rx + 19, 142, rx + 13, 144, rx + 19, 146], fillColor=c_grain, strokeColor=None))
-            d.add(Polygon([rx + 96, 142, rx + 102, 144, rx + 96, 146], fillColor=c_grain, strokeColor=None))
-            d.add(String(rx + 120, 140, 'BL', fontName='Helvetica-Bold', fontSize=10, fillColor=colors.black))
-            d.add(Line(rx + 148, 144, rx + 243, 144, strokeColor=c_grain, strokeWidth=0.4))
-            d.add(Polygon([rx + 152, 142, rx + 146, 144, rx + 152, 146], fillColor=c_grain, strokeColor=None))
-            d.add(Polygon([rx + 239, 142, rx + 245, 144, rx + 239, 146], fillColor=c_grain, strokeColor=None))
-            d.add(String(rx, 122, f'BL. BELT LOOPS STRIP ({bw:.1f} cm x {bl:.0f} cm)  |  Cut 1 Main (Yields {spec.belt_loops_count} Loops)', fontName='Helvetica-Bold', fontSize=6, fillColor=colors.HexColor('#222222')))
+            g.add(Rect(rx, 134, 258, 20, fillColor=c_fill_main, strokeColor=c_cut, strokeWidth=0.7))
+            g.add(Rect(rx + 3, 137, 252, 14, fillColor=None, strokeColor=c_seam, strokeWidth=0.4, strokeDashArray=[3, 2]))
+            g.add(Line(rx + 15, 144, rx + 100, 144, strokeColor=c_grain, strokeWidth=0.4))
+            g.add(Polygon([rx + 19, 142, rx + 13, 144, rx + 19, 146], fillColor=c_grain, strokeColor=None))
+            g.add(Polygon([rx + 96, 142, rx + 102, 144, rx + 96, 146], fillColor=c_grain, strokeColor=None))
+            g.add(String(rx + 120, 140, 'BL', fontName='Helvetica-Bold', fontSize=10, fillColor=colors.black))
+            g.add(Line(rx + 148, 144, rx + 243, 144, strokeColor=c_grain, strokeWidth=0.4))
+            g.add(Polygon([rx + 152, 142, rx + 146, 144, rx + 152, 146], fillColor=c_grain, strokeColor=None))
+            g.add(Polygon([rx + 239, 142, rx + 245, 144, rx + 239, 146], fillColor=c_grain, strokeColor=None))
+            g.add(String(rx, 122, f'BL. BELT LOOPS STRIP ({bw:.1f} cm x {bl:.0f} cm)  |  Cut 1 Main (Yields {spec.belt_loops_count} Loops)', fontName='Helvetica-Bold', fontSize=6, fillColor=colors.HexColor('#222222')))
 
         # ---------------------------------------------------------------------
         # ENGINEERING TITLE BLOCK / FOOTER
         # ---------------------------------------------------------------------
-        d.add(Line(rx, 110, rx + 258, 110, strokeColor=colors.HexColor('#D5D0C8'), strokeWidth=0.5))
-        d.add(String(rx, 98, f'SEWLUXE PATTERNS  •  CAD PATTERN INVENTORY', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#111111')))
+        g.add(Line(rx, 110, rx + 258, 110, strokeColor=colors.HexColor('#D5D0C8'), strokeWidth=0.5))
+        g.add(String(rx, 98, f'SEWLUXE PATTERNS  •  CAD PATTERN INVENTORY', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#111111')))
         sizes_str = "Sizes: XXS–10XL (15 Sizes)" if spec.size_standard == "PATTERNFAST_XXS_10XL" else "Sizes: US 00–22"
-        d.add(String(rx, 88, f'Model: {spec.model_name}  •  {sizes_str}', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#444444')))
-        d.add(String(rx, 78, f'Seam Allowance: {spec.seam_allowance_cm:.1f} cm Included  •  Hem: {spec.hem_allowance_cm:.1f} cm', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#444444')))
+        g.add(String(rx, 88, f'Model: {spec.model_name}  •  {sizes_str}', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#444444')))
+        g.add(String(rx, 78, f'Seam Allowance: {spec.seam_allowance_cm:.1f} cm Included  •  Hem: {spec.hem_allowance_cm:.1f} cm', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#444444')))
         closure_label = "Concealed Trouser Hook & Bar" if spec.closure_type == "concealed_hook_bar" else ("Pull-On Continuous Elastic" if is_elastic_waist else ("Side Invisible Zipper" if spec.closure_type == "side_invisible_zip" else "Tailored Button Closure"))
         back_label = "Pocketless Back" if spec.back_pockets == "none" else f"{spec.back_pockets.replace('_', ' ').title()}"
         accent_hex = spec.color_hex if hasattr(spec, 'color_hex') and spec.color_hex else '#1A4D54'
-        d.add(String(rx, 68, f'{closure_label}  •  {back_label}  •  Zero AI Clutter', fontName='Helvetica-Bold', fontSize=5.5, fillColor=colors.HexColor(accent_hex)))
+        g.add(String(rx, 68, f'{closure_label}  •  {back_label}  •  Zero AI Clutter', fontName='Helvetica-Bold', fontSize=5.5, fillColor=colors.HexColor(accent_hex)))
 
         # 5 cm CAD Calibration Reference Bar
         cal_x = rx
         cal_y = 44
-        d.add(Rect(cal_x, cal_y, 70.87, 8, fillColor=colors.HexColor('#FFFFFF'), strokeColor=colors.HexColor('#222222'), strokeWidth=0.5))
-        d.add(Rect(cal_x, cal_y, 35.43, 8, fillColor=colors.HexColor('#222222'), strokeColor=None))
-        d.add(String(cal_x + 76, cal_y + 1.5, "5 cm / 2 in CAD Reference Scale", fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#555555')))
+        g.add(Rect(cal_x, cal_y, 70.87, 8, fillColor=colors.HexColor('#FFFFFF'), strokeColor=colors.HexColor('#222222'), strokeWidth=0.5))
+        g.add(Rect(cal_x, cal_y, 35.43, 8, fillColor=colors.HexColor('#222222'), strokeColor=None))
+        g.add(String(cal_x + 76, cal_y + 1.5, "5 cm / 2 in CAD Reference Scale", fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#555555')))
 
+        d.add(g)
         return d
 
     # Backwards compatibility alias
