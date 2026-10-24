@@ -101,6 +101,8 @@ class UniversalBookletBuilder:
         self.spec = spec
         self.engine = UniversalTrouserEngine(spec)
         self.rules = SILHOUETTE_RULES[spec.silhouette]
+        self.accent_color = HexColor("#1A4D54")
+        self.accent_muted = HexColor("#4E787D")
 
     def resolve_step_panel(self, step_num: int) -> Optional[str]:
         """
@@ -156,27 +158,27 @@ class UniversalBookletBuilder:
             # Running Footer
             c.line(M_L, 42, M_R, 42)
             c.setFont("Lora-Italic", 9.0)
-            c.setFillColor(BURGUNDY)
+            c.setFillColor(self.accent_color)
             c.drawString(M_L, 28, "SewLuxePatterns")
             c.setFont("Poppins", 7.5)
             c.setFillColor(TEXT_MUTED)
-            c.drawRightString(M_R, 28, str(page_num))
+            c.drawRightString(M_R, 28, f"Page {page_num} of 16")
         c.restoreState()
 
     def _draw_section_header(self, c: canvas.Canvas, kicker: str, title: str, y_top: float = H - 62) -> float:
         c.saveState()
         c.setFont("Poppins-Medium", 7.5)
-        c.setFillColor(BURGUNDY)
+        c.setFillColor(self.accent_color)
         spaced_kicker = "  ".join(list(kicker.upper()))
         c.drawString(M_L, y_top, spaced_kicker)
 
         y = y_top - 22
-        c.setFont("Lora", 23)
+        c.setFont("Lora-Bold", 23)
         c.setFillColor(CHARCOAL)
         c.drawString(M_L, y, title)
 
         y -= 9
-        c.setStrokeColor(BURGUNDY)
+        c.setStrokeColor(self.accent_color)
         c.setLineWidth(1.4)
         c.line(M_L, y, M_L + 100, y)
         c.restoreState()
@@ -393,60 +395,192 @@ class UniversalBookletBuilder:
         c.showPage()
 
         # =====================================================================
-        # PAGE 2: WELCOME & DESIGN STORY
+        # PAGE 2: WELCOME, DESIGN STORY & TABLE OF CONTENTS
         # =====================================================================
         self._draw_chrome(c, 2)
-        y = self._draw_section_header(c, "WELCOME", f"Meet the {self.spec.model_name}")
 
-        intro = (
-            f"Thank you for choosing the <b>{self.spec.model_name}</b>. Designed for fluid woven textiles, "
-            f"these high-waisted trousers epitomize modern quiet-luxury tailoring. "
-            f"Featuring {self.spec.front_shaping.replace('_', ' ')} with an expansive silhouette, "
-            f"deep {self.spec.hem_allowance_cm:.1f} cm weighted hem, and comfortable clean lines."
+        # Page Border Frame in Garment Accent Color
+        frame_margin = 15.0
+        c.setStrokeColor(accent_color)
+        c.setLineWidth(1.2)
+        c.roundRect(frame_margin, frame_margin, W - (frame_margin * 2), H - (frame_margin * 2), 10, fill=0, stroke=1)
+        inner_margin = 18.5
+        c.setStrokeColor(accent_muted)
+        c.setLineWidth(0.5)
+        c.roundRect(inner_margin, inner_margin, W - (inner_margin * 2), H - (inner_margin * 2), 7, fill=0, stroke=1)
+
+        # Section Header
+        y_cur = H - 64
+        c.setFont("Poppins-Bold", 7.8)
+        c.setFillColor(accent_color)
+        c.drawString(M_L, y_cur, "W E L C O M E")
+
+        y_cur -= 24
+        c.setFont("Lora-Bold", 23.0)
+        c.setFillColor(CHARCOAL)
+        c.drawString(M_L, y_cur, f"Meet the {self.spec.model_name}")
+
+        y_cur -= 10
+        c.setStrokeColor(accent_color)
+        c.setLineWidth(1.2)
+        c.line(M_L, y_cur, M_L + 180, y_cur)
+
+        # Welcome Narrative Card
+        y_cur -= 16
+        intro_h = 74.0
+        c.setFillColor(CONTAINER_BG)
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(M_L, y_cur - intro_h, CONTENT_W, intro_h, 8, fill=1, stroke=1)
+
+        intro_text = (
+            f"Thank you for choosing the <b>{self.spec.model_name}</b>. Designed for fluid, heavy-drape woven textiles, "
+            f"these high-waisted palazzo trousers capture the effortless sophistication of modern quiet-luxury tailoring. "
+            f"Featuring a completely seamless flat front waistband, gentle vertical waist-shaping darts, "
+            f"a discreet left-side invisible zipper (18.00 cm), and an expansive full-length leg sweep terminating in a "
+            f"luxurious {self.spec.hem_allowance_cm:.1f} cm ({self.spec.hem_allowance_cm/2.54:.1f} in) weighted hem for fluid, waterfall drape with every step."
         )
-        p_intro = Paragraph(intro, ParagraphStyle("WelcomeIntro", fontName="Poppins", fontSize=8.8, leading=13.0, textColor=TEXT_BODY))
-        w, h = p_intro.wrap(CONTENT_W, 80)
-        p_intro.drawOn(c, M_L, y - h)
-        y -= (h + 16)
+        p_intro = Paragraph(intro_text, ParagraphStyle("WelcomeNarrative", fontName="Poppins", fontSize=8.4, leading=13.0, textColor=TEXT_BODY))
+        w_p, h_p = p_intro.wrap(CONTENT_W - 24, intro_h)
+        p_intro.drawOn(c, M_L + 12, y_cur - 12 - h_p)
 
-        c.setFont("Poppins-Bold", 9.2)
-        c.setFillColor(BURGUNDY)
-        c.drawString(M_L, y, "Key Design & Tailoring Features")
-        y -= 14
+        y_cur = y_cur - intro_h - 16
 
-        back_feat = "Clean pocketless back shaped with contoured waist shaping." if self.spec.back_pockets == "none" else f"Contoured back waist shaping with refined {self.spec.back_pockets.replace('_', ' ')}."
+        # Two Side-by-Side Structured Cards
+        card_gap = 14.0
+        card_w = (CONTENT_W - card_gap) / 2.0
+        card_h = 240.0
+
+        # Left Card: Key Tailoring Features
+        c.setFillColor(CONTAINER_BG)
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(M_L, y_cur - card_h, card_w, card_h, 8, fill=1, stroke=1)
+
+        c.setFont("Poppins-Bold", 8.8)
+        c.setFillColor(accent_color)
+        c.drawString(M_L + 14, y_cur - 20, "KEY DESIGN & TAILORING FEATURES")
+
+        c.setStrokeColor(accent_muted)
+        c.setLineWidth(0.6)
+        c.line(M_L + 14, y_cur - 26, M_L + card_w - 14, y_cur - 26)
+
         features = [
-            f"High-waisted tailored fit sitting cleanly at natural waistline.",
-            f"Constructed with {self.spec.front_shaping.replace('_', ' ')} for authentic garment ease.",
-            back_feat,
-            f"Deep weighted {self.spec.hem_allowance_cm:.1f} cm ({self.spec.hem_allowance_cm/2.54:.1f} in) fold-up hem creating fluid waterfall break.",
-            f"Standard {self.spec.seam_allowance_cm:.1f} cm (3/8 in) seam allowance included on all pattern edges.",
+            ("High-Rise Fitted Waistband", "Sits comfortably at natural waistline with clean contouring."),
+            ("Seamless Flat Front", "Zero front buttons, zero fly shield, zero bulk over the tummy."),
+            ("Concealed Left Side Zipper", "18.00 cm (7 1/8 in) invisible zipper for effortless wear."),
+            ("Vertical Shaping Darts", "4 contoured darts (2 front, 2 back) shaping gently over hips."),
+            ("Sweeping Palazzo Silhouette", "Fluid wide-leg drape measuring 60.5 to 96.9 cm leg sweep."),
+            ("Deep 5.0 cm Weighted Hem", f"Generous {self.spec.hem_allowance_cm:.1f} cm double-fold hem giving graceful drape."),
+            ("Standard Seam Allowance", f"{self.spec.seam_allowance_cm:.1f} cm (3/8 in) included on all joining edges.")
         ]
-        if self.spec.belt_loops_count > 0:
-            features.append(f"Refined {self.spec.belt_loops_count} belt loops (1.1 cm finished) tailored securely to waistband.")
-        else:
-            features.append("Clean seamless waistband with zero belt loops for an ultra-sleek minimalist profile.")
-        for feat in features:
-            y = self._draw_bullet(c, M_L, y, feat, CONTENT_W, font_size=7.6, leading=10.6)
+        cur_fy = y_cur - 40
+        for title_f, desc_f in features:
+            c.setFillColor(accent_color)
+            c.rect(M_L + 14, cur_fy - 6, 3, 3, fill=1, stroke=0)
 
-        y -= 12
-        c.setFont("Poppins-Bold", 9.2)
-        c.setFillColor(BURGUNDY)
-        c.drawString(M_L, y, "What is Included in Your Package")
-        y -= 14
+            c.setFont("Poppins-Bold", 7.4)
+            c.setFillColor(CHARCOAL)
+            c.drawString(M_L + 22, cur_fy - 6, title_f)
 
-        inc_items = [
-            "This complete 16-page illustrated luxury sewing instruction booklet.",
-            f"Full printable pattern suite in A4, US Letter, and A0 CopyShop {'across all 15 sizes (XXS to 10XL)' if self.spec.size_standard == 'PATTERNFAST_XXS_10XL' else 'across all 13 sizes (US 00 to 22)'}.",
-            "Dedicated Multi-Size Layered A0 PDF and Projector File with individual size toggle layers.",
-            "Interactive Video Guides Hub with clickable links and direct QR codes (Page 8)."
+            c.setFont("Poppins", 6.8)
+            c.setFillColor(TEXT_MUTED)
+            c.drawString(M_L + 22, cur_fy - 16, desc_f)
+            cur_fy -= 26.5
+
+        # Right Card: Booklet Table of Contents
+        rx = M_L + card_w + card_gap
+        c.setFillColor(CONTAINER_BG)
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(rx, y_cur - card_h, card_w, card_h, 8, fill=1, stroke=1)
+
+        c.setFont("Poppins-Bold", 8.8)
+        c.setFillColor(accent_color)
+        c.drawString(rx + 14, y_cur - 20, "BOOKLET TABLE OF CONTENTS")
+
+        c.setStrokeColor(accent_muted)
+        c.setLineWidth(0.6)
+        c.line(rx + 14, y_cur - 26, rx + card_w - 14, y_cur - 26)
+
+        toc_items = [
+            ("Page 1", "Cover Page & Editorial Hero Showcase"),
+            ("Page 2", "Welcome, Design Story & Table of Contents"),
+            ("Page 3", "Printing & Assembling Guide (4x4 in Calibration)"),
+            ("Page 4", "Body Size Charts & Finished Garment Measurements"),
+            ("Page 5", "Fabric Requirements & Recommended Textiles"),
+            ("Page 6", "Pattern Pieces Inventory & Required Notions"),
+            ("Page 7", "Master CAD Blueprint & Cutting Lines"),
+            ("Page 8", "Fabric Cutting Layout & Clickable Video QR Codes"),
+            ("Pages 9–15", "Step-by-Step Illustrated Sewing Panels (Steps 1–7)"),
+            ("Page 16", "360° Editorial Fit Gallery & Social Community")
         ]
-        for it in inc_items:
-            y = self._draw_bullet(c, M_L, y, it, CONTENT_W, font_size=7.6, leading=10.8)
+        cur_ty = y_cur - 39
+        for p_num, p_title in toc_items:
+            c.setFont("Poppins-Bold", 7.2)
+            c.setFillColor(accent_color)
+            c.drawString(rx + 14, cur_ty - 6, p_num)
 
-        y -= 12
-        self._draw_tip_box(c, y, "The SewLuxe Tailoring Philosophy",
-                           "Take your time pressing each seam as you sew. In luxury trouser tailoring, 60% of the silhouette is created with the steam iron. A tailor's pressing ham and clapper make all the difference.")
+            c.setFont("Poppins", 7.0)
+            c.setFillColor(TEXT_BODY)
+            c.drawString(rx + 62, cur_ty - 6, p_title)
+            cur_ty -= 18.2
+
+        y_cur = y_cur - card_h - 16
+
+        # Package Contents Card
+        inc_h = 76.0
+        c.setFillColor(CONTAINER_BG)
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(M_L, y_cur - inc_h, CONTENT_W, inc_h, 8, fill=1, stroke=1)
+
+        c.setFont("Poppins-Bold", 8.2)
+        c.setFillColor(accent_color)
+        c.drawString(M_L + 14, y_cur - 16, "WHAT IS INCLUDED IN YOUR SEWLUXE CUSTOMER PACKAGE")
+
+        c.setStrokeColor(accent_muted)
+        c.setLineWidth(0.5)
+        c.line(M_L + 14, y_cur - 21, M_L + CONTENT_W - 14, y_cur - 21)
+
+        inc_cols = [
+            ("Printable Pattern Suite", "A4, US Letter & A0 across all 13 sizes (US 00 to 22) in 3 delivery ZIPs."),
+            ("Multi-Size Layered Files", "Dedicated Layered A0 PDF with toggleable size layers in Adobe Reader."),
+            ("Projector Calibration File", "High-contrast projector file with 1-inch and 5 cm calibration grid."),
+            ("Illustrated Booklet & Hub", "This complete 16-page guide + 1-page clickable download portal.")
+        ]
+        col_w_inc = (CONTENT_W - 28) / 2.0
+        for idx_inc, (title_inc, desc_inc) in enumerate(inc_cols):
+            col_c = idx_inc % 2
+            row_c = idx_inc // 2
+            ix = M_L + 14 + (col_c * (col_w_inc + 14))
+            iy = y_cur - 33 - (row_c * 21)
+
+            c.setFont("Poppins-Bold", 7.2)
+            c.setFillColor(CHARCOAL)
+            c.drawString(ix, iy, f"✓ {title_inc}:")
+
+            c.setFont("Poppins", 6.8)
+            c.setFillColor(TEXT_MUTED)
+            c.drawString(ix + 120, iy, desc_inc[:55] + ("..." if len(desc_inc) > 55 else ""))
+
+        y_cur = y_cur - inc_h - 14
+
+        # Tip Box: Pressing Philosophy
+        tip_h = 42.0
+        c.setFillColor(colors.HexColor("#EAF1F2"))
+        c.setStrokeColor(accent_color)
+        c.setLineWidth(1.0)
+        c.roundRect(M_L, y_cur - tip_h, CONTENT_W, tip_h, 6, fill=1, stroke=1)
+
+        c.setFont("Poppins-Bold", 7.6)
+        c.setFillColor(accent_color)
+        c.drawString(M_L + 12, y_cur - 14, "THE SEWLUXE TAILORING PHILOSOPHY: THE ART OF STEAM PRESSING")
+
+        c.setFont("Poppins", 6.8)
+        c.setFillColor(TEXT_BODY)
+        c.drawString(M_L + 12, y_cur - 26, "In fluid wide-leg trouser tailoring, pressing creates 60% of the silhouette. Press each seam flat first, then open with steam.")
+        c.drawString(M_L + 12, y_cur - 36, "Use a tailor's pressing ham for curved darts and a wooden clapper on the hem to lock crisp, professional edges.")
         c.showPage()
 
         # =====================================================================
