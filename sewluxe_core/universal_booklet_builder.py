@@ -529,7 +529,7 @@ class UniversalBookletBuilder:
         y_cur = y_cur - card_h - 16
 
         # Package Contents Card
-        inc_h = 76.0
+        inc_h = 82.0
         c.setFillColor(CONTAINER_BG)
         c.setStrokeColor(BORDER_SUBTLE)
         c.setLineWidth(0.8)
@@ -543,28 +543,26 @@ class UniversalBookletBuilder:
         c.setLineWidth(0.5)
         c.line(M_L + 14, y_cur - 21, M_L + CONTENT_W - 14, y_cur - 21)
 
-        inc_cols = [
-            ("Printable Pattern Suite", "A4, US Letter & A0 across all 13 sizes (US 00 to 22) in 3 delivery ZIPs."),
-            ("Multi-Size Layered Files", "Dedicated Layered A0 PDF with toggleable size layers in Adobe Reader."),
-            ("Projector Calibration File", "High-contrast projector file with 1-inch and 5 cm calibration grid."),
-            ("Illustrated Booklet & Hub", "This complete 16-page guide + 1-page clickable download portal.")
+        inc_items = [
+            ("Printable Pattern Suite", "A4, US Letter & A0 across all 13 sizes (US 00 to 22) organized in 3 turnkey delivery ZIPs."),
+            ("Multi-Size Layered Files", "Dedicated copyshop PDF with toggleable size layers via Adobe Acrobat Reader."),
+            ("Projector Calibration File", "Ultra-high-contrast layout featuring 1-inch & 5 cm calibration grids for fabric projection."),
+            ("Illustrated Booklet & Hub", "This complete 16-page master guide + 1-page clickable customer download hub.")
         ]
-        col_w_inc = (CONTENT_W - 28) / 2.0
-        for idx_inc, (title_inc, desc_inc) in enumerate(inc_cols):
-            col_c = idx_inc % 2
-            row_c = idx_inc // 2
-            ix = M_L + 14 + (col_c * (col_w_inc + 14))
-            iy = y_cur - 33 - (row_c * 21)
-
+        cur_iy = y_cur - 33.0
+        for title_inc, desc_inc in inc_items:
+            title_str = f"✓  {title_inc}:  "
             c.setFont("Poppins-Bold", 7.2)
             c.setFillColor(CHARCOAL)
-            c.drawString(ix, iy, f"✓ {title_inc}:")
+            c.drawString(M_L + 14, cur_iy, title_str)
+            t_w = c.stringWidth(title_str, "Poppins-Bold", 7.2)
 
-            c.setFont("Poppins", 6.8)
+            c.setFont("Poppins", 7.0)
             c.setFillColor(TEXT_MUTED)
-            c.drawString(ix + 120, iy, desc_inc[:55] + ("..." if len(desc_inc) > 55 else ""))
+            c.drawString(M_L + 14 + t_w, cur_iy, desc_inc)
+            cur_iy -= 13.0
 
-        y_cur = y_cur - inc_h - 14
+        y_cur = y_cur - inc_h - 12
 
         # Tip Box: Pressing Philosophy
         tip_h = 42.0
