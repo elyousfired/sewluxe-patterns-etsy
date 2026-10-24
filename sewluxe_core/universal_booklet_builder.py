@@ -1463,9 +1463,10 @@ class UniversalBookletBuilder:
             c.linkURL(v_url, (tx, cy - 58, tx + 110, cy - 42), relative=0)
 
         y_foot = cy - c_h - 40
-        c.setFont("Poppins-Italic", 7.2)
-        c.setFillColor(TEXT_MUTED)
-        c.drawString(M_L, y_foot, "Video tutorials are produced by independent tailoring educators. Always follow the seam allowances and measurements in this guide.")
+        p_style_foot = ParagraphStyle("P8FootNote", fontName="Poppins-Italic", fontSize=7.0, leading=10.0, textColor=TEXT_MUTED)
+        p_foot = Paragraph("Video tutorials are produced by independent tailoring educators. Always follow the official SewLuxe seam allowances (1.0 cm / 3/8 in) and hem allowances (5.0 cm / 2.0 in) as specified in this guide.", p_style_foot)
+        pw_f, ph_f = p_foot.wrap(CONTENT_W, 35)
+        p_foot.drawOn(c, M_L, y_foot - ph_f)
         c.showPage()
 
         # =====================================================================
