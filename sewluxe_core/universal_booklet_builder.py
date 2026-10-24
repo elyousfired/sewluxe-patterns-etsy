@@ -223,100 +223,173 @@ class UniversalBookletBuilder:
         c.setAuthor("SewLuxePatterns")
 
         # =====================================================================
-        # PAGE 1: COVER
+        # PAGE 1: COVER (GOLD STANDARD V4 - CENTERED LUXURY & BESPOKE BORDER)
         # =====================================================================
-        self._draw_chrome(c, 1, is_cover=True)
-        c.setFont("Poppins-Medium", 7.5)
-        c.setFillColor(BURGUNDY)
-        c.drawString(M_L, H - 44, "S E W I N G   P A T T E R N   ·   I N S T R U C T I O N   B O O K L E T")
+        center_x = W / 2.0
+        # Determine garment-specific accent color (Deep Petrol Teal #1A4D54 default or Burgundy)
+        accent_color = HexColor("#1A4D54")
+        accent_muted = HexColor("#4E787D")
 
-        c.setFont("Lora", 40)
+        # 1. Luxury Page Border (Double-Frame in Garment Color)
+        frame_margin = 15.0
+        c.setStrokeColor(accent_color)
+        c.setLineWidth(1.8)
+        c.roundRect(frame_margin, frame_margin, W - (frame_margin * 2), H - (frame_margin * 2), 12, fill=0, stroke=1)
+
+        inner_margin = 19.5
+        c.setStrokeColor(accent_muted)
+        c.setLineWidth(0.6)
+        c.roundRect(inner_margin, inner_margin, W - (inner_margin * 2), H - (inner_margin * 2), 9, fill=0, stroke=1)
+
+        # Corner diamond embellishments
+        c.setFillColor(accent_color)
+        for cx_corner, cy_corner in [
+            (inner_margin + 6, inner_margin + 6),
+            (W - inner_margin - 6, inner_margin + 6),
+            (inner_margin + 6, H - inner_margin - 6),
+            (W - inner_margin - 6, H - inner_margin - 6),
+        ]:
+            p = c.beginPath()
+            p.moveTo(cx_corner, cy_corner + 2.5)
+            p.lineTo(cx_corner + 2.5, cy_corner)
+            p.lineTo(cx_corner, cy_corner - 2.5)
+            p.lineTo(cx_corner - 2.5, cy_corner)
+            p.close()
+            c.drawPath(p, fill=1, stroke=0)
+
+        # 2. Centered Luxury Titles & Typography
+        c.setFont("Poppins-Medium", 7.8)
+        c.setFillColor(accent_color)
+        c.drawCentredString(center_x, H - 42.0, "S E W I N G   P A T T E R N   ·   I N S T R U C T I O N   B O O K L E T")
+
+        c.setFont("Lora-Bold", 36.0)
         c.setFillColor(CHARCOAL)
-        c.drawString(M_L, H - 90, self.spec.model_name)
+        c.drawCentredString(center_x, H - 80.0, self.spec.model_name)
 
-        c.setFont("Poppins-Medium", 10.5)
-        c.setFillColor(BURGUNDY)
-        c.drawString(M_L, H - 114, self.rules['name'].upper())
+        c.setFont("Poppins-Medium", 9.8)
+        c.setFillColor(accent_color)
+        c.drawCentredString(center_x, H - 101.0, self.rules['name'].upper())
 
-        c.setFont("Lora-Italic", 9.8)
-        c.setFillColor(TEXT_BODY)
-        sz_sub_str = "Sizes XXS–10XL (15 Sizes)" if self.spec.size_standard == "PATTERNFAST_XXS_10XL" else "Sizes US 00–22"
-        c.drawString(M_L, H - 136, f"{sz_sub_str}  ·  Skill Level: Intermediate  ·  {self.spec.seam_allowance_cm:.1f} cm (3/8 in) Seam Allowance Included")
+        # 3. Big Dominant Hero Photo Showcase (Majority of Page)
+        hero_w = 468.0
+        hero_h = 510.0
+        hx = (W - hero_w) / 2.0
+        hy = 144.0
 
-        # Hero Container / Photo
-        hero_sz = 390.0
-        hx = (W - hero_sz) / 2.0
-        hy = H - 165 - hero_sz
+        c.setFillColor(CONTAINER_BG)
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(1.0)
+        c.roundRect(hx, hy, hero_w, hero_h, 14, fill=1, stroke=1)
 
         photo_placed = False
         if assets_dir and os.path.exists(assets_dir):
             model_slug = self.spec.model_name.lower().split()[0]
             candidates = [
+                os.path.join(assets_dir, "01_Model_Photos", "photo_01_front.jpg"),
                 os.path.join(assets_dir, "01_Model_Photos", f"{model_slug}_photo_01_front.jpg"),
                 os.path.join(assets_dir, f"{model_slug}_photo_01_front.jpg"),
                 os.path.join(assets_dir, "01_Model_Photos", f"{model_slug}_photo_01.jpg"),
                 os.path.join(assets_dir, f"{model_slug}_photo_01.jpg"),
                 os.path.join(assets_dir, "01_Model_Photos", f"{self.spec.silhouette}_photo_01.jpg"),
-                os.path.join(assets_dir, "model_photos", f"01_{self.spec.silhouette}_front.jpg"),
-                os.path.join(assets_dir, f"{self.spec.silhouette}_photo_01.jpg"),
-                os.path.join(assets_dir, f"01_{self.spec.silhouette}_pants.jpg"),
             ]
-            # Dynamically scan model photos directory for front image
             for sdir in [os.path.join(assets_dir, "01_Model_Photos"), assets_dir]:
                 if os.path.exists(sdir):
                     for fn in sorted(os.listdir(sdir)):
                         if fn.lower().endswith(('.jpg', '.jpeg', '.png')) and any(k in fn.lower() for k in ('01_front', 'photo_01', 'photo_1', 'front')):
                             candidates.append(os.path.join(sdir, fn))
 
+            pad = 7.0
+            img_x = hx + pad
+            img_y = hy + pad
+            img_w = hero_w - (pad * 2)
+            img_h = hero_h - (pad * 2)
+
             for candidate in candidates:
                 if os.path.exists(candidate):
-                    c.drawImage(candidate, hx, hy, width=hero_sz, height=hero_sz, preserveAspectRatio=True)
+                    c.setFillColor(WHITE)
+                    c.setStrokeColor(BORDER_SUBTLE)
+                    c.setLineWidth(1.0)
+                    c.roundRect(img_x, img_y, img_w, img_h, 10, fill=1, stroke=1)
+                    c.drawImage(candidate, img_x + 2, img_y + 2, width=img_w - 4, height=img_h - 4, preserveAspectRatio=True)
                     photo_placed = True
                     break
 
         if not photo_placed:
-            # Fallback elegant vector container with CAD blueprint badge
-            c.setFillColor(CONTAINER_BG)
-            c.setStrokeColor(BORDER_SUBTLE)
-            c.setLineWidth(1)
-            c.roundRect(hx, hy, hero_sz, hero_sz, 14, fill=1, stroke=1)
-            # Center subtle emblem
             c.setFont("Lora-Italic", 24)
-            c.setFillColor(BURGUNDY)
-            c.drawCentredString(W / 2, hy + hero_sz / 2 + 10, self.spec.model_name)
-            c.setFont("Poppins", 8.5)
-            c.setFillColor(TEXT_MUTED)
-            c.drawCentredString(W / 2, hy + hero_sz / 2 - 14, "Luxury Quiet-Tailoring Collection")
+            c.setFillColor(accent_color)
+            c.drawCentredString(center_x, hy + hero_h / 2 + 10, self.spec.model_name)
 
-        # Lower specs bar
-        y_spec = hy - 24
-        c.setStrokeColor(BURGUNDY)
-        c.setLineWidth(1.0)
-        c.line(M_L, y_spec, M_R, y_spec)
-
-        cols_x = [M_L, M_L + 100, M_L + 230, M_L + 370]
-        sizes_cover_val = "XXS – 10XL (15 sizes)" if self.spec.size_standard == "PATTERNFAST_XXS_10XL" else "US 00 – 22 (13 sizes)"
-        specs_cover = [
-            ("S I Z E S", sizes_cover_val),
-            ("L E V E L", "Intermediate"),
-            ("S E A M   A L L O W A N C E", f"{self.spec.seam_allowance_cm:.1f} cm (3/8 in) included"),
-            ("F O R M A T S", "A4 · US Letter · A0 · Projector"),
+        # Inset Technical Flat Sketch Badge (Bottom-Right corner)
+        sketch_candidates = [
+            os.path.join(assets_dir, "02_Technical_Flat_Sketches", "SewLuxe_Flat_Sketch_1800.png"),
+            os.path.join(assets_dir, "02_Technical_Flat_Sketches", "SewLuxe_Native_CAD_Flat_Sketch_1800.png"),
+            os.path.join(assets_dir, "02_Technical_Flat_Sketches", "patternfast_native_sketch.png"),
         ]
-        for cx_col, (lbl, val) in zip(cols_x, specs_cover):
-            c.setFont("Poppins-Medium", 6.5)
-            c.setFillColor(BURGUNDY)
-            c.drawString(cx_col, y_spec - 14, lbl)
-            c.setFont("Poppins", 8.0)
-            c.setFillColor(CHARCOAL)
-            c.drawString(cx_col, y_spec - 26, val)
+        for sk_path in sketch_candidates:
+            if os.path.exists(sk_path):
+                inset_w = 138.0
+                inset_h = 138.0
+                ix = hx + hero_w - inset_w - 14.0
+                iy = hy + 14.0
 
+                c.setFillColor(WHITE)
+                c.setStrokeColor(BORDER_SUBTLE)
+                c.setLineWidth(1.2)
+                c.roundRect(ix, iy, inset_w, inset_h, 8, fill=1, stroke=1)
+
+                c.setFont("Poppins-Bold", 6.5)
+                c.setFillColor(accent_color)
+                c.drawCentredString(ix + inset_w / 2.0, iy + inset_h - 11.0, "TECHNICAL FLAT SKETCH")
+                c.drawImage(sk_path, ix + 5.0, iy + 5.0, width=inset_w - 10.0, height=inset_h - 22.0, preserveAspectRatio=True)
+                break
+
+        # Inset Garment Features Pill (Bottom-Left corner)
+        pill_w = 205.0
+        pill_h = 32.0
+        px = hx + 14.0
+        py = hy + 14.0
+        c.setFillColor(HexColor("#FAF8F5"))
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(1.0)
+        c.roundRect(px, py, pill_w, pill_h, 8, fill=1, stroke=1)
+
+        c.setFont("Poppins-Bold", 7.0)
+        c.setFillColor(accent_color)
+        c.drawString(px + 10.0, py + 18.0, "PALAZZO SILHOUETTE")
         c.setFont("Poppins", 6.5)
         c.setFillColor(TEXT_MUTED)
-        c.drawCentredString(W / 2, y_spec - 52, "HELPFUL VIDEO GUIDES INCLUDED  ·  CLICKABLE LINKS AND DIRECT QR CODES ON PAGE 8")
+        c.drawString(px + 10.0, py + 7.5, "Seamless Flat Front  ·  Side Invisible Zip  ·  Clean Darts")
+
+        # 4. Lower Specs Bar (Perfected Mathematical Symmetry with Hero Container)
+        y_spec = hy - 16.0
+        c.setStrokeColor(accent_color)
+        c.setLineWidth(1.2)
+        c.line(hx, y_spec, hx + hero_w, y_spec)
+
+        col_w = hero_w / 4.0
+        sizes_cover_val = "US 00 – 22 (13 sizes)" if self.spec.size_standard != "PATTERNFAST_XXS_10XL" else "XXS – 10XL (15 sizes)"
+        specs_cover = [
+            ("SIZES", sizes_cover_val),
+            ("LEVEL", "Confident Beginner" if self.spec.closure_type == "side_invisible_zip" else "Intermediate"),
+            ("SEAM ALLOWANCE", f"{self.spec.seam_allowance_cm:.1f} cm (3/8 in) included"),
+            ("FORMATS", "A4 · US Letter · A0 · Projector"),
+        ]
+        for i, (lbl, val) in enumerate(specs_cover):
+            cx_col = hx + (i * col_w)
+            c.setFont("Poppins-Bold", 6.8)
+            c.setFillColor(accent_color)
+            c.drawString(cx_col, y_spec - 13, lbl)
+            c.setFont("Poppins", 8.2)
+            c.setFillColor(CHARCOAL)
+            c.drawString(cx_col, y_spec - 25, val)
+
+        c.setFont("Poppins-Medium", 6.8)
+        c.setFillColor(TEXT_MUTED)
+        c.drawCentredString(center_x, y_spec - 45, "HELPFUL VIDEO GUIDES INCLUDED  ·  CLICKABLE LINKS AND DIRECT QR CODES ON PAGE 8")
 
         c.setFont("Lora-Italic", 12.5)
-        c.setFillColor(BURGUNDY)
-        c.drawCentredString(W / 2, 54, "SewLuxePatterns")
+        c.setFillColor(accent_color)
+        c.drawCentredString(center_x, 38, "SewLuxePatterns")
         c.showPage()
 
         # =====================================================================
