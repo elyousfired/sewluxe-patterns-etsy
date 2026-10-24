@@ -1229,80 +1229,130 @@ class UniversalBookletBuilder:
         # PAGE 7: PATTERN PIECES BLUEPRINT (UniversalCADBlueprintEngine)
         # =====================================================================
         self._draw_chrome(c, 7)
-        y = self._draw_section_header(c, "PIECES GUIDE", "Pattern Pieces & Markings Guide")
 
-        cad_w = 230.0
-        cad_h = 245.0
-        cad_drawing = UniversalCADBlueprintEngine.render_blueprint(self.spec, width=int(cad_w), height=int(cad_h))
-        renderPDF.draw(cad_drawing, c, M_L, y - cad_h - 4)
+        # Page Border Frame in Garment Accent Color
+        frame_margin = 15.0
+        c.setStrokeColor(self.accent_color)
+        c.setLineWidth(1.2)
+        c.roundRect(frame_margin, frame_margin, W - (frame_margin * 2), H - (frame_margin * 2), 10, fill=0, stroke=1)
 
-        rx = M_L + cad_w + 16
-        rw = M_R - rx
-        ry = y - 4
+        inner_margin = 18.5
+        c.setStrokeColor(self.accent_muted)
+        c.setLineWidth(0.5)
+        c.roundRect(inner_margin, inner_margin, W - (inner_margin * 2), H - (inner_margin * 2), 7, fill=0, stroke=1)
 
-        c.setFont("Poppins-Bold", 9.0)
-        c.setFillColor(BURGUNDY)
-        c.drawString(rx, ry, "Understanding Pattern Markings")
-        ry -= 14
+        y = self._draw_section_header(c, "PIECES GUIDE", "Master CAD Blueprint & Markings")
 
-        back_desc_mark = "clean pocketless back" if self.spec.back_pockets == "none" else f"refined {self.spec.back_pockets.replace('_', ' ')}"
-        markings = [
-            ("Grainline Arrow", "Ensure pattern grainline is placed strictly parallel to fabric selvage."),
-            ("Seam Allowance", f"All pieces include standard {self.spec.seam_allowance_cm:.1f} cm (3/8 in) seam allowance."),
-            ("Hem Allowance", f"Deep {self.spec.hem_allowance_cm:.1f} cm ({self.spec.hem_allowance_cm/2.54:.1f} in) weighted hem for fluid drape."),
-            ("Notches", "Single and double triangle notches indicate precise seam matching positions."),
-            ("Waist Shaping", f"Constructed with {self.spec.front_shaping.replace('_', ' ')} and {back_desc_mark}.")
+        # Hero Master CAD Blueprint Drawing (Full Width)
+        y_cur = y - 14
+        cad_w = int(CONTENT_W)   # 523 pt
+        cad_h = 330              # 330 pt
+        cad_drawing = UniversalCADBlueprintEngine.render_blueprint(self.spec, width=cad_w, height=cad_h)
+        renderPDF.draw(cad_drawing, c, M_L, y_cur - cad_h)
+
+        y_cur = y_cur - cad_h - 14
+
+        # Two Side-by-Side Structured Cards (Markings Guide & Length Alteration)
+        card_gap = 14.0
+        card_w = (CONTENT_W - card_gap) / 2.0
+        card_h = 135.0
+
+        p_style_card = ParagraphStyle(
+            "CardBulletP7",
+            fontName="Poppins",
+            fontSize=6.7,
+            leading=9.5,
+            textColor=TEXT_BODY
+        )
+
+        # Left Card: Technical CAD Markings & Symbols Guide
+        bx_l = M_L
+        c.setFillColor(CONTAINER_BG)
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(bx_l, y_cur - card_h, card_w, card_h, 8, fill=1, stroke=1)
+
+        c.setFont("Poppins-Bold", 8.2)
+        c.setFillColor(self.accent_color)
+        c.drawString(bx_l + 14, y_cur - 16, "TECHNICAL CAD MARKINGS GUIDE")
+
+        c.setStrokeColor(self.accent_muted)
+        c.setLineWidth(0.5)
+        c.line(bx_l + 14, y_cur - 22, bx_l + card_w - 14, y_cur - 22)
+
+        markings_bullets = [
+            ("Solid Outer Line (0.8pt):", "Represents the exact fabric cutting line. Do NOT add extra seam allowance."),
+            ("Dashed Inner Line (0.4pt):", f"Represents active stitching line, offset exactly by {self.spec.seam_allowance_cm:.1f} cm (and {self.spec.hem_allowance_cm:.1f} cm at leg hem)."),
+            ("Grainline Vector Arrow:", "Indicates straight of grain. Must lie strictly parallel to fabric selvedge along the entire leg."),
+            ("Technical T-Notches:", "Single balance notches at knees and crotch indicate precise alignment points between pieces."),
+            ("Waist Dart Contours:", "Vertical V-lines show stitching lines from waistline tapering to zero at dart apex.")
         ]
-        for title, desc in markings:
-            ry = self._draw_bullet(c, rx, ry, f"<b>{title}:</b> {desc}", rw, font_size=7.2, leading=10.0)
 
-        # Lengthen / Shorten Adjustment Protocol
-        y_adj = y - cad_h - 20
-        c.setFont("Poppins-Bold", 8.8)
-        c.setFillColor(CHARCOAL)
-        c.drawString(M_L, y_adj, "HOW TO LENGTHEN OR SHORTEN YOUR TROUSERS")
-        y_adj -= 12
+        cur_ly = y_cur - 34
+        for m_head, m_body in markings_bullets:
+            c.setFillColor(self.accent_color)
+            c.rect(bx_l + 14, cur_ly - 5.5, 3, 3, fill=1, stroke=0)
 
-        col_w = (CONTENT_W - 14) / 2.0
-        b_adj_h = 88.0
-        c.saveState()
-        # Left Box: Lengthen
+            full_m_txt = f"<b>{m_head}</b> {m_body}"
+            p_m = Paragraph(full_m_txt, p_style_card)
+            pw_m, ph_m = p_m.wrap(card_w - 30, 40)
+            p_m.drawOn(c, bx_l + 22, cur_ly - ph_m)
+            cur_ly -= (ph_m + 5.0)
+
+        # Right Card: Pro-Tailor Length Alteration Protocol
+        bx_r = M_L + card_w + card_gap
         c.setFillColor(CONTAINER_BG)
-        c.rect(M_L, y_adj - b_adj_h, col_w, b_adj_h, fill=1, stroke=0)
-        c.setFillColor(BURGUNDY)
-        c.rect(M_L, y_adj - b_adj_h, 3.5, b_adj_h, fill=1, stroke=0)
-        c.setFont("Poppins-Bold", 8.0)
-        c.setFillColor(BURGUNDY)
-        c.drawString(M_L + 12, y_adj - 13, "TO LENGTHEN (+) — FOR TALL FIT")
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(bx_r, y_cur - card_h, card_w, card_h, 8, fill=1, stroke=1)
 
-        len_txt = (
-            "<b>1. Cut Across:</b> Locate horizontal line at mid-thigh on Pieces 1 & 2.<br/>"
-            "<b>2. Spread Evenly:</b> Separate sections by desired extension (e.g. +3 to +5 cm).<br/>"
-            "<b>3. Tape & True:</b> Back with paper and blend side and inner leg seamlines."
-        )
-        p_len = Paragraph(len_txt, ParagraphStyle("LenP", fontName="Poppins", fontSize=6.8, leading=9.8, textColor=TEXT_BODY))
-        p_len.wrapOn(c, col_w - 20, b_adj_h - 22)
-        p_len.drawOn(c, M_L + 12, y_adj - 20 - p_len.height)
+        c.setFont("Poppins-Bold", 8.2)
+        c.setFillColor(self.accent_color)
+        c.drawString(bx_r + 14, y_cur - 16, "MID-THIGH LENGTH ALTERATIONS")
 
-        # Right Box: Shorten
-        rx2 = M_L + col_w + 14
+        c.setStrokeColor(self.accent_muted)
+        c.setLineWidth(0.5)
+        c.line(bx_r + 14, y_cur - 22, bx_r + card_w - 14, y_cur - 22)
+
+        alter_bullets = [
+            ("Locate Alteration Lines:", "Locate the horizontal dashed 'Lengthen / Shorten Lines' printed across Front and Back mid-thighs."),
+            ("To Lengthen Trousers:", "Cut along the line, spread pieces by the desired amount (e.g. +3 cm / 1 1/4\"), tape scrap paper underneath."),
+            ("To Shorten Trousers:", "Draw a parallel line above the line by the desired reduction, fold/overlap the excess, and tape flat."),
+            ("True Up Seam Edges:", "Use a styling curve ruler to smoothly redraw the inseam and side seam lines across the adjustment gap.")
+        ]
+
+        cur_ry = y_cur - 34
+        for a_head, a_body in alter_bullets:
+            c.setFillColor(self.accent_color)
+            c.rect(bx_r + 14, cur_ry - 5.5, 3, 3, fill=1, stroke=0)
+
+            full_a_txt = f"<b>{a_head}</b> {a_body}"
+            p_a = Paragraph(full_a_txt, p_style_card)
+            pw_a, ph_a = p_a.wrap(card_w - 30, 45)
+            p_a.drawOn(c, bx_r + 22, cur_ry - ph_a)
+            cur_ry -= (ph_a + 6.0)
+
+        y_cur = y_cur - card_h - 12
+
+        # Bottom Pro-Tailor Advisory Banner
+        tip_h = 44.0
         c.setFillColor(CONTAINER_BG)
-        c.rect(rx2, y_adj - b_adj_h, col_w, b_adj_h, fill=1, stroke=0)
-        c.setFillColor(BURGUNDY)
-        c.rect(rx2, y_adj - b_adj_h, 3.5, b_adj_h, fill=1, stroke=0)
-        c.setFont("Poppins-Bold", 8.0)
-        c.setFillColor(BURGUNDY)
-        c.drawString(rx2 + 12, y_adj - 13, "TO SHORTEN (-) — FOR PETITE FIT")
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(M_L, y_cur - tip_h, CONTENT_W, tip_h, 6, fill=1, stroke=1)
 
-        shrt_txt = (
-            "<b>1. Measure Up:</b> Mark a parallel line above the lengthen/shorten line.<br/>"
-            "<b>2. Fold & Overlap:</b> Crease lower section upward to meet guideline.<br/>"
-            "<b>3. Re-true Edges:</b> Tape flat and smooth outer side seams and inseams."
-        )
-        p_shrt = Paragraph(shrt_txt, ParagraphStyle("ShrtP", fontName="Poppins", fontSize=6.8, leading=9.8, textColor=TEXT_BODY))
-        p_shrt.wrapOn(c, col_w - 20, b_adj_h - 22)
-        p_shrt.drawOn(c, rx2 + 12, y_adj - 20 - p_shrt.height)
-        c.restoreState()
+        c.setFillColor(self.accent_color)
+        c.rect(M_L, y_cur - tip_h, 4.0, tip_h, fill=1, stroke=0)
+
+        c.setFont("Poppins-Bold", 7.6)
+        c.setFillColor(self.accent_color)
+        c.drawString(M_L + 14, y_cur - 15, "PRO-TAILOR TIP: HEM LENGTH FITTING WITH TARGET FOOTWEAR")
+
+        c.setFont("Poppins", 6.8)
+        c.setFillColor(TEXT_BODY)
+        c.drawString(M_L + 14, y_cur - 27, "Always fit your hem length while wearing the exact shoes or heels you plan to style with these palazzo trousers.")
+        c.drawString(M_L + 14, y_cur - 37, "For fluid waterfall drape, the finished 5.0 cm hem fold should hover approximately 1.0 cm (3/8 in) above floor level.")
+
         c.showPage()
 
         # =====================================================================

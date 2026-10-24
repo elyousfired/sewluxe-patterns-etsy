@@ -251,7 +251,7 @@ class UniversalCADBlueprintEngine:
         d.add(String(rx + 28, 307, wb_label, fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
 
         # ---------------------------------------------------------------------
-        # POCKETS (Pieces 6 & 4 or In-seam or Cargo)
+        # POCKETS (Pieces 6 & 4 or In-seam or None)
         # ---------------------------------------------------------------------
         if spec.front_pockets == "slant_italian":
             # Piece 6: Pocket Lining
@@ -299,7 +299,7 @@ class UniversalCADBlueprintEngine:
             d.add(String(rx + 96, 222, '4', fontName='Helvetica-Bold', fontSize=12, fillColor=colors.black))
             d.add(String(rx + 72, 166, '4. POCKET BAG', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
             d.add(String(rx + 72, 157, 'Cut 2 Main Fabric', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#666666')))
-        else:
+        elif spec.front_pockets == "in_seam":
             # In-Seam Pocket Bag
             p_in = Path(fillColor=c_fill_main, strokeColor=c_cut, strokeWidth=0.7)
             p_in.moveTo(rx + 30, 272)
@@ -313,9 +313,10 @@ class UniversalCADBlueprintEngine:
             d.add(String(rx + 30, 157, 'Cut 4 Main Fabric', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#666666')))
 
         # ---------------------------------------------------------------------
-        # FLY PIECES (5 & 7) - Only if not elastic waist!
+        # FLY PIECES (5 & 7) - Only if front fly closure!
         # ---------------------------------------------------------------------
-        if not is_elastic_waist:
+        has_fly = spec.closure_type in ("exterior_button", "jeans_tack_button", "concealed_hook_bar")
+        if has_fly and not is_elastic_waist:
             # Piece 5: Fly Shield
             p5 = Path(fillColor=c_fill_main, strokeColor=c_cut, strokeWidth=0.7)
             p5.moveTo(rx + 148, 272)
@@ -341,6 +342,33 @@ class UniversalCADBlueprintEngine:
             d.add(String(rx + 200, 224, '7', fontName='Helvetica-Bold', fontSize=11, fillColor=colors.black))
             d.add(String(rx + 188, 166, '7. FLY FACING', fontName='Helvetica-Bold', fontSize=6, fillColor=colors.HexColor('#222222')))
             d.add(String(rx + 188, 157, 'Cut 2 Interfacing', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#666666')))
+        elif spec.closure_type == "side_invisible_zip" and spec.front_pockets == "none":
+            # Clean Pocketless & Side-Zip Blueprint Legend Block
+            box_x = rx + 6
+            box_y = 138
+            box_w = 246
+            box_h = 146
+            d.add(Rect(box_x, box_y, box_w, box_h, fillColor=colors.HexColor('#F8F7F4'), strokeColor=colors.HexColor('#D5D0C8'), strokeWidth=0.8, rx=4, ry=4))
+            d.add(Rect(box_x, box_y + box_h - 18, box_w, 18, fillColor=colors.HexColor('#1A4D54'), strokeColor=None, rx=4, ry=4))
+            d.add(Rect(box_x, box_y + box_h - 18, box_w, 4, fillColor=colors.HexColor('#1A4D54'), strokeColor=None))
+            d.add(String(box_x + 8, box_y + box_h - 12.5, "TECHNICAL BLUEPRINT SPECIFICATIONS", fontName='Helvetica-Bold', fontSize=6.8, fillColor=colors.white))
+
+            specs_lines = [
+                ("Pattern Piece Count:", "3 Essential Garment Pieces (Clean Minimalist Silhouette)"),
+                ("Piece 1 (Pants Front):", "Cut 2 Mirrored Pair  •  1 Contoured Waist Dart per Leg"),
+                ("Piece 2 (Pants Back):", "Cut 2 Mirrored Pair  •  1 Contoured Waist Dart per Side"),
+                ("Piece 3 (Waistband):", "Cut 1 Main Fabric + Cut 1 Fusible Interfacing"),
+                ("Left Side Seam:", "18.00 cm (7 1/8 in) Concealed Invisible Zipper Opening"),
+                ("Front Rise Shaping:", "Continuous Flat Front  •  Zero Bulk  •  No Fly Shield"),
+                ("Seam Allowances:", f"Standard {spec.seam_allowance_cm:.1f} cm (3/8 in) included on all edges"),
+                ("Bottom Weighted Hem:", f"Deep {spec.hem_allowance_cm:.1f} cm ({spec.hem_allowance_cm/2.54:.1f} in) double-fold hem built-in"),
+            ]
+            cur_sy = box_y + box_h - 32
+            for s_label, s_val in specs_lines:
+                d.add(Circle(box_x + 10, cur_sy + 2, 1.5, fillColor=colors.HexColor('#1A4D54'), strokeColor=None))
+                d.add(String(box_x + 16, cur_sy, s_label, fontName='Helvetica-Bold', fontSize=5.6, fillColor=colors.HexColor('#1E1A19')))
+                d.add(String(box_x + 90, cur_sy, s_val, fontName='Helvetica', fontSize=5.4, fillColor=colors.HexColor('#444444')))
+                cur_sy -= 13.5
 
         # ---------------------------------------------------------------------
         # BL: BELT LOOPS STRIP (Only if belt_loops_count > 0)
@@ -368,7 +396,15 @@ class UniversalCADBlueprintEngine:
         d.add(String(rx, 78, f'Seam Allowance: {spec.seam_allowance_cm:.1f} cm Included  •  Hem: {spec.hem_allowance_cm:.1f} cm', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#444444')))
         closure_label = "Concealed Trouser Hook & Bar" if spec.closure_type == "concealed_hook_bar" else ("Pull-On Continuous Elastic" if is_elastic_waist else ("Side Invisible Zipper" if spec.closure_type == "side_invisible_zip" else "Tailored Button Closure"))
         back_label = "Pocketless Back" if spec.back_pockets == "none" else f"{spec.back_pockets.replace('_', ' ').title()}"
-        d.add(String(rx, 68, f'{closure_label}  •  {back_label}  •  Zero AI Clutter', fontName='Helvetica-Bold', fontSize=5.5, fillColor=colors.HexColor('#8B2635')))
+        accent_hex = spec.color_hex if hasattr(spec, 'color_hex') and spec.color_hex else '#1A4D54'
+        d.add(String(rx, 68, f'{closure_label}  •  {back_label}  •  Zero AI Clutter', fontName='Helvetica-Bold', fontSize=5.5, fillColor=colors.HexColor(accent_hex)))
+
+        # 5 cm CAD Calibration Reference Bar
+        cal_x = rx
+        cal_y = 44
+        d.add(Rect(cal_x, cal_y, 70.87, 8, fillColor=colors.HexColor('#FFFFFF'), strokeColor=colors.HexColor('#222222'), strokeWidth=0.5))
+        d.add(Rect(cal_x, cal_y, 35.43, 8, fillColor=colors.HexColor('#222222'), strokeColor=None))
+        d.add(String(cal_x + 76, cal_y + 1.5, "5 cm / 2 in CAD Reference Scale", fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#555555')))
 
         return d
 
