@@ -352,7 +352,7 @@ class UniversalTrouserEngine:
                 "fin_waist": f"{fin_waist_cm:.1f} cm ({cm_to_tailor_inches(fin_waist_cm)})",
                 "fin_hips": f"{fin_hips_cm:.1f} cm ({cm_to_tailor_inches(fin_hips_cm)})",
                 "leg_sweep": f"{leg_sweep_cm:.1f} cm ({cm_to_tailor_inches(leg_sweep_cm)})",
-                "inseam_outseam": f"{int(round(inseam_cm))} cm / {int(round(outseam_cm))} cm",
+                "inseam_outseam": f"{inseam_cm:.1f} / {outseam_cm:.1f} cm",
                 "_raw": (fin_waist_cm, fin_hips_cm, leg_sweep_cm, inseam_cm, outseam_cm)
             })
 

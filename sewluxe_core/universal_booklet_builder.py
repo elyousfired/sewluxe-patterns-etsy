@@ -470,7 +470,7 @@ class UniversalBookletBuilder:
             ("Seamless Flat Front", "Zero front buttons, zero fly shield, zero bulk over the tummy."),
             ("Concealed Left Side Zipper", "18.00 cm (7 1/8 in) invisible zipper for effortless wear."),
             ("Vertical Shaping Darts", "4 contoured darts (2 front, 2 back) shaping gently over hips."),
-            ("Sweeping Palazzo Silhouette", "Fluid wide-leg drape measuring 60.5 to 96.9 cm leg sweep."),
+            ("Sweeping Palazzo Silhouette", "Fluid wide-leg drape measuring 60.5 to 91.7 cm leg sweep."),
             ("Deep 5.0 cm Weighted Hem", f"Generous {self.spec.hem_allowance_cm:.1f} cm double-fold hem giving graceful drape."),
             ("Standard Seam Allowance", f"{self.spec.seam_allowance_cm:.1f} cm (3/8 in) included on all joining edges.")
         ]
