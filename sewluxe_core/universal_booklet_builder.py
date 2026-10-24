@@ -1073,70 +1073,153 @@ class UniversalBookletBuilder:
         # PAGE 6: CUTTING & GARMENT PIECE INVENTORY
         # =====================================================================
         self._draw_chrome(c, 6)
-        y = self._draw_section_header(c, "CUTTING", "Pattern Pieces & Cutting Protocol")
 
-        c.setFont("Poppins-Bold", 8.8)
-        c.setFillColor(BURGUNDY)
-        inv_title = "GARMENT PIECE INVENTORY (CLEAN POCKETLESS BACK)" if self.spec.back_pockets == "none" else f"GARMENT PIECE INVENTORY ({self.spec.back_pockets.replace('_', ' ').upper()})"
-        c.drawString(M_L, y, inv_title)
+        # Page Border Frame in Garment Accent Color
+        frame_margin = 15.0
+        c.setStrokeColor(self.accent_color)
+        c.setLineWidth(1.2)
+        c.roundRect(frame_margin, frame_margin, W - (frame_margin * 2), H - (frame_margin * 2), 10, fill=0, stroke=1)
+
+        inner_margin = 18.5
+        c.setStrokeColor(self.accent_muted)
+        c.setLineWidth(0.5)
+        c.roundRect(inner_margin, inner_margin, W - (inner_margin * 2), H - (inner_margin * 2), 7, fill=0, stroke=1)
+
+        y = self._draw_section_header(c, "CUTTING & INVENTORY", "Pattern Pieces & Cutting Protocol")
+
+        # Section 1: Garment Piece Inventory Table
         y -= 14
+        c.setFont("Poppins-Bold", 8.2)
+        c.setFillColor(self.accent_color)
+        inv_title = f"GARMENT PIECE INVENTORY (AUTHENTIC CAD BLUEPRINT - {len(self.engine.generate_piece_inventory())} PIECES)"
+        c.drawString(M_L, y, inv_title)
 
-        pw = [35, 140, 160, 150]
-        c.setFillColor(TABLE_HEAD)
-        c.rect(M_L, y - 13, sum(pw), 13, fill=1, stroke=0)
-        c.setFont("Poppins-Bold", 6.5)
+        y -= 14
+        pw = [40.0, 145.0, 158.0, 180.28]  # Sum = 523.28 pt
+
+        c.setFillColor(self.accent_color)
+        c.roundRect(M_L, y - 13.5, sum(pw), 13.5, 3, fill=1, stroke=0)
+        c.setFont("Poppins-Bold", 6.6)
         c.setFillColor(WHITE)
-        c.drawString(M_L + 6, y - 9.5, "#")
-        c.drawString(M_L + pw[0] + 6, y - 9.5, "PIECE NAME")
-        c.drawString(M_L + pw[0] + pw[1] + 6, y - 9.5, "MATERIAL")
-        c.drawString(M_L + pw[0] + pw[1] + pw[2] + 6, y - 9.5, "CUT QUANTITY")
-        y -= 13
+        c.drawString(M_L + 8, y - 9.8, "#")
+        c.drawString(M_L + pw[0] + 8, y - 9.8, "PIECE NAME")
+        c.drawString(M_L + pw[0] + pw[1] + 8, y - 9.8, "MATERIAL")
+        c.drawString(M_L + pw[0] + pw[1] + pw[2] + 8, y - 9.8, "CUT QUANTITY")
+        y -= 13.5
 
         inventory_data = self.engine.generate_piece_inventory()
+        p_row_h = 13.5
         for r_idx, item in enumerate(inventory_data):
             p_num, p_name, p_mat, p_cut = item['id'], item['name'], item['material'], item['qty']
             bg = TABLE_ALT if r_idx % 2 == 1 else WHITE
             c.setFillColor(bg)
-            c.rect(M_L, y - 12.0, sum(pw), 12.0, fill=1, stroke=0)
-            c.setFont("Poppins-Bold", 6.5)
-            c.setFillColor(TEXT_BODY)
-            c.drawString(M_L + 6, y - 8.5, p_num)
-            c.setFont("Poppins", 6.5)
-            c.drawString(M_L + pw[0] + 6, y - 8.5, p_name)
-            c.drawString(M_L + pw[0] + pw[1] + 6, y - 8.5, p_mat)
-            c.drawString(M_L + pw[0] + pw[1] + pw[2] + 6, y - 8.5, p_cut)
-            y -= 12.0
+            c.rect(M_L, y - p_row_h, sum(pw), p_row_h, fill=1, stroke=0)
 
-        y -= 16
-        c.setFont("Poppins-Bold", 8.8)
-        c.setFillColor(BURGUNDY)
-        c.drawString(M_L, y, "SEWING ORDER AT A GLANCE")
+            c.setFont("Poppins-Bold", 6.6)
+            c.setFillColor(CHARCOAL)
+            c.drawString(M_L + 8, y - 9.8, p_num)
+
+            c.setFont("Poppins-Bold", 6.6)
+            c.setFillColor(self.accent_color)
+            c.drawString(M_L + pw[0] + 8, y - 9.8, p_name)
+
+            c.setFont("Poppins", 6.4)
+            c.setFillColor(TEXT_BODY)
+            c.drawString(M_L + pw[0] + pw[1] + 8, y - 9.8, p_mat)
+            c.drawString(M_L + pw[0] + pw[1] + pw[2] + 8, y - 9.8, p_cut)
+            y -= p_row_h
+
         y -= 14
 
-        sow = [135, 350]
-        c.setFillColor(TABLE_HEAD)
-        c.rect(M_L, y - 13, sum(sow), 13, fill=1, stroke=0)
-        c.setFont("Poppins-Bold", 6.5)
+        # Section 2: Sewing Order at a Glance Table (7 Phases)
+        c.setFont("Poppins-Bold", 8.2)
+        c.setFillColor(self.accent_color)
+        c.drawString(M_L, y, "SEWING ORDER AT A GLANCE (ROADMAP TO PAGES 9–15)")
+
+        y -= 14
+        sow = [160.0, 363.28]  # Sum = 523.28 pt
+
+        c.setFillColor(self.accent_color)
+        c.roundRect(M_L, y - 13.5, sum(sow), 13.5, 3, fill=1, stroke=0)
+        c.setFont("Poppins-Bold", 6.6)
         c.setFillColor(WHITE)
-        c.drawString(M_L + 6, y - 9.5, "PHASE")
-        c.drawString(M_L + sow[0] + 6, y - 9.5, "OPERATION SUMMARY")
-        y -= 13
+        c.drawString(M_L + 8, y - 9.8, "PHASE & STEP")
+        c.drawString(M_L + sow[0] + 8, y - 9.8, "OPERATION SUMMARY")
+        y -= 13.5
 
         steps_data = self.engine.generate_sewing_steps()
+        s_row_h = 13.0
         for r_idx, s_data in enumerate(steps_data):
             bg = TABLE_ALT if r_idx % 2 == 1 else WHITE
             c.setFillColor(bg)
-            c.rect(M_L, y - 12.0, sum(sow), 12.0, fill=1, stroke=0)
+            c.rect(M_L, y - s_row_h, sum(sow), s_row_h, fill=1, stroke=0)
+
             c.setFont("Poppins-Bold", 6.5)
+            c.setFillColor(CHARCOAL)
+            c.drawString(M_L + 8, y - 9.5, f"Step {s_data['step']}: {s_data['title']}")
+
+            c.setFont("Poppins", 6.4)
             c.setFillColor(TEXT_BODY)
-            c.drawString(M_L + 6, y - 8.5, f"Step {s_data['step']}: {s_data['title']}")
-            c.setFont("Poppins", 6.5)
-            c.drawString(M_L + sow[0] + 6, y - 8.5, s_data['bullets'][0][:65] + "...")
-            y -= 12.0
+            c.drawString(M_L + sow[0] + 8, y - 9.5, s_data['bullets'][0])
+            y -= s_row_h
 
         y -= 14
-        self._draw_tip_box(c, y, "Standard Seam Allowance & Hem Protocol",
-                           f"• Standard <b>{self.spec.seam_allowance_cm:.1f} cm (3/8 in)</b> seam allowance is included on all pattern edges.<br/>• Deep <b>{self.spec.hem_allowance_cm:.1f} cm ({self.spec.hem_allowance_cm/2.54:.1f} in)</b> hem is included at bottom of legs for authentic drape.<br/>• Cut directly along solid pattern lines—do NOT add extra seam allowance.")
+
+        # Section 3: Cutting Protocol & Pattern Markings Card
+        proto_h = 118.0
+        c.setFillColor(CONTAINER_BG)
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(M_L, y - proto_h, CONTENT_W, proto_h, 8, fill=1, stroke=1)
+
+        c.setFont("Poppins-Bold", 8.2)
+        c.setFillColor(self.accent_color)
+        c.drawString(M_L + 14, y - 16, "MANDATORY CUTTING & SEAM ALLOWANCE PROTOCOL")
+
+        c.setStrokeColor(self.accent_muted)
+        c.setLineWidth(0.5)
+        c.line(M_L + 14, y - 22, M_L + CONTENT_W - 14, y - 22)
+
+        proto_bullets = [
+            (f"Built-in Seam Allowances ({self.spec.seam_allowance_cm:.1f} cm / 3/8 in):", f"Standard {self.spec.seam_allowance_cm:.1f} cm (3/8 in) seam allowance is already included on all pattern joining edges. Cut directly along solid pattern lines—do NOT add extra seam allowance."),
+            (f"Built-in Weighted Hem ({self.spec.hem_allowance_cm:.1f} cm / {self.spec.hem_allowance_cm/2.54:.1f} in):", f"Generous {self.spec.hem_allowance_cm:.1f} cm ({self.spec.hem_allowance_cm/2.54:.1f} in) double-fold hem is included at leg bottoms. This provides authentic weight for the waterfall palazzo drape over shoes."),
+            ("Strict Grainline Alignment:", "The long vertical grainline arrow on Front and Back pieces MUST lie perfectly parallel to the fabric selvedge. Measure from both arrow tips to verify exact distance."),
+            ("Transferring Technical Notches & Dart Markings:", "Snip shallow 3 mm (1/8 in) notches into the seam allowances at knee balance points, hip notches, and center seams. Mark dart apex points with tailor's chalk.")
+        ]
+
+        p_style_proto = ParagraphStyle("ProtoBullet", fontName="Poppins", fontSize=6.8, leading=9.6, textColor=TEXT_BODY)
+        cur_py = y - 34
+        for p_head, p_body in proto_bullets:
+            c.setFillColor(self.accent_color)
+            c.rect(M_L + 14, cur_py - 5.5, 3, 3, fill=1, stroke=0)
+
+            full_p_txt = f"<b>{p_head}</b> {p_body}"
+            p_p = Paragraph(full_p_txt, p_style_proto)
+            pw_p, ph_p = p_p.wrap(CONTENT_W - 32, 50)
+            p_p.drawOn(c, M_L + 22, cur_py - ph_p)
+            cur_py -= (ph_p + 5.5)
+
+        y = y - proto_h - 12
+
+        # Section 4: Pro-Tailor Cutting Tip Banner
+        tip_h = 44.0
+        c.setFillColor(CONTAINER_BG)
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(M_L, y - tip_h, CONTENT_W, tip_h, 6, fill=1, stroke=1)
+
+        c.setFillColor(self.accent_color)
+        c.rect(M_L, y - tip_h, 4.0, tip_h, fill=1, stroke=0)
+
+        c.setFont("Poppins-Bold", 7.6)
+        c.setFillColor(self.accent_color)
+        c.drawString(M_L + 14, y - 15, "PRO-TAILOR TIP: CUTTING FLUID CREPE & SLIPPERY TEXTILES")
+
+        c.setFont("Poppins", 6.8)
+        c.setFillColor(TEXT_BODY)
+        c.drawString(M_L + 14, y - 27, "When cutting fluid silk-viscose or Tencel crepe, use pattern weights and a 45 mm rotary cutter on a self-healing mat.")
+        c.drawString(M_L + 14, y - 37, "Avoid lifting the fabric off the table during cutting, which causes distortion along the curved waistline and crotch seams.")
+
         c.showPage()
 
         # =====================================================================
