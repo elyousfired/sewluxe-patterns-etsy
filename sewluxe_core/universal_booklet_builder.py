@@ -899,27 +899,40 @@ class UniversalBookletBuilder:
         # PAGE 5: MATERIALS & FABRIC YARDAGE
         # =====================================================================
         self._draw_chrome(c, 5)
-        y = self._draw_section_header(c, "MATERIALS", "Fabric Requirements & Notions")
 
-        c.setFont("Poppins-Bold", 8.8)
-        c.setFillColor(BURGUNDY)
-        c.drawString(M_L, y, "INTELLIGENT FABRIC REQUIREMENTS TABLE (WITH 10% BUFFER)")
+        # Page Border Frame in Garment Accent Color
+        frame_margin = 15.0
+        c.setStrokeColor(self.accent_color)
+        c.setLineWidth(1.2)
+        c.roundRect(frame_margin, frame_margin, W - (frame_margin * 2), H - (frame_margin * 2), 10, fill=0, stroke=1)
+
+        inner_margin = 18.5
+        c.setStrokeColor(self.accent_muted)
+        c.setLineWidth(0.5)
+        c.roundRect(inner_margin, inner_margin, W - (inner_margin * 2), H - (inner_margin * 2), 7, fill=0, stroke=1)
+
+        y = self._draw_section_header(c, "MATERIALS & FABRICS", "Fabric Requirements & Notions")
+
+        # Table: Fabric Requirements
         y -= 14
+        c.setFont("Poppins-Bold", 8.2)
+        c.setFillColor(self.accent_color)
+        c.drawString(M_L, y, "TABLE 3: INTELLIGENT FABRIC REQUIREMENTS (WITH 10% BUFFER)")
 
+        y -= 14
         req_heads = ["SIZE CLUSTER", "60 IN (150 CM) FABRIC WIDTH", "45 IN (115 CM) FABRIC WIDTH"]
-        req_widths = [135, 175, 175]
+        req_widths = [143.0, 190.0, 190.28]  # Sum = 523.28 pt
 
-        c.setFillColor(TABLE_HEAD)
-        c.rect(M_L, y - 14, sum(req_widths), 14, fill=1, stroke=0)
+        c.setFillColor(self.accent_color)
+        c.roundRect(M_L, y - 14.0, sum(req_widths), 14.0, 3, fill=1, stroke=0)
         c.setFont("Poppins-Bold", 6.8)
         c.setFillColor(WHITE)
         cur_x = M_L
         for rh, rw in zip(req_heads, req_widths):
-            c.drawString(cur_x + 8, y - 10, rh)
+            c.drawString(cur_x + 8, y - 10.0, rh)
             cur_x += rw
-        y -= 14
+        y -= 14.0
 
-        # Dynamic physical yardage from universal engine
         yardage_data = self.engine.calculate_geometric_yardage()
         if self.spec.size_standard == "PATTERNFAST_XXS_10XL":
             req_rows = [
@@ -929,50 +942,131 @@ class UniversalBookletBuilder:
             ]
         else:
             req_rows = [
-                ("Sizes US 00 – 08", f"{yardage_data['00_08']['60_m']:.2f} m ({yardage_data['00_08']['60_yd']:.2f} yards)", f"{yardage_data['00_08']['45_m']:.2f} m ({yardage_data['00_08']['45_yd']:.2f} yards)"),
-                ("Sizes US 10 – 14", f"{yardage_data['10_14']['60_m']:.2f} m ({yardage_data['10_14']['60_yd']:.2f} yards)", f"{yardage_data['10_14']['45_m']:.2f} m ({yardage_data['10_14']['45_yd']:.2f} yards)"),
-                ("Sizes US 16 – 22", f"{yardage_data['16_22']['60_m']:.2f} m ({yardage_data['16_22']['60_yd']:.2f} yards)", f"{yardage_data['16_22']['45_m']:.2f} m ({yardage_data['16_22']['45_yd']:.2f} yards)"),
+                ("Sizes US 00 – 08 (XXS to M)", f"{yardage_data['00_08']['60_m']:.2f} m ({yardage_data['00_08']['60_yd']:.2f} yards)", f"{yardage_data['00_08']['45_m']:.2f} m ({yardage_data['00_08']['45_yd']:.2f} yards)"),
+                ("Sizes US 10 – 14 (M to L)", f"{yardage_data['10_14']['60_m']:.2f} m ({yardage_data['10_14']['60_yd']:.2f} yards)", f"{yardage_data['10_14']['45_m']:.2f} m ({yardage_data['10_14']['45_yd']:.2f} yards)"),
+                ("Sizes US 16 – 22 (XL to 3XL)", f"{yardage_data['16_22']['60_m']:.2f} m ({yardage_data['16_22']['60_yd']:.2f} yards)", f"{yardage_data['16_22']['45_m']:.2f} m ({yardage_data['16_22']['45_yd']:.2f} yards)"),
             ]
+
+        r_row_h = 13.5
         for r_idx, (sc, w60, w45) in enumerate(req_rows):
             bg = TABLE_ALT if r_idx % 2 == 1 else WHITE
             c.setFillColor(bg)
-            c.rect(M_L, y - 15, sum(req_widths), 15, fill=1, stroke=0)
-            c.setFont("Poppins-Bold" if r_idx == 0 else "Poppins", 7.0)
+            c.rect(M_L, y - r_row_h, sum(req_widths), r_row_h, fill=1, stroke=0)
+            c.setFont("Poppins-Bold" if r_idx == 0 else "Poppins", 6.6)
             c.setFillColor(TEXT_BODY)
-            c.drawString(M_L + 8, y - 10.5, sc)
-            c.drawString(M_L + req_widths[0] + 8, y - 10.5, w60)
-            c.drawString(M_L + req_widths[0] + req_widths[1] + 8, y - 10.5, w45)
-            y -= 15
+            c.drawString(M_L + 8, y - 9.8, sc)
+            c.drawString(M_L + req_widths[0] + 8, y - 9.8, w60)
+            c.drawString(M_L + req_widths[0] + req_widths[1] + 8, y - 9.8, w45)
+            y -= r_row_h
 
         y -= 14
-        c.setFont("Poppins-Bold", 8.8)
-        c.setFillColor(BURGUNDY)
-        c.drawString(M_L, y, "REQUIRED NOTIONS & HARDWARE")
-        y -= 12
+
+        p_style_textile = ParagraphStyle("TextileBullet", fontName="Poppins", fontSize=6.8, leading=9.6, textColor=TEXT_BODY)
+
+        # Card 1: Recommended Textiles & Drape Guide
+        textiles_h = 142.0
+        c.setFillColor(CONTAINER_BG)
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(M_L, y - textiles_h, CONTENT_W, textiles_h, 8, fill=1, stroke=1)
+
+        c.setFont("Poppins-Bold", 8.2)
+        c.setFillColor(self.accent_color)
+        c.drawString(M_L + 14, y - 16, "RECOMMENDED TEXTILES & DRAPE GUIDE")
+
+        c.setStrokeColor(self.accent_muted)
+        c.setLineWidth(0.5)
+        c.line(M_L + 14, y - 22, M_L + CONTENT_W - 14, y - 22)
+
+        textile_bullets = [
+            ("Primary Quiet-Luxury Choice (Fluid Silk-Viscose or Tencel Crepe):", "Weight: 200–280 gsm. Delivers a dramatic liquid waterfall drape, soft matte luster, and fluid swing when walking. Perfect match for the Aria silhouette."),
+            ("Natural Warm-Weather Tailoring (Washed Linen-Viscose Blend):", "Weight: 190–240 gsm. Combines the breathable slub texture of pure linen with the soft, fluid drape of viscose, minimizing stiff creasing."),
+            ("Four-Season Tailored Suiting (Lightweight Wool Gabardine / Tropical Wool):", "Weight: 210–260 gsm. Provides crisp seam recovery, breathable structure, and refined drape suited for year-round capsule wardrobe styling."),
+            ("Fabrics to Avoid:", "Avoid stiff rigid cotton canvas, heavy rigid denim, and lightweight slippery lining synthetics. Stiff fabrics balloon out unflatteringly, while overly flimsy textiles cling and lack hem weight.")
+        ]
+
+        cur_ty = y - 34
+        for t_head, t_body in textile_bullets:
+            c.setFillColor(self.accent_color)
+            c.rect(M_L + 14, cur_ty - 5.5, 3, 3, fill=1, stroke=0)
+
+            full_t_txt = f"<b>{t_head}</b> {t_body}"
+            p_t = Paragraph(full_t_txt, p_style_textile)
+            pw, ph = p_t.wrap(CONTENT_W - 32, 50)
+            p_t.drawOn(c, M_L + 22, cur_ty - ph)
+            cur_ty -= (ph + 6.5)
+
+        y = y - textiles_h - 14
+
+        # Card 2: Required Notions & Hardware
+        notions_h = 138.0
+        c.setFillColor(CONTAINER_BG)
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(M_L, y - notions_h, CONTENT_W, notions_h, 8, fill=1, stroke=1)
+
+        c.setFont("Poppins-Bold", 8.2)
+        c.setFillColor(self.accent_color)
+        c.drawString(M_L + 14, y - 16, "REQUIRED NOTIONS & HARDWARE INVENTORY")
+
+        c.setStrokeColor(self.accent_muted)
+        c.setLineWidth(0.5)
+        c.line(M_L + 14, y - 22, M_L + CONTENT_W - 14, y - 22)
 
         if self.spec.closure_type in ("exterior_button", "jeans_tack_button"):
             closure_txt = "7–8 in (18–20 cm) trouser zipper fly + 20 mm tailored horn button & buttonhole."
         elif self.spec.closure_type == "concealed_hook_bar":
             closure_txt = "Concealed heavy-duty trouser hook & bar for inside extension tab + 7–8 in (18–20 cm) trouser zipper fly."
         elif self.spec.closure_type == "side_invisible_zip":
-            closure_txt = "8–9 in (20–22 cm) invisible zipper for left hip seam."
+            closure_txt = "18.00 cm (7 1/8 in) invisible nylon zipper matching the main fabric color for the left hip seam closure."
         elif self.spec.closure_type == "pull_on_elastic":
-            closure_txt = "Continuous elastic 3.5 cm (1.4 in) wide."
+            closure_txt = "Continuous elastic 3.5 cm (1.4 in) wide matching waist circumference."
         else:
             closure_txt = "Tailored horn button 20 mm + buttonhole."
-        notions_list = [
-            ("Waistband Closure", closure_txt),
-            ("Fusible Interfacing", "0.50 m (1/2 yard) lightweight woven fusible interfacing."),
-            ("Pocket Lining Fabric", "0.40 m lightweight cotton lawn or Bemberg lining for pocket bags."),
-            ("Sewing Thread", "1 spool quality 100% polyester all-purpose thread matching your main fabric."),
-            ("Tailoring Tools", "Steam iron, tailor's ham, press cloth, and wooden clapper.")
-        ]
-        for n_title, n_desc in notions_list:
-            y = self._draw_bullet(c, M_L, y, f"<b>{n_title}:</b> {n_desc}", CONTENT_W, font_size=7.4, leading=10.5)
 
-        y -= 10
-        self._draw_tip_box(c, y, "Pro Tip: Cutting Wide Legs on 45\" Fabric",
-                           "Because this silhouette features generous leg volume, Front and Back leg pieces must be stacked lengthwise when cutting on 45\" (115 cm) width fabric. Always ensure your fabric length accounts for lengthwise nesting.")
+        pocket_lining_txt = "None required. The Aria trousers feature a sleek, pocketless silhouette for an uninterrupted, bulge-free hip contour." if self.spec.front_pockets == "none" else "0.40 m lightweight cotton lawn or Bemberg lining for pocket bags."
+
+        notions_bullets = [
+            ("Waistband Closure:", closure_txt),
+            ("Fusible Interfacing:", "0.50 m (1/2 yard) lightweight woven or non-woven fusible interfacing (Pellon SF101 or Vlieseline G700) to stabilize the waistband."),
+            ("Pocket Lining:", pocket_lining_txt),
+            ("Sewing Thread:", "1 spool (250m / 274yd) quality 100% all-purpose polyester thread (Gütermann Mara 100 or Coats & Clark) matching main fabric."),
+            ("Machine Needles:", "New Microtex or Universal needle, size 70/10 to 80/12, chosen to suit your selected fabric weave."),
+            ("Couture Pressing Tools:", "Steam iron, tailor's ham (for pressing curved waist darts), press cloth, and a wooden clapper to set razor-sharp hem folds.")
+        ]
+
+        cur_ny = y - 34
+        for n_head, n_body in notions_bullets:
+            c.setFillColor(self.accent_color)
+            c.rect(M_L + 14, cur_ny - 5.5, 3, 3, fill=1, stroke=0)
+
+            full_n_txt = f"<b>{n_head}</b> {n_body}"
+            p_n = Paragraph(full_n_txt, p_style_textile)
+            pw, ph = p_n.wrap(CONTENT_W - 32, 50)
+            p_n.drawOn(c, M_L + 22, cur_ny - ph)
+            cur_ny -= (ph + 5.5)
+
+        y = y - notions_h - 12
+
+        # Bottom Pro-Tailor Advisory Banner
+        tip_h = 44.0
+        c.setFillColor(CONTAINER_BG)
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(M_L, y - tip_h, CONTENT_W, tip_h, 6, fill=1, stroke=1)
+
+        c.setFillColor(self.accent_color)
+        c.rect(M_L, y - tip_h, 4.0, tip_h, fill=1, stroke=0)
+
+        c.setFont("Poppins-Bold", 7.6)
+        c.setFillColor(self.accent_color)
+        c.drawString(M_L + 14, y - 15, "PRO-TAILOR TIP: NESTING WIDE-LEG PATTERNS ON 45\" (115 CM) FABRIC")
+
+        c.setFont("Poppins", 6.8)
+        c.setFillColor(TEXT_BODY)
+        c.drawString(M_L + 14, y - 27, "Because wide-leg palazzo patterns have expansive hem widths, Front and Back legs cannot fit side-by-side on 45\" fabric.")
+        c.drawString(M_L + 14, y - 37, "They must be nested lengthwise end-to-end, which requires extra yardage. Always verify your fabric width before buying!")
+
         c.showPage()
 
         # =====================================================================
