@@ -48,6 +48,22 @@ Tailornova frequently generates generic instructions (e.g., shirt plackets with 
   - **Clip Curves / Notches**: Red V-snips (`#D9534F`) along concave/convex allowances with callout "clip curves / snip seam allowance".
   - **Pressing**: Realistic tailor's ham (`#F4ECE1`) for 3D bust/shoulder molding + modern vector iron pressing seam allowances open ("press open").
 
+### 4. Official API Harvesting & Dual-Box Standard (Mamnou3 Matplotlib Al-Badai)
+- **STRICT PROHIBITION**: NEVER draw crude polygonal shapes with Matplotlib when official vector instruction diagrams exist on the PatternFast/Tailornova API.
+- **Official API Endpoint**:
+  ```text
+  GET / POST https://api.patternfast.com/api/sewing-instructions?elementIds={elem_ids}&mannequinId={man_id}&categoryCode={cat}&format=pdf
+  ```
+  Returns the complete 28-page official instruction PDF containing high-definition vector illustrations for all sewing steps.
+- **Mandatory Text-Purge Rule (Qti3 l-ktaba l-3amiyya)**:
+  - When extracting diagrams from the official PDF, render strictly below `y = 285 pt` (or auto-crop active drawing bounds) to completely purge the raw generic Tailornova bullet points that cause text collisions with callout numbers.
+- **Dual-Box Extraction & Assembly**:
+  - For multi-piece steps (e.g. Back + Front darts, Left + Right leg inseams), detect the vertical whitespace gap via `InstructionHarvester.split_side_by_side_pieces()`.
+  - Assemble into two distinct white rectangular boxes (`#FFFFFF`) with 4px black borders inside the `#F5F2EF` container via `InstructionHarvester.build_dual_panel_box()`.
+  - Top-left of Box 1: **`1.`** in `Poppins-Bold` with concise title & subtitle.
+  - Top-left of Box 2: **`2.`** in `Poppins-Bold` with concise title & subtitle.
+  - Zero overlapping text, zero clipped borders, 100% quiet-luxury quiet aesthetic.
+
 ---
 
 ## Ready-to-Use Studio Scripts
