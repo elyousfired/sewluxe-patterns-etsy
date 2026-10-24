@@ -1370,20 +1370,64 @@ class UniversalBookletBuilder:
         p_hub.drawOn(c, M_L, y - h)
         y -= (h + 20)
 
-        v1_title = "Sewing Front Pleats & Center Crease" if "pleat" in self.spec.front_shaping else "Flat Front Waist Shaping & Creases"
-        if self.spec.closure_type in ("exterior_button", "jeans_tack_button"):
-            v7_title = "Waistband Button Closure & Hemming"
-        elif self.spec.closure_type == "concealed_hook_bar":
-            v7_title = "Concealed Hook & Bar Waistband Closure"
+        # Dynamic Video Selection based strictly on TrouserSpec
+        if "pleat" in self.spec.front_shaping:
+            v1_title = "Sewing Front Pleats & Center Crease"
+            v1_step = "Step 1 Technique Guide"
+            v1_url = "https://www.youtube.com/watch?v=kYJvM9x0b0Q"
+        else:
+            v1_title = "Contoured Waist Darts & Shaping"
+            v1_step = "Step 1 & 3 Technique Guide"
+            v1_url = "https://www.youtube.com/watch?v=kYJvM9x0b0Q"
+
+        if self.spec.front_pockets == "slant_italian":
+            v2_title = "Sewing Slanted Trouser Pockets"
+            v2_step = "Step 2 Technique Guide"
+            v2_url = "https://www.youtube.com/watch?v=rZvkl2069sQ"
+        elif self.spec.front_pockets == "in_seam":
+            v2_title = "Sewing In-Seam Pocket Bags"
+            v2_step = "Pocket Technique Guide"
+            v2_url = "https://www.youtube.com/watch?v=rZvkl2069sQ"
+        else:
+            v2_title = "Rise Seams & Crotch Reinforcement"
+            v2_step = "Step 2 & 4 Technique Guide"
+            v2_url = "https://www.youtube.com/watch?v=Y3rAmHE7CZs"
+
+        if self.spec.closure_type in ("exterior_button", "jeans_tack_button", "concealed_hook_bar"):
+            v3_title = "Front Zipper Fly & Shield Installation"
+            v3_step = "Step 3 Technique Guide"
+            v3_url = "https://www.youtube.com/watch?v=Y3rAmHE7CZs"
         elif self.spec.closure_type == "side_invisible_zip":
-            v7_title = "Invisible Zipper & Waistband Finishing"
+            v3_title = "Concealed Side Invisible Zipper"
+            v3_step = "Step 6 Technique Guide"
+            v3_url = "https://www.youtube.com/watch?v=rZvkl2069sQ"
+        else:
+            v3_title = "Elastic Casing & Drawstring Assembly"
+            v3_step = "Waistband Assembly Guide"
+            v3_url = "https://www.youtube.com/watch?v=rZvkl2069sQ"
+
+        if self.spec.closure_type == "concealed_hook_bar":
+            v7_title = "Concealed Hook & Bar Waistband Closure"
+            v7_step = "Step 7 Technique Guide"
+            v7_url = "https://www.youtube.com/watch?v=DPpF3kAP_oo"
+        elif self.spec.closure_type == "side_invisible_zip":
+            v7_title = "Waistband Attachment & 5.0 cm Hem"
+            v7_step = "Step 7 Technique Guide"
+            v7_url = "https://www.youtube.com/watch?v=DPpF3kAP_oo"
+        elif self.spec.closure_type in ("exterior_button", "jeans_tack_button"):
+            v7_title = "Waistband Button Closure & Hemming"
+            v7_step = "Step 7 Technique Guide"
+            v7_url = "https://www.youtube.com/watch?v=DPpF3kAP_oo"
         else:
             v7_title = "Waistband Construction & Hemming"
+            v7_step = "Step 7 Technique Guide"
+            v7_url = "https://www.youtube.com/watch?v=DPpF3kAP_oo"
+
         video_cards = [
-            (v1_title, "Step 1 Technique Guide", "https://www.youtube.com/watch?v=kYJvM9x0b0Q"),
-            ("Sewing Slanted Trouser Pockets", "Step 2 Technique Guide", "https://www.youtube.com/watch?v=rZvkl2069sQ"),
-            ("Front Zipper Fly & Shield Installation", "Step 3 Technique Guide", "https://www.youtube.com/watch?v=Y3rAmHE7CZs"),
-            (v7_title, "Step 7 Technique Guide", "https://www.youtube.com/watch?v=DPpF3kAP_oo")
+            (v1_title, v1_step, v1_url),
+            (v2_title, v2_step, v2_url),
+            (v3_title, v3_step, v3_url),
+            (v7_title, v7_step, v7_url)
         ]
 
         c_w = (CONTENT_W - 20) / 2.0
