@@ -582,63 +582,150 @@ class UniversalBookletBuilder:
         c.showPage()
 
         # =====================================================================
-        # PAGE 3: READ THIS FIRST / BEFORE YOU BEGIN
+        # PAGE 3: READ THIS FIRST / PRINTING & ASSEMBLING PROTOCOL
         # =====================================================================
         self._draw_chrome(c, 3)
-        y = self._draw_section_header(c, "READ THIS FIRST", "Before You Begin")
 
-        chk_cols = [
-            ("1. PRINT & CALIBRATE", [
-                "Always print Page 1 first at <b>100% Actual Size</b> (uncheck 'Fit to Page').",
-                "Measure the 4\" x 4\" (10 cm x 10 cm) test square with a hard physical ruler.",
-                "Verify both horizontal and vertical lines match exactly before printing remaining tiles."
-            ]),
-            ("2. ACCURATE BODY MEASUREMENTS", [
-                "Measure in light undergarments at natural waist (narrowest part) and full hip.",
-                "If your waist and hip fall between sizes, blend smoothly along side seams.",
-                "Check finished garment measurements (Page 4) to verify desired ease."
-            ]),
-            ("3. FABRIC PREPARATION", [
-                "Pre-wash, steam, and shrink your suiting fabric thoroughly before pinning.",
-                "Linen-viscose and Tencel blends can shrink 5–8% on first steam pressing.",
-                "Press fabric completely flat on the grainline to prevent twisted trouser legs."
-            ]),
-            ("4. SEAM ALLOWANCES & TOOLS", [
-                f"Standard <b>{self.spec.seam_allowance_cm:.1f} cm (3/8 in)</b> seam allowance is included on all seams.",
-                f"Generous <b>{self.spec.hem_allowance_cm:.1f} cm ({self.spec.hem_allowance_cm/2.54:.1f} in)</b> fold-up hem is included at leg hems.",
-                "Equip your machine with a new 80/12 Microtex needle and quality polyester thread."
-            ])
+        # Page Border Frame in Garment Accent Color
+        frame_margin = 15.0
+        c.setStrokeColor(self.accent_color)
+        c.setLineWidth(1.2)
+        c.roundRect(frame_margin, frame_margin, W - (frame_margin * 2), H - (frame_margin * 2), 10, fill=0, stroke=1)
+
+        inner_margin = 18.5
+        c.setStrokeColor(self.accent_muted)
+        c.setLineWidth(0.5)
+        c.roundRect(inner_margin, inner_margin, W - (inner_margin * 2), H - (inner_margin * 2), 7, fill=0, stroke=1)
+
+        y = self._draw_section_header(c, "READ THIS FIRST", "Printing & Assembling Protocol")
+
+        # Mandatory Calibration Alert Box
+        alert_h = 58.0
+        c.setFillColor(colors.HexColor("#EAF1F2"))
+        c.setStrokeColor(self.accent_color)
+        c.setLineWidth(1.2)
+        c.roundRect(M_L, y - alert_h, CONTENT_W, alert_h, 8, fill=1, stroke=1)
+
+        c.setFillColor(self.accent_color)
+        c.roundRect(M_L + 12, y - 23, 72, 14, 4, fill=1, stroke=0)
+        c.setFont("Poppins-Bold", 6.8)
+        c.setFillColor(WHITE)
+        c.drawCentredString(M_L + 48, y - 19, "CRITICAL STEP")
+
+        c.setFont("Poppins-Bold", 8.2)
+        c.setFillColor(self.accent_color)
+        c.drawString(M_L + 92, y - 19, "ALWAYS PRINT PAGE 1 FIRST & VERIFY THE 4\" x 4\" TEST SQUARE")
+
+        alert_desc = (
+            "Never print the entire pattern batch at once! Open your pattern in Adobe Acrobat Reader and print "
+            "<b>Page 1 only at 100% Actual Size</b>. Measure the test square with a hard physical ruler. "
+            "Both horizontal and vertical edges must measure exactly <b>4.00 inches (10.00 cm)</b> before printing remaining tiles."
+        )
+        p_alert = Paragraph(alert_desc, ParagraphStyle(
+            "AlertDesc", fontName="Poppins", fontSize=7.2, leading=10.8, textColor=TEXT_BODY
+        ))
+        pw, ph = p_alert.wrap(CONTENT_W - 24, 40)
+        p_alert.drawOn(c, M_L + 12, y - 32 - ph)
+
+        y_cur = y - alert_h - 14
+
+        # Four Technical Cards in 2x2 Grid
+        card_gap = 14.0
+        card_w = (CONTENT_W - card_gap) / 2.0
+        card_h = 222.0
+
+        card_data = [
+            (
+                "1. PRINTER SETUP & SCALING",
+                [
+                    ("Software Selection:", "Always open the pattern PDF in <b>Adobe Acrobat Reader</b> (free for Mac and PC). Avoid printing directly from web browsers (Chrome/Safari), which apply non-standard margins."),
+                    ("Scale at 100% Actual Size:", "In the print dialog, select <b>'Actual Size'</b> or set Custom Scale to exactly <b>100%</b>. Never select 'Fit to Printable Area' or 'Shrink Oversized Pages'."),
+                    ("Paper Orientation & Source:", "Choose <b>Auto Portrait/Landscape</b>. Select paper size matching your downloaded ZIP (A4 for international, US Letter for North America)."),
+                    ("Ruler Calibration:", "Use a rigid acrylic or steel ruler to check the 4\" x 4\" square. Even a 2% scaling distortion shifts garment sizing by an entire dress size.")
+                ]
+            ),
+            (
+                "2. MULTI-SIZE LAYERS (ADOBE READER)",
+                [
+                    ("Print Only Your Size:", "Our pattern files feature embedded <b>OCG Layers</b>. You can isolate and print exclusively your target size, eliminating confusing overlapping lines and saving printer ink."),
+                    ("Locate the Layers Panel:", "In Adobe Reader, click the <b>Layers Icon</b> (resembling two stacked sheets of paper) located on the left-hand navigation sidebar."),
+                    ("Manage Visibility:", "Click the <b>eye icon</b> next to each size to toggle visibility. Uncheck all sizes you do not need, leaving only your chosen size visible."),
+                    ("Keep Calibration Active:", "Always keep the <b>'Calibration Square & Grid'</b> layer checked ON so alignment markers and tile borders print clearly on every sheet.")
+                ]
+            ),
+            (
+                "3. TILING & ASSEMBLY (A4 / US LETTER)",
+                [
+                    ("Sequential Coordinate System:", "Each tiled sheet is indexed with clean row and column coordinates (e.g., <b>Tile 1A, 1B, 1C</b> in Row 1; <b>Tile 2A, 2B, 2C</b> in Row 2)."),
+                    ("Trimming the Borders:", "Trim away the top and left printed border margins along the designated scissor cutting line. Alternatively, fold cleanly along the border line."),
+                    ("Matching Alignment Diamonds:", "Align the circular or diamond reference marks between adjacent tiles until they form a continuous, unbroken geometry."),
+                    ("Tape Securely on Flat Surface:", "Assemble on a hard, clean table or hard floor using transparent scotch tape. Tape joins across the seams before cutting out the pattern pieces.")
+                ]
+            ),
+            (
+                "4. FABRIC PREPARATION & GRAINLINE",
+                [
+                    ("Pre-Wash & Steam Shrinkage:", "Pre-treat your suiting fabric exactly as you plan to launder the finished trousers. Fluid crepe, Tencel, and viscose blends often shrink <b>3% to 6%</b> on first steam pressing."),
+                    ("True Grainline Alignment:", "The vertical grainline arrow on each pattern piece MUST lie exactly parallel to the fabric selvedge. Measure from both arrow tips to the edge to confirm."),
+                    ("Prevent Twisted Legs:", "Wide-leg palazzo silhouettes require absolute grainline precision. Cutting even 2° off-grain will cause trouser legs to torque and twist inward around the calf."),
+                    (f"Built-in Seam Allowances:", f"Standard <b>{self.spec.seam_allowance_cm:.1f} cm (3/8 in)</b> seam allowance is included on all edges. Bottom hem includes a generous <b>{self.spec.hem_allowance_cm:.1f} cm ({self.spec.hem_allowance_cm/2.54:.1f} in)</b> fold-up hem.")
+                ]
+            )
         ]
 
-        box_w = (CONTENT_W - 14) / 2.0
-        box_h = 135.0
-        for idx, (b_title, b_points) in enumerate(chk_cols):
-            col = idx % 2
-            row = idx // 2
-            bx = M_L + col * (box_w + 14)
-            by = y - row * (box_h + 16)
+        p_style_body = ParagraphStyle("CardBullet", fontName="Poppins", fontSize=6.9, leading=9.8, textColor=TEXT_BODY)
 
-            c.saveState()
+        for idx, (c_title, c_bullets) in enumerate(card_data):
+            col_c = idx % 2
+            row_c = idx // 2
+            bx = M_L + (col_c * (card_w + card_gap))
+            by = y_cur - (row_c * (card_h + card_gap))
+
             c.setFillColor(CONTAINER_BG)
             c.setStrokeColor(BORDER_SUBTLE)
             c.setLineWidth(0.8)
-            c.roundRect(bx, by - box_h, box_w, box_h, 6, fill=1, stroke=1)
+            c.roundRect(bx, by - card_h, card_w, card_h, 8, fill=1, stroke=1)
 
-            c.setFont("Poppins-Bold", 8.8)
-            c.setFillColor(BURGUNDY)
-            c.drawString(bx + 12, by - 16, b_title)
+            c.setFont("Poppins-Bold", 8.2)
+            c.setFillColor(self.accent_color)
+            c.drawString(bx + 14, by - 18, c_title)
 
-            by_pt = by - 32
-            for pt in b_points:
-                p_pt = Paragraph(f"• {pt}", ParagraphStyle(f"Pt_{idx}", fontName="Poppins", fontSize=7.4, leading=10.6, textColor=TEXT_BODY))
-                pw, ph = p_pt.wrap(box_w - 24, 70)
-                p_pt.drawOn(c, bx + 12, by_pt - ph)
-                by_pt -= (ph + 6)
-            c.restoreState()
+            c.setStrokeColor(self.accent_muted)
+            c.setLineWidth(0.5)
+            c.line(bx + 14, by - 24, bx + card_w - 14, by - 24)
 
-        y = y - 2 * (box_h + 16) - 10
-        self._draw_tip_box(c, y, "Gold Standard Cutting Advice",
-                           "Never cut along the pattern line without double-checking the grainline orientation. Placing pieces off-grain causes legs to twist around the calves during wear.")
+            cur_by = by - 36
+            for b_heading, b_text in c_bullets:
+                c.setFillColor(self.accent_color)
+                c.rect(bx + 14, cur_by - 5.5, 3, 3, fill=1, stroke=0)
+
+                full_b_text = f"<b>{b_heading}</b> {b_text}"
+                p_b = Paragraph(full_b_text, p_style_body)
+                pw, ph = p_b.wrap(card_w - 32, 70)
+                p_b.drawOn(c, bx + 22, cur_by - ph)
+                cur_by -= (ph + 7.5)
+
+        y_cur = y_cur - (2 * card_h) - card_gap - 14
+
+        # Bottom Tip Banner
+        tip_h = 44.0
+        c.setFillColor(CONTAINER_BG)
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(M_L, y_cur - tip_h, CONTENT_W, tip_h, 6, fill=1, stroke=1)
+
+        c.setFillColor(self.accent_color)
+        c.rect(M_L, y_cur - tip_h, 4.0, tip_h, fill=1, stroke=0)
+
+        c.setFont("Poppins-Bold", 7.6)
+        c.setFillColor(self.accent_color)
+        c.drawString(M_L + 14, y_cur - 15, "PRO-TAILOR TIP: A0 COPYSHOP & PROJECTOR ALTERNATIVES")
+
+        c.setFont("Poppins", 6.8)
+        c.setFillColor(TEXT_BODY)
+        c.drawString(M_L + 14, y_cur - 27, "Prefer to skip taping? Take the A0 PDF file to your local copyshop or use an online blueprint printing service.")
+        c.drawString(M_L + 14, y_cur - 37, "If using a sewing projector, open the dedicated Projector file with 100% zoom and calibrate using the 1\" & 5 cm high-contrast grid.")
+
         c.showPage()
 
         # =====================================================================
