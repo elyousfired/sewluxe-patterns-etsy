@@ -62,6 +62,10 @@ Whenever building a sewing pattern product package for Etsy (e.g. Odette Vest, C
    - **Phase 1**: Market research & 1:1 Technical Flat Sketch + Photorealistic Editorial Photoshoot (3 poses).
    - **Phase 2**: PatternFast & Tailornova batch export (unlocked only after Sub-Step 0.4 A4-First audit passes): all 13–15 sizes x 3 formats (A4, US Letter, A0) = 39–45 PDFs. White-label to `SewLuxePatterns` with strict 4x4 in calibration square.
    - **Phase 3**: 16-page Luxury Booklet PDF compiled via ReportLab (`Lora` + `Poppins`, real size tables, fabric nesting, clickable QR video links on page 8, step panels 9–15, 360° Fit Gallery on page 16).
+     - **Mandatory Page-by-Page Interactive Verification Gate (قاعدة التدقيق والموافقة التفاعلية صفحة بصفحة)**:
+       - The agent MUST NEVER compile all 16 pages at once without showing each page.
+       - Build and render each page individually (starting with Page 1: Cover), present the high-res render to the user, and **WAIT for explicit user 'OK' / approval before proceeding to the next page**!
+       - Strict sequence: Page 1 Render $\rightarrow$ Wait for User OK $\rightarrow$ Page 2 Render $\rightarrow$ Wait for User OK $\rightarrow$ ... up to Page 16 $\rightarrow$ Final Linter Gate.
    - **Phase 3.5: Mandatory Automated Pre-Flight PDF Linter Gate (`sewluxe_booklet_linter.py`)**:
      - **CRITICAL CI/CD GATE**: MUST execute automated linter on compiled 16-page booklet PDF before presenting to user.
      - Verifies:

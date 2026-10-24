@@ -59,8 +59,12 @@ Whenever building a sewing pattern product package for Etsy:
 - All sizes (00-24 / 32-56) across 3 formats (A4, US Letter, A0).
 - White-label to `SewLuxePatterns` with strict 4x4 in (10x10 cm) calibration test square.
 
-### Phase 3: 16-page Luxury Booklet PDF & Automated Pre-Flight Linter Gate
+### Phase 3: 16-page Luxury Booklet PDF & Mandatory Page-by-Page Interactive Verification Gate
 - Compiled via ReportLab (`Lora` + `Poppins`, real size tables, fabric nesting, clickable QR video links on page 8, step panels 9–15, 360° Fit Gallery on page 16).
+- **Mandatory Page-by-Page Interactive Verification Gate (قاعدة التدقيق والموافقة التفاعلية صفحة بصفحة)**:
+  - When building the 16-page booklet, the agent **MUST NEVER compile all 16 pages and present them all at once** without intermediate review.
+  - The agent MUST build and render each page individually (starting with Page 1: Cover), present the high-resolution render directly to the user in chat, and **MUST WAIT for the user's explicit 'OK' / approval before proceeding to the next page**!
+  - Strict sequence: Page 1 Render $\rightarrow$ Wait for User OK $\rightarrow$ Page 2 Render $\rightarrow$ Wait for User OK $\rightarrow$ ... $\rightarrow$ Page 16 Render $\rightarrow$ Final 16-Page Compilation & Linter Gate.
 - **Mandatory Pre-Flight PDF Linter (`sewluxe_booklet_linter.py`)**:
   - Verifies zero corrupted fraction bugs (`0/0"`), zero text collision typos (`trousersece`), and zero missing numbers.
   - Finished garment chart math sanity via `sewluxe_math_engine.py`.
