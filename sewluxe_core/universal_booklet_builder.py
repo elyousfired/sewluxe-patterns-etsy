@@ -1137,7 +1137,7 @@ class UniversalBookletBuilder:
         c.drawString(M_L, y, "SEWING ORDER AT A GLANCE (ROADMAP TO PAGES 9–15)")
 
         y -= 14
-        sow = [160.0, 363.28]  # Sum = 523.28 pt
+        sow = [180.0, 343.28]  # Sum = 523.28 pt
 
         c.setFillColor(self.accent_color)
         c.roundRect(M_L, y - 13.5, sum(sow), 13.5, 3, fill=1, stroke=0)
@@ -1156,7 +1156,10 @@ class UniversalBookletBuilder:
 
             c.setFont("Poppins-Bold", 6.5)
             c.setFillColor(CHARCOAL)
-            c.drawString(M_L + 8, y - 9.5, f"Step {s_data['step']}: {s_data['title']}")
+            step_t = f"Step {s_data['step']}: {s_data['title']}"
+            if s_data['step'] == 7:
+                step_t = "Step 7: Waistband Attachment & Hem"
+            c.drawString(M_L + 8, y - 9.5, step_t)
 
             c.setFont("Poppins", 6.4)
             c.setFillColor(TEXT_BODY)
