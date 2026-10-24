@@ -732,31 +732,61 @@ class UniversalBookletBuilder:
         # PAGE 4: SIZE CHARTS & MEASUREMENTS
         # =====================================================================
         self._draw_chrome(c, 4)
-        y = self._draw_section_header(c, "CHOOSE YOUR SIZE", "Size Charts & Measurements")
+
+        # Page Border Frame in Garment Accent Color
+        frame_margin = 15.0
+        c.setStrokeColor(self.accent_color)
+        c.setLineWidth(1.2)
+        c.roundRect(frame_margin, frame_margin, W - (frame_margin * 2), H - (frame_margin * 2), 10, fill=0, stroke=1)
+
+        inner_margin = 18.5
+        c.setStrokeColor(self.accent_muted)
+        c.setLineWidth(0.5)
+        c.roundRect(inner_margin, inner_margin, W - (inner_margin * 2), H - (inner_margin * 2), 7, fill=0, stroke=1)
+
+        y = self._draw_section_header(c, "CHOOSE YOUR SIZE", "Body Size Charts & Measurements")
+
+        # Explanatory Ease Guide Bar
+        ease_bar_h = 32.0
+        c.setFillColor(colors.HexColor("#EAF1F2"))
+        c.setStrokeColor(self.accent_color)
+        c.setLineWidth(0.8)
+        c.roundRect(M_L, y - ease_bar_h, CONTENT_W, ease_bar_h, 6, fill=1, stroke=1)
+
+        c.setFont("Poppins-Bold", 7.0)
+        c.setFillColor(self.accent_color)
+        c.drawString(M_L + 10, y - 12, "DESIGN EASE SPECIFICATION:")
+
+        c.setFont("Poppins", 6.8)
+        c.setFillColor(TEXT_BODY)
+        c.drawString(M_L + 124, y - 12, "Waist Ease: +1.5 cm (+5/8\") for breathing comfort  |  Hip Ease: +3.0 cm (+1 1/4\") for fluid contour")
+        c.drawString(M_L + 10, y - 23, "• If between sizes, choose according to your natural waist measurement, as the wide palazzo silhouette allows generous hip ease.")
+
+        y_cur = y - ease_bar_h - 14
 
         # Table 1: Body Measurements
-        c.setFont("Poppins-Bold", 8.8)
-        c.setFillColor(BURGUNDY)
+        c.setFont("Poppins-Bold", 8.2)
+        c.setFillColor(self.accent_color)
         ute_tables = self.engine.generate_size_tables()
         if self.spec.size_standard == "PATTERNFAST_XXS_10XL":
-            c.drawString(M_L, y, "BODY SIZE CHART (PATTERNFAST / EUROPEAN STANDARD)")
+            c.drawString(M_L, y_cur, "TABLE 1: BODY SIZE CHART (PATTERNFAST / EUROPEAN STANDARD)")
             b_heads = ["SIZE", "EU CODE", "BUST (CM)", "WAIST (CM)", "HIPS (CM)", "WAIST (IN)", "HIPS (IN)"]
         else:
-            c.drawString(M_L, y, "BODY SIZE CHART (ALVANON NORTH AMERICA STANDARD)")
+            c.drawString(M_L, y_cur, "TABLE 1: BODY MEASUREMENTS (ALVANON NORTH AMERICA STANDARD)")
             b_heads = ["US SIZE", "LETTER", "BUST (CM)", "WAIST (CM)", "HIPS (CM)", "WAIST (IN)", "HIPS (IN)"]
-        y -= 14
+        y_cur -= 14
 
-        b_widths = [55, 45, 65, 75, 75, 75, 95]
+        b_widths = [60, 50, 70, 75, 75, 93, 100]  # Sum = 523 pt
 
-        c.setFillColor(TABLE_HEAD)
-        c.rect(M_L, y - 13, sum(b_widths), 13, fill=1, stroke=0)
-        c.setFont("Poppins-Bold", 6.5)
+        c.setFillColor(self.accent_color)
+        c.roundRect(M_L, y_cur - 13.5, sum(b_widths), 13.5, 3, fill=1, stroke=0)
+        c.setFont("Poppins-Bold", 6.6)
         c.setFillColor(WHITE)
         cur_x = M_L
         for h_txt, hw in zip(b_heads, b_widths):
-            c.drawString(cur_x + 6, y - 9.5, h_txt)
+            c.drawString(cur_x + 6, y_cur - 10, h_txt)
             cur_x += hw
-        y -= 13
+        y_cur -= 13.5
 
         body_rows = [
             (
@@ -770,39 +800,44 @@ class UniversalBookletBuilder:
             )
             for r in ute_tables["body"]
         ]
-        row_h = 9.5 if len(body_rows) > 13 else 11.0
+        row_h = 10.8
         for r_idx, r_data in enumerate(body_rows):
             bg = TABLE_ALT if r_idx % 2 == 1 else WHITE
             c.setFillColor(bg)
-            c.rect(M_L, y - row_h, sum(b_widths), row_h, fill=1, stroke=0)
-            c.setFont("Poppins", 6.0 if len(body_rows) > 13 else 6.2)
-            c.setFillColor(TEXT_BODY)
+            c.rect(M_L, y_cur - row_h, sum(b_widths), row_h, fill=1, stroke=0)
             cur_x = M_L
-            for val, hw in zip(r_data, b_widths):
-                c.drawString(cur_x + 6, y - (row_h - 3.0), val)
+            for c_idx, (val, hw) in enumerate(zip(r_data, b_widths)):
+                if c_idx == 0:
+                    c.setFont("Poppins-Bold", 6.3)
+                    c.setFillColor(CHARCOAL)
+                else:
+                    c.setFont("Poppins", 6.3)
+                    c.setFillColor(TEXT_BODY)
+                c.drawString(cur_x + 6, y_cur - (row_h - 3.2), val)
                 cur_x += hw
-            y -= row_h
+            y_cur -= row_h
 
-        y -= 12
+        y_cur -= 14
+
         # Table 2: Finished Garment Measurements
-        c.setFont("Poppins-Bold", 8.8)
-        c.setFillColor(BURGUNDY)
-        c.drawString(M_L, y, "FINISHED GARMENT MEASUREMENTS")
-        y -= 14
+        c.setFont("Poppins-Bold", 8.2)
+        c.setFillColor(self.accent_color)
+        c.drawString(M_L, y_cur, "TABLE 2: FINISHED GARMENT MEASUREMENTS (AFTER SEWING)")
+        y_cur -= 14
 
         size_col_name = "SIZE" if self.spec.size_standard == "PATTERNFAST_XXS_10XL" else "US SIZE"
-        f_heads = [size_col_name, "FINISHED WAIST", "FINISHED HIPS*", "LEG SWEEP (CIRC.)", "INSEAM / OUTSEAM"]
-        f_widths = [60, 100, 100, 110, 115]
+        f_heads = [size_col_name, "FINISHED WAIST", "FINISHED HIPS*", "LEG SWEEP (CIRCUMFERENCE)", "INSEAM / OUTSEAM"]
+        f_widths = [60, 105, 105, 120, 133]  # Sum = 523 pt
 
-        c.setFillColor(TABLE_HEAD)
-        c.rect(M_L, y - 13, sum(f_widths), 13, fill=1, stroke=0)
-        c.setFont("Poppins-Bold", 6.5)
+        c.setFillColor(self.accent_color)
+        c.roundRect(M_L, y_cur - 13.5, sum(f_widths), 13.5, 3, fill=1, stroke=0)
+        c.setFont("Poppins-Bold", 6.6)
         c.setFillColor(WHITE)
         cur_x = M_L
         for h_txt, hw in zip(f_heads, f_widths):
-            c.drawString(cur_x + 6, y - 9.5, h_txt)
+            c.drawString(cur_x + 6, y_cur - 10, h_txt)
             cur_x += hw
-        y -= 13
+        y_cur -= 13.5
 
         fin_rows = [
             (
@@ -814,23 +849,50 @@ class UniversalBookletBuilder:
             )
             for r in ute_tables["finished"]
         ]
-        f_row_h = 9.5 if len(fin_rows) > 13 else 11.0
+        f_row_h = 10.8
         for r_idx, r_data in enumerate(fin_rows):
             bg = TABLE_ALT if r_idx % 2 == 1 else WHITE
             c.setFillColor(bg)
-            c.rect(M_L, y - f_row_h, sum(f_widths), f_row_h, fill=1, stroke=0)
-            c.setFont("Poppins", 6.0 if len(fin_rows) > 13 else 6.2)
-            c.setFillColor(TEXT_BODY)
+            c.rect(M_L, y_cur - f_row_h, sum(f_widths), f_row_h, fill=1, stroke=0)
             cur_x = M_L
-            for val, hw in zip(r_data, f_widths):
-                c.drawString(cur_x + 6, y - (f_row_h - 3.0), val)
+            for c_idx, (val, hw) in enumerate(zip(r_data, f_widths)):
+                if c_idx == 0:
+                    c.setFont("Poppins-Bold", 6.3)
+                    c.setFillColor(CHARCOAL)
+                else:
+                    c.setFont("Poppins", 6.3)
+                    c.setFillColor(TEXT_BODY)
+                c.drawString(cur_x + 6, y_cur - (f_row_h - 3.2), val)
                 cur_x += hw
-            y -= f_row_h
+            y_cur -= f_row_h
 
-        y -= 8
-        c.setFont("Poppins-Italic", 6.5)
-        c.setFillColor(TEXT_MUTED)
-        c.drawString(M_L, y, "* Finished waist and hip circumferences measured with all shaping elements closed. Zero 0/0 fraction bugs.")
+        y_cur -= 12
+
+        # Footnote & Custom Fitting Advisory Box
+        note_h = 56.0
+        c.setFillColor(CONTAINER_BG)
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(M_L, y_cur - note_h, CONTENT_W, note_h, 6, fill=1, stroke=1)
+
+        c.setFillColor(self.accent_color)
+        c.rect(M_L, y_cur - note_h, 3.5, note_h, fill=1, stroke=0)
+
+        c.setFont("Poppins-Bold", 7.2)
+        c.setFillColor(self.accent_color)
+        c.drawString(M_L + 12, y_cur - 14, "* MEASUREMENT NOTES & LENGTH ADJUSTMENTS:")
+
+        note_text = (
+            "• <b>Finished Dimensions:</b> Finished waist and hip circumferences are measured with the 4 vertical darts stitched and left invisible zipper closed.<br/>"
+            "• <b>Floor-Length Inseam:</b> Standard inseam is drafted at <b>78.0 cm (30 3/4 in)</b> for a 168 cm (5'6\") height to cascade gracefully over shoes.<br/>"
+            "• <b>Lengthening / Shortening:</b> To alter length, cut along the printed 'Lengthen / Shorten Lines' at mid-thigh on Front and Back pieces before cutting fabric."
+        )
+        p_note = Paragraph(note_text, ParagraphStyle(
+            "NoteStyle", fontName="Poppins", fontSize=6.8, leading=10.2, textColor=TEXT_BODY
+        ))
+        pw, ph = p_note.wrap(CONTENT_W - 24, note_h - 16)
+        p_note.drawOn(c, M_L + 12, y_cur - 16 - ph)
+
         c.showPage()
 
         # =====================================================================
