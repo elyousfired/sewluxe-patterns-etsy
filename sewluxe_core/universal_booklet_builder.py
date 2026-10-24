@@ -944,7 +944,7 @@ class UniversalBookletBuilder:
             req_rows = [
                 ("Sizes US 00 – 08 (XXS to M)", f"{yardage_data['00_08']['60_m']:.2f} m ({yardage_data['00_08']['60_yd']:.2f} yards)", f"{yardage_data['00_08']['45_m']:.2f} m ({yardage_data['00_08']['45_yd']:.2f} yards)"),
                 ("Sizes US 10 – 14 (M to L)", f"{yardage_data['10_14']['60_m']:.2f} m ({yardage_data['10_14']['60_yd']:.2f} yards)", f"{yardage_data['10_14']['45_m']:.2f} m ({yardage_data['10_14']['45_yd']:.2f} yards)"),
-                ("Sizes US 16 – 22 (XL to 3XL)", f"{yardage_data['16_22']['60_m']:.2f} m ({yardage_data['16_22']['60_yd']:.2f} yards)", f"{yardage_data['16_22']['45_m']:.2f} m ({yardage_data['16_22']['45_yd']:.2f} yards)"),
+                ("Sizes US 16 – 22 (XL to 4XL)", f"{yardage_data['16_22']['60_m']:.2f} m ({yardage_data['16_22']['60_yd']:.2f} yards)", f"{yardage_data['16_22']['45_m']:.2f} m ({yardage_data['16_22']['45_yd']:.2f} yards)"),
             ]
 
         r_row_h = 13.5
