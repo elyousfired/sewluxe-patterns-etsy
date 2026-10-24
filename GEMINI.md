@@ -19,7 +19,13 @@ Whenever building a sewing pattern product package for Etsy (e.g. Odette Vest, C
    - **CRITICAL GATE & SEQUENTIAL ORDER (The Golden Sequence)**:
      1. **Sub-Step 0.1: Target Competitor Visual & Anatomical Forensics (The First Sacred Step)**:
         - BEFORE touching PatternFast or Tailornova, thoroughly scrutinize the Etsy target design's real photos and flat sketches.
-        - Identify and lock the garment's true DNA: front shaping (flat/darted vs pleated), closure (side invisible zip vs front fly vs pull-on elastic), pockets (slant vs in-seam vs none), and back (clean vs welt vs yoke).
+        - **DNA Structural Lock**: Front shaping (flat/darted vs pleated), closure (side invisible zip vs front fly vs pull-on elastic), pockets (slant vs in-seam vs none), and back (clean vs welt vs yoke).
+        - **Fabric & Material Lock (Strict Non-Assumption Rule)**: NEVER assume or substitute default fabrics (e.g. casual linen). Scrutinize physical textile behavior:
+          * If liquid waterfall drape with soft matte-satin sheen -> Heavy Fluid Silk-Viscose Crepe / Tencel (ZERO linen slub, ZERO wrinkles).
+          * If visible weave slub with natural wrinkles -> Washed linen.
+          * If structured body -> Wool / Twill.
+        - **Exact Colorway Lock**: Primary photoshoot MUST match the winning benchmark colorway (e.g. Deep Petrol Teal) to maintain market visual parity.
+        - **Zero-Obscuring Styling**: When garments feature high-waist detailing, clean front rise seams, or waist darts, styling MUST NOT conceal them (use cropped bandeau / crop top / bare midriff so waistband, darts, and rise seams are 100% visible and uncluttered).
      2. **Sub-Step 0.2: Component-Locked CAD Configuration in PatternFast/Tailornova**:
         - Configure PatternFast and Tailornova using the exact locked DNA components from Sub-Step 0.1, preventing mismatched default templates.
      3. **Sub-Step 0.3: Deep Cross-Examination & Error Hunter Protocol**:

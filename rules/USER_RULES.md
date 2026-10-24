@@ -23,7 +23,13 @@ Whenever building a sewing pattern product package for Etsy:
 - **The Golden Sequence**:
   1. **Sub-Step 0.1: Target Competitor Visual & Anatomical Forensics**:
      - Thoroughly scrutinize the Etsy target design's real photos and flat sketches.
-     - Identify and lock the garment's true DNA: front shaping (flat/darted vs pleated), closure (side invisible zip vs front fly vs pull-on elastic), pockets (slant vs in-seam vs none), and back (clean vs welt vs yoke).
+     - **DNA Structural Lock**: Front shaping (flat/darted vs pleated), closure (side invisible zip vs front fly vs pull-on elastic), pockets (slant vs in-seam vs none), and back (clean vs welt vs yoke).
+     - **Fabric & Material Lock (Strict Non-Assumption Rule)**: NEVER assume or substitute default fabrics (e.g. casual linen). Scrutinize physical textile behavior:
+       * If liquid waterfall drape with soft matte-satin sheen $\rightarrow$ Heavy Fluid Silk-Viscose Crepe / Tencel (ZERO linen slub, ZERO wrinkles).
+       * If visible weave slub with natural wrinkles $\rightarrow$ Washed linen.
+       * If structured body $\rightarrow$ Wool / Twill.
+     - **Exact Colorway Lock**: Primary photoshoot MUST match the winning benchmark colorway (e.g. Deep Petrol Teal) to maintain market visual parity.
+     - **Zero-Obscuring Styling**: When garments feature high-waist detailing, clean front rise seams, or waist darts, styling MUST NOT conceal them (use cropped bandeau / crop top / bare midriff so waistband, darts, and rise seams are 100% visible and uncluttered).
   2. **Sub-Step 0.2: Component-Locked CAD Configuration in PatternFast/Tailornova**:
      - Configure PatternFast and Tailornova using the exact locked DNA components from Sub-Step 0.1, preventing mismatched default templates.
      - Bypasses random AI Designer (/ai-designer) and directly controls the standard CAD Garment Designer (/designer via /new-design).
@@ -41,7 +47,8 @@ Whenever building a sewing pattern product package for Etsy:
      - **HARD STOP**: MUST WAIT for explicit user confirmation/approval before proceeding to Phase 1! Never start production on a defective pattern.
 
 ### Phase 1: Photorealistic Editorial Photoshoot (3 poses) + 1:1 Technical Flat Sketch
-- Square 1:1 editorial catalogue photography matching the approved CAD pattern pieces 1:1 (Front, Side, Back).
+- Square 1:1 editorial catalogue photography matching the approved CAD pattern pieces and target reference image 1:1 (Front, Side, Back).
+- Strictly enforce the locked Fabric, Colorway, and Zero-Obscuring Styling rules from Sub-Step 0.1.
 - Clean, crisp 1800x1800 technical flat sketch with Front and Back views side-by-side at 1.0 scale.
 
 ### Phase 2: PatternFast & Tailornova Batch Export

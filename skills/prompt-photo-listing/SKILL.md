@@ -52,6 +52,14 @@ Write two lists from the sketch/pattern:
 - If the new garment is close to an older one (same collar, same closure), name the difference in the prompt with capital NO (e.g. Audrey vs Vivienne: "NO peplum, NO ruffle, NO flared skirt at the waist: the jacket continues smoothly in one piece from the bust to the hem."). Repeat it in every prompt.
 - Its color must be clearly different from every listing in the table, and especially from the most similar garment (not burgundy next to plum, not olive-teal next to teal).
 
+## Step 1c: Competitor Reference & Fabric Forensics (Mandatory Non-Assumption Rule)
+- **1:1 Fabric & Textile Lock**: NEVER assume or substitute default fabrics (e.g. casual linen slub). Strictly scrutinize the target Etsy photo for physical textile behavior:
+  * Liquid waterfall drape with soft matte-satin sheen $\rightarrow$ Heavy Fluid Silk-Viscose Crepe / Tencel (ZERO linen slub, ZERO wrinkles).
+  * Visible weave slub with natural relaxed creases $\rightarrow$ Washed pure linen.
+  * Stiff, structured body $\rightarrow$ Cotton twill, canvas, or suiting wool.
+- **1:1 Exact Colorway Lock**: Photoshoot 1-3 MUST match the winning benchmark listing's exact colorway (e.g. Deep Petrol Teal) to maintain proven market appeal.
+- **Zero-Obscuring Styling**: When the garment features high-waisted tailoring, clean front rise seams, or vertical waist darts, styling MUST NEVER cover them (use cropped bandeau / crop top / bare midriff so the entire waistband, darts, and front rise seam are 100% visible and unobscured).
+
 ## Wording that works on the first try
 Always include these sentences, adapted to the garment:
 - For any garment whose front has no vertical seams: "The front panels are one smooth continuous piece of fabric below the bust darts: NO vertical seams, NO princess lines, NO waist darts." (Plain "no princess seams" was not enough: faint vertical lines kept appearing.)
