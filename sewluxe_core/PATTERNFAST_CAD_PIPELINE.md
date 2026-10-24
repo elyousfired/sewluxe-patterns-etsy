@@ -51,6 +51,51 @@ This document outlines the standard operating procedure (SOP) for configuring an
   2. Resets the Back view `transform` (normalizing scale from $0.7$ to $1.0$).
   3. Renders both views side-by-side at 300 DPI on a clean $1800 \times 1800$ white canvas.
 
-### Step 5: Save & Export
-- Click `button.btn.primary.small.save` (`Save Design`) to persist into the user's collection.
-- Trigger `Download` to export pattern files (`PDF`, `PDF-TAPE`, `DXF-AAMA`, `PLT`).
+### Step 5: Save & Persistent Design ID
+- Click `button.btn.primary.small.save` (`Save Design`) or `POST /api/designs` to persist into the user's collection.
+- PatternFast returns a persistent `Design ID` (e.g. `10593`).
+- **Instant Reload Flow**: Instead of re-doing steps 1-3 (25s), navigate directly to `https://patternfast.com/designer/{design_id}` which loads in ~3 seconds.
+
+---
+
+## 3. High-Speed Pattern Download Engine
+
+### The PDF Sub-Format Selector Sequence
+In PatternFast's download modal, the Download button is disabled by default for `PDF` until a specific paper format is selected from the nested dropdown.
+
+**Automated Playwright Sequence**:
+1. Click toolbar Download:
+   ```python
+   page.locator("button.btn.secondary.small:has-text('Download')").first.click()
+   ```
+2. Expand the PDF info dropdown:
+   ```python
+   pdf_block = page.locator(".selected-block").filter(has_text="PDF").first
+   pdf_block.locator(".info").first.click()
+   ```
+3. Select paper format (`A4`, `LETTER`, `A0`):
+   ```python
+   page.locator(".base-dropdown__content__item").filter(has_text=format_name).first.click()
+   ```
+4. Confirm download button is enabled and trigger download:
+   ```python
+   with page.expect_download(timeout=60000) as dl_info:
+       page.locator(".download-pattern-modal button.btn.primary.one").first.click()
+   download = dl_info.value
+   download.save_as(target_path)
+   ```
+
+---
+
+## 4. Phase 0 Gate: A4-First Fast Audit Protocol
+Never download all 39-45 files across Letter and A0 until A4 is verified!
+1. Download reference size in **A4** (e.g. Size 4 / Size 8).
+2. **Page 1 Audit**: Test square calibration (10 cm x 10 cm / 4 in x 4 in).
+3. **Page 2 Audit**: Piece inventory & technical specifications:
+   - Pants Front (Cut 2 Mirrored)
+   - Pants Back (Cut 2 Mirrored)
+   - Waistband (Cut 1 Main, Cut 1 Interfacing)
+   - Technical closure specs (e.g. Left Side Invisible Zipper: 18.00 cm / 7 1/8 in)
+   - Zero ghost pieces (no fly shield, no welt pocket pieces).
+4. **Page 4 Audit**: Piece layout sanity & seam alignments.
+5. **Pre-Production Audit Report**: Present report in chat, **HARD STOP** for explicit user approval before Phase 1.

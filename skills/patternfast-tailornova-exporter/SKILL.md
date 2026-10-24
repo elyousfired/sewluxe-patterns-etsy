@@ -24,12 +24,21 @@ Goal: Given a garment design recipe (Category, Silhouette, Neckline/Collar, Clos
 
 ---
 
-## Saved Credentials, Persistent Browser Profile & Fast Batch Script
+## Saved Credentials, Persistent Browser Profile & Fast Batch Engine
 - **Credentials File**: `C:\Users\red1e\.gemini\config\skills\patternfast-tailornova-exporter\.credentials.json`
-  - Active PatternFast account: `lefavoy394@proguidex.com`
-- **Persistent Browser Profile**: `C:\Users\red1e\.gemini\config\skills\patternfast-tailornova-exporter\browser_profile_active`
-- **Fast 30-Second Batch Exporter Script**: `C:\Users\red1e\.gemini\config\skills\patternfast-tailornova-exporter\download_all_template.py`
-  - **ALWAYS use this script as your template!** Instead of slowly clicking the UI for 39 downloads, this script logs into PatternFast via Playwright, calls `/orders/edit` + `/designs/pattern` across all 13 sizes (`US 00–22`) and 3 formats (`A4`, `US Letter`, `A0`) + White-Label cleaning in one automated pass, and fetches Tailornova's `/designs/instructions` JSON + Illustrator SVG diagrams directly via `urllib.request` in ~35 seconds total!
+  - Active PatternFast primary account: `berop37791@playfine.com` (`Elyousfi1993@`)
+  - Backup account: `lefavoy394@proguidex.com`
+- **Persistent Browser Profile**: `C:\Users\red1e\.gemini\antigravity\scratch\etsy\browser_profile_berop`
+- **Fast 3-Second Loader & Core CAD Engine**: `C:\Users\red1e\.gemini\antigravity\scratch\etsy\sewluxe_core\patternfast_cad_engine.py`
+  - Once a design is created and saved (`POST /api/designs`), PatternFast assigns a persistent `Design ID` (e.g. `10593`).
+  - **Instant Reload**: Navigating directly to `https://patternfast.com/designer/{design_id}` bypasses the 25s setup flow and loads the workspace in ~3 seconds.
+- **Fast Pattern Download Selector Sequence**:
+  - In PatternFast's Download modal, the Download button is disabled by default for PDF because PDF requires selecting a sub-format.
+  - The exact automated selector sequence is:
+    1. Click toolbar Download: `page.locator("button.btn.secondary.small:has-text('Download')").first.click()`
+    2. Expand PDF format dropdown: `page.locator(".selected-block").filter(has_text="PDF").locator(".info").first.click()`
+    3. Select target paper format: `page.locator(".base-dropdown__content__item").filter(has_text=format_name).first.click()` (`A4`, `LETTER`, or `A0`)
+    4. Confirm download button is enabled and trigger: `with page.expect_download() as dl: page.locator(".download-pattern-modal button.btn.primary.one").first.click()`
 
 ---
 

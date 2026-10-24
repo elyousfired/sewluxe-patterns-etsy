@@ -16,7 +16,8 @@
 Whenever building a sewing pattern product package for Etsy (e.g. Odette Vest, Colette Trousers, Camille Coat, Margot Pants):
 
 1. **Phase 0: Mandatory Pre-Production CAD & Measurement Audit Gate (STOP & REPORT)**:
-   - **CRITICAL GATE & SEQUENTIAL ORDER (The Golden Sequence)**:
+   - **CRITICAL GATE & STRICT SEQUENTIAL ENFORCEMENT (قاعدة عدم تخطي المراحل أو العمل العشوائي)**:
+     Every garment project MUST strictly follow the sequential order below without skipping, shortcutting, or inventing details from head.
      1. **Sub-Step 0.1: Target Competitor Visual & Anatomical Forensics (The First Sacred Step)**:
         - BEFORE touching PatternFast or Tailornova, thoroughly scrutinize the Etsy target design's real photos and flat sketches.
         - **DNA Structural Lock**: Front shaping (flat/darted vs pleated), closure (side invisible zip vs front fly vs pull-on elastic), pockets (slant vs in-seam vs none), and back (clean vs welt vs yoke).
@@ -28,6 +29,7 @@ Whenever building a sewing pattern product package for Etsy (e.g. Odette Vest, C
         - **Zero-Obscuring Styling**: When garments feature high-waist detailing, clean front rise seams, or waist darts, styling MUST NOT conceal them (use cropped bandeau / crop top / bare midriff so waistband, darts, and rise seams are 100% visible and uncluttered).
      2. **Sub-Step 0.2: Component-Locked CAD Configuration in PatternFast/Tailornova**:
         - Configure PatternFast and Tailornova using the exact locked DNA components from Sub-Step 0.1, preventing mismatched default templates.
+        - Save Design permanently to collection (`POST /api/designs`) to obtain persistent `Design ID` for direct 3-second loading (`/designer/{design_id}`).
      3. **Sub-Step 0.3: Deep Cross-Examination & Error Hunter Protocol**:
         - Piece Inventory & Stray Marks: Confirm all required garment pieces are present (Front, Back, Waistband). Detect and purge ghost pieces (e.g., zipper fly shield on side-zip, welt pockets on clean back).
         - Seam-Line & Geometry Sanity: Verify matching seam lengths (Front Inseam == Back Inseam, Front Side Seam == Back Side Seam).
@@ -35,7 +37,8 @@ Whenever building a sewing pattern product package for Etsy (e.g. Odette Vest, C
         - Instructions vs. CAD Alignment & Diagram Sourcing Rule: Keep authentic Tailornova vectors where matching 1:1; use Custom Anatomical CAD only for contradictions/missing bespoke features.
         - Intelligent Fabric Yardage: Calculate true fabric requirements using physical garment geometry for 60" and 45" widths, scaling extended sizes (4XL–10XL) to avoid shortages.
      4. **Sub-Step 0.4: Mandatory A4-First Fast Audit & Correction Protocol (Zero Token/Time Waste)**:
-        - **A4-First Rule**: In the initial audit, correction, and verification phase, ALWAYS rely strictly on the **A4** format (single reference size, e.g. SIZE 0 / SIZE 8, or A4 overview) to inspect piece lists, calibration square, ghost pieces, and white-label branding.
+        - **A4-First Rule**: In the initial audit, correction, and verification phase, ALWAYS rely strictly on the **A4** format (single reference size, e.g. SIZE 0 / SIZE 4 / SIZE 8, or A4 overview) to inspect piece lists, calibration square, ghost pieces, and white-label branding.
+        - Use the proven 3-second download selector sequence: Click toolbar `Download` -> Click PDF `.info` dropdown -> Click `.base-dropdown__content__item` (`A4`) -> Click modal `Download`.
         - DO NOT waste time, tokens, or bandwidth downloading/processing all 39-45 files across US Letter and A0 until A4 is verified and confirmed 100% clean and correct.
         - Once A4 passes 100%, batch export for US Letter, A0, Multi-Size Layered, and Projector files is unlocked.
      5. **Sub-Step 0.5: Executive Pre-Production Audit Report & Mandatory Gate**:

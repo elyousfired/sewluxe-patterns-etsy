@@ -24,6 +24,12 @@ test_*.pdf
 *.html
 fetch_*.py
 etsy_listing_extracted.json
+01_market_research/dashboard/static/images/
+03_booklet_engine/audit_report.json
+06_sewing_tips_engine/orig_pages/
+06_sewing_tips_engine/preview_pages/
+06_sewing_tips_engine/test_*
+06_sewing_tips_engine/test_render/
 
 # Individual Garment Projects & Customer Packages (STRICTLY LOCAL ON PC - NEVER PUSH TO GIT)
 projects/
