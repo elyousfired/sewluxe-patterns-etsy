@@ -250,16 +250,25 @@ class UniversalBookletBuilder:
 
         photo_placed = False
         if assets_dir and os.path.exists(assets_dir):
-            for candidate in [
-                os.path.join(assets_dir, "01_Model_Photos", "vivienne_photo_01_front.jpg"),
-                os.path.join(assets_dir, "vivienne_photo_01_front.jpg"),
-                os.path.join(assets_dir, "01_Model_Photos", "trendy_photo_01_front.jpg"),
-                os.path.join(assets_dir, "trendy_photo_01_front.jpg"),
+            model_slug = self.spec.model_name.lower().split()[0]
+            candidates = [
+                os.path.join(assets_dir, "01_Model_Photos", f"{model_slug}_photo_01_front.jpg"),
+                os.path.join(assets_dir, f"{model_slug}_photo_01_front.jpg"),
+                os.path.join(assets_dir, "01_Model_Photos", f"{model_slug}_photo_01.jpg"),
+                os.path.join(assets_dir, f"{model_slug}_photo_01.jpg"),
                 os.path.join(assets_dir, "01_Model_Photos", f"{self.spec.silhouette}_photo_01.jpg"),
                 os.path.join(assets_dir, "model_photos", f"01_{self.spec.silhouette}_front.jpg"),
                 os.path.join(assets_dir, f"{self.spec.silhouette}_photo_01.jpg"),
                 os.path.join(assets_dir, f"01_{self.spec.silhouette}_pants.jpg"),
-            ]:
+            ]
+            # Dynamically scan model photos directory for front image
+            for sdir in [os.path.join(assets_dir, "01_Model_Photos"), assets_dir]:
+                if os.path.exists(sdir):
+                    for fn in sorted(os.listdir(sdir)):
+                        if fn.lower().endswith(('.jpg', '.jpeg', '.png')) and any(k in fn.lower() for k in ('01_front', 'photo_01', 'photo_1', 'front')):
+                            candidates.append(os.path.join(sdir, fn))
+
+            for candidate in candidates:
                 if os.path.exists(candidate):
                     c.drawImage(candidate, hx, hy, width=hero_sz, height=hero_sz, preserveAspectRatio=True)
                     photo_placed = True
@@ -332,14 +341,18 @@ class UniversalBookletBuilder:
         c.drawString(M_L, y, "Key Design & Tailoring Features")
         y -= 14
 
+        back_feat = "Clean pocketless back shaped with contoured waist shaping." if self.spec.back_pockets == "none" else f"Contoured back waist shaping with refined {self.spec.back_pockets.replace('_', ' ')}."
         features = [
             f"High-waisted tailored fit sitting cleanly at natural waistline.",
             f"Constructed with {self.spec.front_shaping.replace('_', ' ')} for authentic garment ease.",
-            f"Clean pocketless back shaped with contoured waist shaping.",
+            back_feat,
             f"Deep weighted {self.spec.hem_allowance_cm:.1f} cm ({self.spec.hem_allowance_cm/2.54:.1f} in) fold-up hem creating fluid waterfall break.",
             f"Standard {self.spec.seam_allowance_cm:.1f} cm (3/8 in) seam allowance included on all pattern edges.",
-            f"Refined {self.spec.belt_loops_count} belt loops (1.1 cm finished) tailored securely to waistband."
         ]
+        if self.spec.belt_loops_count > 0:
+            features.append(f"Refined {self.spec.belt_loops_count} belt loops (1.1 cm finished) tailored securely to waistband.")
+        else:
+            features.append("Clean seamless waistband with zero belt loops for an ultra-sleek minimalist profile.")
         for feat in features:
             y = self._draw_bullet(c, M_L, y, feat, CONTENT_W, font_size=7.6, leading=10.6)
 
@@ -616,7 +629,8 @@ class UniversalBookletBuilder:
 
         c.setFont("Poppins-Bold", 8.8)
         c.setFillColor(BURGUNDY)
-        c.drawString(M_L, y, "GARMENT PIECE INVENTORY (CLEAN POCKETLESS BACK)")
+        inv_title = "GARMENT PIECE INVENTORY (CLEAN POCKETLESS BACK)" if self.spec.back_pockets == "none" else f"GARMENT PIECE INVENTORY ({self.spec.back_pockets.replace('_', ' ').upper()})"
+        c.drawString(M_L, y, inv_title)
         y -= 14
 
         pw = [35, 140, 160, 150]
@@ -697,12 +711,13 @@ class UniversalBookletBuilder:
         c.drawString(rx, ry, "Understanding Pattern Markings")
         ry -= 14
 
+        back_desc_mark = "clean pocketless back" if self.spec.back_pockets == "none" else f"refined {self.spec.back_pockets.replace('_', ' ')}"
         markings = [
             ("Grainline Arrow", "Ensure pattern grainline is placed strictly parallel to fabric selvage."),
             ("Seam Allowance", f"All pieces include standard {self.spec.seam_allowance_cm:.1f} cm (3/8 in) seam allowance."),
             ("Hem Allowance", f"Deep {self.spec.hem_allowance_cm:.1f} cm ({self.spec.hem_allowance_cm/2.54:.1f} in) weighted hem for fluid drape."),
             ("Notches", "Single and double triangle notches indicate precise seam matching positions."),
-            ("Waist Shaping", f"Constructed with {self.spec.front_shaping.replace('_', ' ')} and clean pocketless back.")
+            ("Waist Shaping", f"Constructed with {self.spec.front_shaping.replace('_', ' ')} and {back_desc_mark}.")
         ]
         for title, desc in markings:
             ry = self._draw_bullet(c, rx, ry, f"<b>{title}:</b> {desc}", rw, font_size=7.2, leading=10.0)
@@ -895,48 +910,36 @@ class UniversalBookletBuilder:
         # Try to locate editorial photos or render CAD showcases
         photos_placed = False
         if assets_dir and os.path.exists(assets_dir):
-            cands_options = [
-                [
-                    os.path.join(assets_dir, "01_Model_Photos", "vivienne_photo_01_front.jpg"),
-                    os.path.join(assets_dir, "01_Model_Photos", "vivienne_photo_02_side.jpg"),
-                    os.path.join(assets_dir, "01_Model_Photos", "vivienne_photo_03_back.jpg")
-                ],
-                [
-                    os.path.join(assets_dir, "vivienne_photo_01_front.jpg"),
-                    os.path.join(assets_dir, "vivienne_photo_02_side.jpg"),
-                    os.path.join(assets_dir, "vivienne_photo_03_back.jpg")
-                ],
-                [
-                    os.path.join(assets_dir, "01_Model_Photos", "trendy_photo_01_front.jpg"),
-                    os.path.join(assets_dir, "01_Model_Photos", "trendy_photo_02_side.jpg"),
-                    os.path.join(assets_dir, "01_Model_Photos", "trendy_photo_03_back.jpg")
-                ],
-                [
-                    os.path.join(assets_dir, "trendy_photo_01_front.jpg"),
-                    os.path.join(assets_dir, "trendy_photo_02_side.jpg"),
-                    os.path.join(assets_dir, "trendy_photo_03_back.jpg")
-                ],
-                [
-                    os.path.join(assets_dir, f"{self.spec.silhouette}_photo_01.jpg"),
-                    os.path.join(assets_dir, f"{self.spec.silhouette}_photo_02.jpg"),
-                    os.path.join(assets_dir, f"{self.spec.silhouette}_photo_03.jpg")
-                ]
+            model_slug = self.spec.model_name.lower().split()[0]
+            trio_patterns = [
+                [f"{model_slug}_photo_01_front.jpg", f"{model_slug}_photo_02_side.jpg", f"{model_slug}_photo_03_back.jpg"],
+                [f"{model_slug}_photo_01.jpg", f"{model_slug}_photo_02.jpg", f"{model_slug}_photo_03.jpg"],
+                [f"{self.spec.silhouette}_photo_01.jpg", f"{self.spec.silhouette}_photo_02.jpg", f"{self.spec.silhouette}_photo_03.jpg"],
+                ["vivienne_photo_01_front.jpg", "vivienne_photo_02_side.jpg", "vivienne_photo_03_back.jpg"],
+                ["trendy_photo_01_front.jpg", "trendy_photo_02_side.jpg", "trendy_photo_03_back.jpg"]
             ]
-            for cands in cands_options:
-                if all(os.path.exists(p) for p in cands):
-                    photos_placed = True
-                    caps = ["1. FRONT VIEW", "2. 45° PROFILE", "3. BACK VIEW"]
-                    for i, (p_path, cap) in enumerate(zip(cands, caps)):
-                        gx = M_L + i * (gal_w + 10.0)
-                        gy = y - gal_h
-                        c.setFillColor(WHITE)
-                        c.rect(gx - 3, gy - 3, gal_w + 6, gal_h + 6, fill=1, stroke=0)
-                        c.drawImage(p_path, gx, gy, width=gal_w, height=gal_h, preserveAspectRatio=True)
-                        c.setFillColor(TABLE_HEAD)
-                        c.rect(gx, gy, gal_w, 14, fill=1, stroke=0)
-                        c.setFont("Poppins-Bold", 5.6)
-                        c.setFillColor(WHITE)
-                        c.drawCentredString(gx + gal_w/2.0, gy + 4.0, cap)
+            subdirs = [os.path.join(assets_dir, "01_Model_Photos"), assets_dir]
+            for sdir in subdirs:
+                if not os.path.exists(sdir):
+                    continue
+                for t in trio_patterns:
+                    cands = [os.path.join(sdir, fn) for fn in t]
+                    if all(os.path.exists(p) for p in cands):
+                        photos_placed = True
+                        caps = ["1. FRONT VIEW", "2. 45° PROFILE", "3. BACK VIEW"]
+                        for i, (p_path, cap) in enumerate(zip(cands, caps)):
+                            gx = M_L + i * (gal_w + 10.0)
+                            gy = y - gal_h
+                            c.setFillColor(WHITE)
+                            c.rect(gx - 3, gy - 3, gal_w + 6, gal_h + 6, fill=1, stroke=0)
+                            c.drawImage(p_path, gx, gy, width=gal_w, height=gal_h, preserveAspectRatio=True)
+                            c.setFillColor(TABLE_HEAD)
+                            c.rect(gx, gy, gal_w, 14, fill=1, stroke=0)
+                            c.setFont("Poppins-Bold", 5.6)
+                            c.setFillColor(WHITE)
+                            c.drawCentredString(gx + gal_w/2.0, gy + 4.0, cap)
+                        break
+                if photos_placed:
                     break
 
         if not photos_placed:

@@ -261,6 +261,52 @@ class TrouserSpec:
         strip_length = round((self.belt_loops_count * 8.5) + 2.5, 1)         # 5 * 8.5 + 2.5 = 45.0 cm
         return (strip_width, strip_length)
 
+    def __post_init__(self):
+        # Normalize size standard
+        sz = (self.size_standard or "").upper()
+        if any(k in sz for k in ("XXS", "10XL", "PATTERNFAST", "EU")):
+            self.size_standard = "PATTERNFAST_XXS_10XL"
+        else:
+            self.size_standard = "US_00_22"
+
+        # Normalize front shaping
+        fs = (self.front_shaping or "").lower()
+        if "double" in fs and "pleat" in fs:
+            self.front_shaping = "double_pleats"
+        elif "single" in fs and "pleat" in fs:
+            self.front_shaping = "single_pleat"
+        elif "pleat" in fs:
+            self.front_shaping = "double_pleats"
+        elif "flat" in fs:
+            self.front_shaping = "flat_front"
+        elif "dart" in fs:
+            self.front_shaping = "front_darts"
+        elif "elastic" in fs:
+            self.front_shaping = "elastic_gathered"
+
+        # Normalize silhouette
+        sil = (self.silhouette or "").lower()
+        if "cargo" in sil:
+            self.silhouette = "cargo_utility"
+        elif "barrel" in sil or "horseshoe" in sil:
+            self.silhouette = "barrel_leg"
+        elif "flare" in sil or "bootcut" in sil:
+            self.silhouette = "bootcut_flare"
+        elif "jogger" in sil:
+            self.silhouette = "jogger_pullon"
+        elif "culotte" in sil:
+            self.silhouette = "cropped_culottes"
+        elif "skinny" in sil:
+            self.silhouette = "skinny"
+        elif "cig" in sil:
+            self.silhouette = "cigarette"
+        elif "wide" in sil:
+            self.silhouette = "wide_leg"
+        elif "palazzo" in sil:
+            self.silhouette = "palazzo"
+        elif "straight" in sil:
+            self.silhouette = "straight"
+
 
 # ==============================================================================
 # 5. UNIVERSAL TROUSER ENGINE (TABLES, INVENTORY, STEPS, DIAGRAMS & QA)
@@ -373,23 +419,25 @@ class UniversalTrouserEngine:
         p_num = 1
 
         # 1. Pants Front
-        front_desc = {
+        front_desc_map = {
             "double_pleats": "Cut 2 (Mirrored Pair - 2 Forward Pleats each)",
             "single_pleat":  "Cut 2 (Mirrored Pair - 1 Forward Pleat each)",
             "front_darts":   "Cut 2 (Mirrored Pair - 1 Waist Dart each)",
             "flat_front":    "Cut 2 (Mirrored Pair - Flat Front)",
             "elastic_gathered": "Cut 2 (Mirrored Pair - Elastic Waist)",
-        }[self.spec.front_shaping]
+        }
+        front_desc = front_desc_map.get(self.spec.front_shaping, f"Cut 2 (Mirrored Pair - {self.spec.front_shaping.replace('_', ' ').title()})")
         pieces.append({"id": str(p_num), "name": "Pants Front", "material": "Main Fabric", "qty": front_desc, "type": "front"})
         p_num += 1
 
         # 2. Pants Back (plus optional Back Yoke)
-        back_desc = {
+        back_desc_map = {
             "4_darts": "Cut 2 (Mirrored Pair - 2 Waist Darts per side / 4 total)",
             "2_darts": "Cut 2 (Mirrored Pair - 1 Waist Dart per side / 2 total)",
             "back_yoke": "Cut 2 (Mirrored Pair - Joins to Back Yoke)",
             "elastic_gathered": "Cut 2 (Mirrored Pair - Elastic Waist)",
-        }[self.spec.back_shaping]
+        }
+        back_desc = back_desc_map.get(self.spec.back_shaping, f"Cut 2 (Mirrored Pair - {self.spec.back_shaping.replace('_', ' ').title()})")
         pieces.append({"id": str(p_num), "name": "Pants Back", "material": "Main Fabric", "qty": back_desc, "type": "back"})
         p_num += 1
 

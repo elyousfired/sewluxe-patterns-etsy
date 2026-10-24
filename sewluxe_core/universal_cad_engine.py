@@ -366,8 +366,9 @@ class UniversalCADBlueprintEngine:
         sizes_str = "Sizes: XXS–10XL (15 Sizes)" if spec.size_standard == "PATTERNFAST_XXS_10XL" else "Sizes: US 00–22"
         d.add(String(rx, 88, f'Model: {spec.model_name}  •  {sizes_str}', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#444444')))
         d.add(String(rx, 78, f'Seam Allowance: {spec.seam_allowance_cm:.1f} cm Included  •  Hem: {spec.hem_allowance_cm:.1f} cm', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#444444')))
-        closure_label = "Concealed Trouser Hook & Bar" if spec.closure_type == "concealed_hook_bar" else ("Pull-On Continuous Elastic" if is_elastic_waist else "Tailored Button Closure")
-        d.add(String(rx, 68, f'{closure_label}  •  Pocketless Back  •  Zero AI Clutter', fontName='Helvetica-Bold', fontSize=5.5, fillColor=colors.HexColor('#8B2635')))
+        closure_label = "Concealed Trouser Hook & Bar" if spec.closure_type == "concealed_hook_bar" else ("Pull-On Continuous Elastic" if is_elastic_waist else ("Side Invisible Zipper" if spec.closure_type == "side_invisible_zip" else "Tailored Button Closure"))
+        back_label = "Pocketless Back" if spec.back_pockets == "none" else f"{spec.back_pockets.replace('_', ' ').title()}"
+        d.add(String(rx, 68, f'{closure_label}  •  {back_label}  •  Zero AI Clutter', fontName='Helvetica-Bold', fontSize=5.5, fillColor=colors.HexColor('#8B2635')))
 
         return d
 

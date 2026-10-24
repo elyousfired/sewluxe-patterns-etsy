@@ -21,7 +21,7 @@ class SewLuxeBookletLinter:
     def __init__(self, pdf_path: str):
         self.pdf_path = pdf_path
 
-    def audit(self) -> Tuple[bool, List[str]]:
+    def audit(self, spec=None) -> Tuple[bool, List[str]]:
         logs = []
         if not os.path.exists(self.pdf_path):
             return False, [f"File not found: {self.pdf_path}"]
@@ -41,7 +41,7 @@ class SewLuxeBookletLinter:
             (r'Cut 1 strip \(8 cm x', "Belt loop strip is dangerously wide (8 cm) - must be 3.5 cm"),
         ]
 
-        # 1. Text scans
+        # 1. Text scans & Spec-Aware Invariance Checks
         for page_num in range(1, total_pages + 1):
             text = doc[page_num - 1].get_text()
             for pat, desc in forbidden_patterns:
@@ -49,14 +49,34 @@ class SewLuxeBookletLinter:
                 if matches:
                     errors.append(f"Page {page_num}: {desc} -> Matches: {matches}")
 
-        # 2. Page 7: Pieces Overview vs Inventory
+            # Spec-Aware Cross Examination
+            if spec:
+                if spec.size_standard == "PATTERNFAST_XXS_10XL":
+                    if re.search(r'\bUS\s*00\b|\b00–22\b|\b00-22\b|\b13\s*sizes\b', text, re.I):
+                        errors.append(f"Page {page_num}: Mentions US 00/00-22 or 13 sizes, contradicting PATTERNFAST_XXS_10XL spec!")
+
+        # 2. Spec-Aware Step 1 (Page 9) Shaping Check
+        if spec:
+            p9_text = doc[8].get_text().lower()
+            if spec.front_shaping in ("flat_front", "front_darts"):
+                if "front pleat" in p9_text or "forward pleat" in p9_text or "baste front pleat" in p9_text:
+                    errors.append("Page 9: Mentions front pleats in a flat-front / darted trouser model!")
+                else:
+                    logs.append("[+] Page 9: Verified flat-front / darted shaping (zero pleats detected).")
+            elif "pleat" in spec.front_shaping:
+                if "pleat" not in p9_text:
+                    errors.append("Page 9: Missing pleat instructions for pleated trouser model!")
+                else:
+                    logs.append("[+] Page 9: Verified pleat instructions present.")
+
+        # 3. Page 7: Pieces Overview vs Inventory
         p6_text = doc[5].get_text()
         p7_text = doc[6].get_text()
         if "clean pocketless back" in p6_text.lower():
             if "welt pocket" in p7_text.lower() or "piece 8" in p7_text.lower():
                 errors.append("Page 7: Mentions welt pocket or Piece 8/9/10, contradicting Page 6 pocketless back!")
 
-        # 3. Page 8: QR Codes Hub Check
+        # 4. Page 8: QR Codes Hub Check
         p8 = doc[7]
         p8_drawings = p8.get_drawings()
         if len(p8_drawings) < 15:
@@ -64,7 +84,7 @@ class SewLuxeBookletLinter:
         else:
             logs.append(f"[+] Page 8: QR Code vectors verified ({len(p8_drawings)} vector elements).")
 
-        # 4. Pages 9-15: Step Diagrams Check (Images OR Vector Drawings)
+        # 5. Pages 9-15: Step Diagrams Check (Images OR Vector Drawings)
         for s_page in range(9, 16):
             page = doc[s_page - 1]
             images = page.get_images(full=True)
@@ -76,12 +96,29 @@ class SewLuxeBookletLinter:
                 logs.append(f"[+] Page {s_page}: Step diagram verified ({diag_type}).")
 
         # Check Page 15: Waistband Closure consistency
-        p15_text = doc[14].get_text()
-        if "concealed hook & bar" in p15_text.lower():
-            if "sew a button" in p15_text.lower() or "buttonhole" in p15_text.lower():
-                errors.append("Page 15: Text mentions button/buttonhole, contradicting Concealed Hook & Bar rule!")
+        p15_text = doc[14].get_text().lower()
+        if spec:
+            if spec.closure_type == "concealed_hook_bar":
+                if "sew a button" in p15_text or "buttonhole" in p15_text:
+                    errors.append("Page 15: Text mentions button/buttonhole, contradicting Concealed Hook & Bar rule!")
+                else:
+                    logs.append("[+] Page 15: Closure verified (Concealed Hook & Bar).")
+            elif spec.closure_type in ("exterior_button", "jeans_tack_button"):
+                if "button" not in p15_text and "buttonhole" not in p15_text:
+                    errors.append("Page 15: Missing button/buttonhole instructions for exterior button closure!")
+                else:
+                    logs.append("[+] Page 15: Closure verified (Waistband Button & Buttonhole).")
+            elif spec.closure_type == "pull_on_elastic":
+                if "elastic" not in p15_text:
+                    errors.append("Page 15: Missing elastic instructions for pull-on trouser!")
+                else:
+                    logs.append("[+] Page 15: Closure verified (Elastic Waistband Casing).")
+        else:
+            if "concealed hook & bar" in p15_text:
+                if "sew a button" in p15_text or "buttonhole" in p15_text:
+                    errors.append("Page 15: Text mentions button/buttonhole, contradicting Concealed Hook & Bar rule!")
 
-        # 5. Page 16: 360° Fit Gallery / Celebration Check
+        # 6. Page 16: 360° Fit Gallery / Celebration Check
         p16 = doc[15]
         p16_images = p16.get_images(full=True)
         p16_drawings = p16.get_drawings()
