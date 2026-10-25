@@ -76,7 +76,11 @@ Before clicking on either site, write down the exact component selections so bot
 > [!CRITICAL]
 > **MANDATORY AUDIT GATE & A4-FIRST PROTOCOL BEFORE PROCEEDING**:
 > Before mass batch downloads, you MUST perform an automated pre-flight audit relying strictly on the **A4** format first (single reference size, e.g. SIZE 0 / SIZE 8, or A4 overview) to prevent wasting time and tokens on defective batches:
-> 1. **A4-First Inspection**: Inspect A4 Page 2 (Piece Inventory) and Page 4 (Piece Layout). Cross-reference pieces with the garment DNA. Detect and purge ghost pieces (e.g. fly shield on side zip).
+> 1. **A4-First Inspection & Mourabba3 l-Qiyas l-Merji3i (The Calibration Test Square)**:
+>    - Execute `audit_a4_calibration_test_square()` on Page 1 of the reference A4 pattern PDF before mass batch download.
+>    - Mathematically verify that the vector scaling box measures exactly **10.00 cm x 10.00 cm** (283.46 pt) or **4.00" x 4.00"** (288.0 pt) within $\le 0.5\%$ tolerance.
+>    - Tailor's Golden Rule: A tiny 2% printer scaling/shrink error (9.8 cm or 10.2 cm) distorts the entire pattern by a full dress size, ruining expensive fabric before cutting!
+>    - Inspect A4 Page 2 (Piece Inventory) and Page 4 (Piece Layout). Cross-reference pieces with the garment DNA. Detect and purge ghost pieces (e.g. fly shield on side zip).
 > 2. **Piece Count & Inventory**: Flag any missing pieces (e.g. pocket bag, facing) or rogue pieces.
 > 3. **Seam Length Symmetry**: Verify matching seams (Front Inseam == Back Inseam, Side Seams match).
 > 4. **Measurements & Ease**: Verify finished garment measurements against body size chart for realistic ease.

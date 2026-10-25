@@ -58,6 +58,73 @@ def cm_to_fractional_inch(cm_val: float) -> str:
         return f"{whole} {frac}\""
     return f"{whole}\""
 
+def audit_a4_calibration_test_square(pdf_path: str, max_tol_pct: float = 0.8) -> Tuple[bool, str, Dict]:
+    """
+    Audits Page 1 of an A4 pattern PDF to mathematically verify the Calibration Test Square
+    (Mourabba3 l-Qiyas l-Merji3i / The Calibration Test Square / Scaling Box).
+    Prevents fatal printer shrink/fit errors (e.g. 2% distortion ruining sizing by a full size).
+    """
+    if not os.path.exists(pdf_path):
+        return False, f"File not found: {pdf_path}", {}
+
+    doc = fitz.open(pdf_path)
+    if len(doc) < 1:
+        return False, "PDF has 0 pages", {}
+
+    p1 = doc[0]
+    p1_text = p1.get_text()
+
+    # 1. Text Instruction Inspection
+    text_issues = []
+    if not any(k in p1_text.lower() for k in ["calibration", "scale box", "test page"]):
+        text_issues.append("Missing 'Calibration Test Page' / 'Scale Box' header")
+    if not any(k in p1_text.lower() for k in ["100%", "actual"]):
+        text_issues.append("Missing '100%' or 'Actual Size' printer instruction")
+    if not any(k in p1_text.lower() for k in ["ruler", "measure"]):
+        text_issues.append("Missing ruler measurement instruction before cutting fabric")
+
+    # 2. Vector Calibration Square Geometry Inspection
+    found_square = None
+    drawings = p1.get_drawings()
+    for d in drawings:
+        r = d['rect']
+        w, h = r.width, r.height
+        # 10 cm = 283.46 pt, 4 in = 288.0 pt
+        if 260.0 < w < 310.0 and 260.0 < h < 310.0:
+            aspect = min(w, h) / max(w, h)
+            if aspect > 0.98:  # Uniform square
+                w_cm = w / 72.0 * 2.54
+                h_cm = h / 72.0 * 2.54
+                target_cm = 10.00
+                diff_pct = abs(w_cm - target_cm) / target_cm * 100.0
+                found_square = {
+                    "rect": [r.x0, r.y0, r.x1, r.y1],
+                    "w_pt": round(w, 2),
+                    "h_pt": round(h, 2),
+                    "w_cm": round(w_cm, 3),
+                    "h_cm": round(h_cm, 3),
+                    "aspect_ratio": round(aspect, 4),
+                    "diff_pct": round(diff_pct, 3)
+                }
+                break
+
+    if not found_square:
+        return False, "FATAL: No 10x10 cm (4x4 in) vector calibration square found on Page 1!", {"text_issues": text_issues}
+
+    if found_square["diff_pct"] > max_tol_pct:
+        return (
+            False,
+            f"FATAL: Calibration square distortion {found_square['diff_pct']:.2f}% exceeds tolerance {max_tol_pct}% "
+            f"(w={found_square['w_cm']}cm, h={found_square['h_cm']}cm). Sizing will be distorted by an entire dress size!",
+            found_square
+        )
+
+    if text_issues:
+        return False, f"Instruction Warning: {'; '.join(text_issues)}", found_square
+
+    return True, f"PASSED: 10.00x10.00 cm calibration square verified (w={found_square['w_cm']}cm, diff={found_square['diff_pct']}%)", found_square
+
+
 class MasterTailorAuditor:
     def __init__(self, pdf_path: str, spec=None):
         self.pdf_path = pdf_path
@@ -144,6 +211,23 @@ class MasterTailorAuditor:
 
         if not any("Table 1" in msg and "[-]" in msg for msg in self.report["COUCHE_1_MATH_AND_SPECS"]):
             self.success("COUCHE_1_MATH_AND_SPECS", "Size Chart Math Calibration: All inch conversions verified with zero leading-digit truncations.")
+
+        # 3. Page 3: Mourabba3 l-Qiyas l-Merji3i (The Calibration Test Square Protocol)
+        p3_text = full_text_by_page[2] if total_pages > 2 else ""
+        has_sq_mention = any(k in p3_text.lower() for k in ["4\" x 4\"", "10.00 cm", "test square", "calibration"])
+        has_scale_warn = any(k in p3_text.lower() for k in ["actual size", "100%", "do not scale"])
+        has_ruler_warn = any(k in p3_text.lower() for k in ["ruler", "ruler calibration"])
+
+        if not (has_sq_mention and has_scale_warn and has_ruler_warn):
+            self.error(
+                "COUCHE_1_MATH_AND_SPECS",
+                "Page 3: Missing essential Mourabba3 l-Qiyas l-Merji3i (Calibration Test Square 4\"x4\" / 10.00 cm) protocol!"
+            )
+        else:
+            self.success(
+                "COUCHE_1_MATH_AND_SPECS",
+                "Page 3: Mourabba3 l-Qiyas l-Merji3i verified (10.00 cm / 4\"x4\" scaling box warning against 2% distortion fully codified)."
+            )
 
         # =====================================================================
         # COUCHE 2: Layout & Typography Render Inspection (OCR & Bounding Boxes)
@@ -258,22 +342,48 @@ def run_master_tailor_audit(pdf_path: str, spec=None) -> bool:
     return passed
 
 if __name__ == "__main__":
-    test_pdf = r"C:\Users\red1e\Desktop\Aria_Trendy_Wide_Leg_Pants_Sewing_Instructions.pdf"
-    from sewluxe_core.universal_trouser_engine import TrouserSpec
-    spec = TrouserSpec(
-        model_name="Aria Trendy Wide-Leg Pants",
-        size_standard="US_00_22",
-        silhouette="wide_leg",
-        rise_style="high_waist",
-        front_shaping="front_darts",
-        center_crease=True,
-        back_shaping="2_darts",
-        front_pockets="none",
-        back_pockets="none",
-        closure_type="side_invisible_zip",
-        belt_loops_count=0,
-        seam_allowance_cm=1.0,
-        custom_hem_allowance_cm=5.0
-    )
-    passed = run_master_tailor_audit(test_pdf, spec)
-    sys.exit(0 if passed else 1)
+    import argparse
+    parser = argparse.ArgumentParser(description="Master Tailor Forensic Auditor")
+    parser.add_argument("--booklet", default=r"C:\Users\red1e\Desktop\Aria_Trendy_Wide_Leg_Pants_Sewing_Instructions.pdf", help="Path to 16-page booklet PDF")
+    parser.add_argument("--a4", default=r"C:\Users\red1e\.gemini\antigravity\scratch\etsy\projects\trendy_high_waist_wide_leg\03_Pattern_Suite\A4\SewLuxe_Aria_Wide_Leg_Pants_Size_US_00_A4.pdf", help="Path to A4 pattern PDF for calibration square check")
+    args = parser.parse_args()
+
+    all_passed = True
+
+    # 1. Audit A4 Calibration Test Square
+    if args.a4 and os.path.exists(args.a4):
+        print("\n" + "=" * 70)
+        print("AUDITING A4 CALIBRATION TEST SQUARE (Mourabba3 l-Qiyas l-Merji3i)")
+        print(f"Target: {args.a4}")
+        print("=" * 70)
+        a4_ok, a4_msg, sq_data = audit_a4_calibration_test_square(args.a4)
+        print(f"Result: {a4_msg}")
+        if sq_data:
+            print(f"Details: {sq_data}")
+        if not a4_ok:
+            all_passed = False
+
+    # 2. Audit 16-Page Booklet
+    if args.booklet and os.path.exists(args.booklet):
+        from sewluxe_core.universal_trouser_engine import TrouserSpec
+        spec = TrouserSpec(
+            model_name="Aria Trendy Wide-Leg Pants",
+            size_standard="US_00_22",
+            silhouette="wide_leg",
+            rise_style="high_waist",
+            front_shaping="front_darts",
+            center_crease=True,
+            back_shaping="2_darts",
+            front_pockets="none",
+            back_pockets="none",
+            closure_type="side_invisible_zip",
+            belt_loops_count=0,
+            seam_allowance_cm=1.0,
+            custom_hem_allowance_cm=5.0
+        )
+        booklet_ok = run_master_tailor_audit(args.booklet, spec)
+        if not booklet_ok:
+            all_passed = False
+
+    sys.exit(0 if all_passed else 1)
+

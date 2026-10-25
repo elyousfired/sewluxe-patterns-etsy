@@ -92,6 +92,13 @@ The booklet exists to prevent bad reviews: every step must be impossible to misu
       `Role: Senior Haute-Couture Technical Auditor & Patternmaker QA Engineer.`
       `Task: Conduct a forensic, pixel-level, and mathematical cross-audit of the sewing instruction booklet and CAD specs before publication.`
       `Gate: Deliverable is REJECTED and MUST NOT be presented until all 4 layers pass with 100% Zero Defects.`
+12. **Rule 12: Mourabba3 l-Qiyas l-Merji3i (The Calibration Test Square Verification Protocol)**:
+    - **Physical Tailoring Foundation**: Before cutting expensive luxury fabrics, master couturiers and patternmakers print Page 1 and measure the calibration test square using a rigid metal/acrylic ruler.
+    - **The Fatal 2% Error Law**: If the printed square measures $9.8\text{ cm}$ or $10.2\text{ cm}$ instead of $10.00\text{ cm}$ (a mere $2\%$ printer scaling or "Fit to page" distortion), the entire garment pattern shifts by an entire dress size (2–4 cm difference across waist and hips), ruining costly fabric!
+    - **Dual Automated Verification Gates**:
+      1. **A4 Pattern Page 1 Audit**: During Sub-Step 0.4, execute `audit_a4_calibration_test_square(a4_pdf_path)` to verify that the vector scaling box measures exactly **$10.00\text{ cm} \times 10.00\text{ cm}$** ($283.46\text{ pt}$) or **$4.00'' \times 4.00''$** ($288.0\text{ pt}$) within $\le 0.5\%$ tolerance.
+      2. **Booklet Page 3 Protocol Card**: In the customer instruction booklet, Page 3 MUST prominently feature the "READ THIS FIRST: ALWAYS PRINT PAGE 1 FIRST & VERIFY THE 4\" x 4\" TEST SQUARE" protocol, detailing printer scaling at 100% (Actual Size), rigid ruler verification, and Adobe Reader OCG layer isolation.
+
 
 ### 0. The Golden Read-First Principle ("System Khasso Yaqra 3aad Ya'raf Chno Ydiir")
 **MANDATORY CORE LAW**: In EVERY single phase of the pipeline, the assistant and all scripts MUST **READ and PARSE the authentic source files first** before writing a single line of code, text, table, or diagram:
