@@ -72,6 +72,26 @@ The booklet exists to prevent bad reviews: every step must be impossible to misu
       3. **Engineering Diagrams (واش الرسومات كطابق الباطرون 100%؟)**: Are all drawings strictly representing the actual garment pieces? Have generic/conflicting options (e.g. buttonholes on seamless side-zip pants) been purged and authentic bespoke methods centered? Zero ghost pieces, correct notches, correct seam allowances.
       4. **Visual Photoshoots (واش تصاور الموديل كطابقو الباطرون 1:1؟)**: Does the model's garment match the CAD pattern in waistband, pockets, closures, and drape? Zero stray details that don't exist in the pattern.
       5. **Physical Tailoring Craftsmanship (واش هاد الخدمة صحيحة وتقنية وتقدر تتخيط فـ الواقع؟)**: If a professional tailor took this booklet into an atelier with scissors and fabric, would they execute it flawlessly without getting stuck or ruining materials?
+11. **Rule 11: The Multilayer Inspection Framework (4 Couches Motatabi3a - The Gemini Audit Standard)**:
+    - **MANDATORY FINAL GATE BEFORE PUBLICATION**:
+      The assistant must execute `master_tailor_audit.py` implementing the 4 consecutive inspection layers:
+      1. **Couche 1: Math & Spec Cross-Checking (Vérification Handasiya w Hisabiya)**:
+         - Any measurement on one page must match all other pages 1:1 (Features vs Measurements vs Inventory vs CAD Specs).
+         - Metric-to-Imperial Recalculation ($cm / 2.54 \rightarrow$ nearest 1/8"): Cross-check every row of Table 1. If hips are $87.8\text{ cm}$, recalculate $87.8 / 2.54 = 34.56'' = 34\ 1/2''$. Flag leading-digit truncations immediately (e.g. `14 1/2"` instead of `34 1/2"`).
+      2. **Couche 2: Layout & Typography Render Inspection (OCR & Bounding Boxes)**:
+         - Inspect every table cell and paragraph for text-clipping, digit truncation, and unrendered characters (`!5/8`, `3г`, `chm`).
+         - Detect line overlap collisions and typos (`Left` vs `Lett`).
+      3. **Couche 3: Industrial Sewing & Tailoring Protocol Logic**:
+         - Assembly Order: Darts before seams, pressing directions toward anatomical center.
+         - Roadmap 1:1 Synchronization: Compare Page 6 Roadmap titles word-for-word against step pages (Pages 9–15).
+      4. **Couche 4: Visual CAD & Diagram Rigor**:
+         - Verify grainlines parallel to selvedge, notches, and fold lines.
+         - Purge generic Tailornova contradictions (buttons/buttonholes on seamless side-zip pants).
+         - Verify vector QR codes (Page 8) and 3-angle model photography (Page 16).
+    - **Embedded Auditor System Persona**:
+      `Role: Senior Haute-Couture Technical Auditor & Patternmaker QA Engineer.`
+      `Task: Conduct a forensic, pixel-level, and mathematical cross-audit of the sewing instruction booklet and CAD specs before publication.`
+      `Gate: Deliverable is REJECTED and MUST NOT be presented until all 4 layers pass with 100% Zero Defects.`
 
 ### 0. The Golden Read-First Principle ("System Khasso Yaqra 3aad Ya'raf Chno Ydiir")
 **MANDATORY CORE LAW**: In EVERY single phase of the pipeline, the assistant and all scripts MUST **READ and PARSE the authentic source files first** before writing a single line of code, text, table, or diagram:
