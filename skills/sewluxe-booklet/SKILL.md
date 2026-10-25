@@ -55,6 +55,13 @@ The booklet exists to prevent bad reviews: every step must be impossible to misu
    - Always execute an automated cross-audit between the CAD pattern pieces list and the instruction steps (`Missing Pieces = Total CAD Pieces - Pieces Covered in Steps`).
    - If any piece or feature (e.g. Cargo pockets, flap pieces, drawstring eyelets, belt loops, sash belt) exists in the pattern but is omitted from Tailornova source instructions, procedurally draft the missing step via `instruction-diagram-studio` (`draft_missing_panel.py`) and insert it into the logical assembly sequence.
    - **Zero Orphaned Pieces**: Every piece in the cutting layout MUST have a dedicated, illustrated sewing step showing how it is prepped and assembled.
+9. **Rule 9: The Autonomous Forensic Quality Gate (Gemini Standard - Zero User-Reported Defects)**:
+   - **MANDATORY LAW**: The assistant MUST NEVER present a completed booklet to the user before running an autonomous, multi-layered forensic self-audit that eliminates all defects that a sharp human or AI reviewer would catch.
+   - **4 Mandatory Forensic Self-Audit Checks**:
+     1. **Sewing Order 1:1 Synchronization**: Cross-examine the Page 6 Roadmap table against Pages 9–15 step titles and phase badges. Step numbers, titles, and operations must match 100% with zero discrepancies.
+     2. **Garment DNA vs. Diagram Contradiction Gate**: Inspect every step diagram and bullet text against the locked DNA from Phase 0. If the garment is side-zip / seamless flat front, ensure zero buttons, zero buttonholes, and zero fly fronts are drawn or described in diagrams. If Tailornova vector artwork contains generic options (e.g. buttonhole on left, hook & eye on right), the generic contradiction MUST be purged and the authentic closure centered.
+     3. **Table Geometry & Number Integrity Gate**: For trousers, ensure Table 1 has no BUST column. Verify that all body and finished garment measurements fit comfortably within column widths with zero text wrapping, zero Russian/corrupted glyphs, and zero fraction truncation.
+     4. **Visual Typography & Typo Hunt**: Inspect bottom protocol cards to guarantee clean TTF rendering without encoding artifacts or corrupted bullet symbols. Scan all headings and captions across all pages for spelling typos (e.g. 'Left' vs 'Lett').
 
 ### 0. The Golden Read-First Principle ("System Khasso Yaqra 3aad Ya'raf Chno Ydiir")
 **MANDATORY CORE LAW**: In EVERY single phase of the pipeline, the assistant and all scripts MUST **READ and PARSE the authentic source files first** before writing a single line of code, text, table, or diagram:

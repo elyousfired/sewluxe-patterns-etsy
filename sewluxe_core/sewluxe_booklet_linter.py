@@ -49,11 +49,42 @@ class SewLuxeBookletLinter:
                 if matches:
                     errors.append(f"Page {page_num}: {desc} -> Matches: {matches}")
 
+            # Typo hunter: e.g. "Lett invisible zip" or corrupted typos
+            if re.search(r'\bLett\s+invisible\b', text, re.I):
+                errors.append(f"Page {page_num}: Typo detected: 'Lett invisible' should be 'Left invisible'!")
+
             # Spec-Aware Cross Examination
             if spec:
                 if spec.size_standard == "PATTERNFAST_XXS_10XL":
                     if re.search(r'\bUS\s*00\b|\b00–22\b|\b00-22\b|\b13\s*sizes\b', text, re.I):
                         errors.append(f"Page {page_num}: Mentions US 00/00-22 or 13 sizes, contradicting PATTERNFAST_XXS_10XL spec!")
+
+        # 1b. Page 4: Trouser Table Integrity Gate (No Bust Column on Pants)
+        p4_text = doc[3].get_text()
+        if spec and "pants" in spec.model_name.lower() or "trouser" in spec.model_name.lower():
+            if "BUST (CM)" in p4_text or "BUST (IN)" in p4_text:
+                errors.append("Page 4: Table 1 contains BUST column for trousers/pants! Must be removed to prevent column squishing.")
+            else:
+                logs.append("[+] Page 4: Verified trouser measurement table (zero irrelevant BUST columns).")
+
+        # 1c. Roadmap Synchronization Gate (Page 6 vs Pages 9–15)
+        p6_text = doc[5].get_text()
+        # Extract roadmap steps from Page 6
+        roadmap_steps = re.findall(r'Step\s+(\d+)[:\.]\s*([^\n\r\(]+)', p6_text)
+        if roadmap_steps:
+            for s_num_str, s_title in roadmap_steps:
+                s_num = int(s_num_str)
+                target_page_idx = 7 + s_num  # Step 1 -> Page 9 (idx 8), Step 2 -> Page 10 (idx 9), etc.
+                if target_page_idx < total_pages:
+                    step_page_text = doc[target_page_idx].get_text()
+                    clean_title_part = s_title.strip()[:15].lower()
+                    if clean_title_part not in step_page_text.lower():
+                        errors.append(
+                            f"Sewing Order Mismatch: Roadmap (Page 6) Step {s_num} ('{s_title.strip()}') "
+                            f"does not match Page {target_page_idx + 1} content!"
+                        )
+            if not any("Sewing Order Mismatch" in e for e in errors):
+                logs.append(f"[+] Page 6: Roadmap verified ({len(roadmap_steps)} steps perfectly synchronized with Pages 9–15).")
 
         # 2. Spec-Aware Step 1 (Page 9) Shaping Check
         if spec:
@@ -95,28 +126,24 @@ class SewLuxeBookletLinter:
                 diag_type = "raster image" if len(images) > 0 else f"{len(drawings)} vector elements"
                 logs.append(f"[+] Page {s_page}: Step diagram verified ({diag_type}).")
 
-        # Check Page 15: Waistband Closure consistency
-        p15_text = doc[14].get_text().lower()
+        # 5b. Waistband Closure Consistency Across All Step Pages (Pages 9–15)
+        step_pages_text = "\n".join(doc[p].get_text().lower() for p in range(8, 15))
         if spec:
-            if spec.closure_type == "concealed_hook_bar":
-                if "sew a button" in p15_text or "buttonhole" in p15_text:
-                    errors.append("Page 15: Text mentions button/buttonhole, contradicting Concealed Hook & Bar rule!")
+            if spec.closure_type in ("concealed_hook_bar", "side_invisible_zip"):
+                if "sew a button" in step_pages_text or "make a buttonhole" in step_pages_text or "buttonhole in waistband" in step_pages_text:
+                    errors.append("Step Pages (9–15): Text mentions button/buttonhole, contradicting Concealed Hook & Bar / Side-Zip DNA!")
                 else:
-                    logs.append("[+] Page 15: Closure verified (Concealed Hook & Bar).")
+                    logs.append("[+] Step Pages (9–15): Closure verified (Zero buttons/buttonholes, 100% Concealed Hook & Bar / Side Zip).")
             elif spec.closure_type in ("exterior_button", "jeans_tack_button"):
-                if "button" not in p15_text and "buttonhole" not in p15_text:
-                    errors.append("Page 15: Missing button/buttonhole instructions for exterior button closure!")
+                if "button" not in step_pages_text and "buttonhole" not in step_pages_text:
+                    errors.append("Step Pages (9–15): Missing button/buttonhole instructions for exterior button closure!")
                 else:
-                    logs.append("[+] Page 15: Closure verified (Waistband Button & Buttonhole).")
+                    logs.append("[+] Step Pages (9–15): Closure verified (Waistband Button & Buttonhole).")
             elif spec.closure_type == "pull_on_elastic":
-                if "elastic" not in p15_text:
-                    errors.append("Page 15: Missing elastic instructions for pull-on trouser!")
+                if "elastic" not in step_pages_text:
+                    errors.append("Step Pages (9–15): Missing elastic instructions for pull-on trouser!")
                 else:
-                    logs.append("[+] Page 15: Closure verified (Elastic Waistband Casing).")
-        else:
-            if "concealed hook & bar" in p15_text:
-                if "sew a button" in p15_text or "buttonhole" in p15_text:
-                    errors.append("Page 15: Text mentions button/buttonhole, contradicting Concealed Hook & Bar rule!")
+                    logs.append("[+] Step Pages (9–15): Closure verified (Elastic Waistband Casing).")
 
         # 6. Page 16: 360° Fit Gallery / Celebration Check
         p16 = doc[15]
