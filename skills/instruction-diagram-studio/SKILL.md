@@ -49,7 +49,7 @@ Tailornova frequently generates generic instructions (e.g., shirt plackets with 
   - **Pressing**: Realistic tailor's ham (`#F4ECE1`) for 3D bust/shoulder molding + modern vector iron pressing seam allowances open ("press open").
 
 ### 4. Official API Harvesting & Dual-Box Standard (Mamnou3 Matplotlib Al-Badai)
-- **STRICT PROHIBITION**: NEVER draw crude polygonal shapes with Matplotlib when official vector instruction diagrams exist on the PatternFast/Tailornova API.
+- **THE SACRED FIRST-SOURCE RULE**: If the authentic instruction diagram already exists in Tailornova/PatternFast, **ALWAYS USE IT DIRECTLY** (cleaned, cropped, and framed). ONLY if a technique does NOT exist (or has a fatal model mismatch/contradiction) do you draft it procedurally via CAD! Never invent synthetic shapes when official vector artwork exists.
 - **Official API Endpoint**:
   ```text
   GET / POST https://api.patternfast.com/api/sewing-instructions?elementIds={elem_ids}&mannequinId={man_id}&categoryCode={cat}&format=pdf
@@ -63,6 +63,8 @@ Tailornova frequently generates generic instructions (e.g., shirt plackets with 
   - Top-left of Box 1: **`1.`** in `Poppins-Bold` with concise title & subtitle.
   - Top-left of Box 2: **`2.`** in `Poppins-Bold` with concise title & subtitle.
   - Zero overlapping text, zero clipped borders, 100% quiet-luxury quiet aesthetic.
+- **Generic Template Contradiction Hunter (e.g. Invisible Zipper Text)**:
+  - Watch out for Tailornova generic reuse bugs: e.g. using a skirt/dress center back zipper graphic (`pin back sections together`) on a trouser side seam. Always correct labels to reflect the real garment construction (`pin side seam together below zipper`).
 
 ---
 
