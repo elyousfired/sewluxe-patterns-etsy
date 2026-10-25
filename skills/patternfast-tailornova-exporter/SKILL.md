@@ -85,7 +85,11 @@ Before clicking on either site, write down the exact component selections so bot
 > 3. **Seam Length Symmetry**: Verify matching seams (Front Inseam == Back Inseam, Side Seams match).
 > 4. **Measurements & Ease**: Verify finished garment measurements against body size chart for realistic ease.
 > 5. **Step-by-Step Alignment**: Confirm that every step in the instructions corresponds 1:1 with CAD pieces and notches.
-> 6. **Output Audit Report**: Present the report in chat (Status: PASSED or DISCREPANCY DETECTED) and **WAIT for user approval** before launching full batch downloads across US Letter and A0!
+> 6. **Mandatory Visual Flat Sketch Attachment & Executive Audit Report (The Single Vulnerability Gate)**:
+>    - **The Single Vulnerability Law**: The only vulnerability is initial input in Sub-Step 0.1. If you enter pockets when the reference photo has none, the system will produce a perfect pair of trousers with pockets! Precision in Phase 0.1 guarantees 100% Zero Defect.
+>    - Present the executive report in chat (Status: PASSED or DISCREPANCY DETECTED) accompanied directly by the **2D Technical Flat Sketch (Front + Back)** for a 5-second human visual cross-check.
+>    - **HARD STOP**: WAIT for explicit user approval of both the report and the visual Flat Sketch before launching full batch downloads across US Letter and A0!
+
 
 ### Step 4: Hand Off to Production Skills
 Once Phase 0 is approved by the user, pass the validated assets to:

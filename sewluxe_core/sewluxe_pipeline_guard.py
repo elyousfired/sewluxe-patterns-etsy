@@ -8,11 +8,12 @@ before passing mandatory gates.
 The Golden Sequence:
 --------------------
 Phase 0: CAD & Measurement Pre-Production Audit Gate (STOP & REPORT)
-  - Sub-step 0.1: Visual DNA & Fabric/Color Forensics (Locked parameters)
+  - Sub-step 0.1: Visual DNA & Fabric/Color Forensics (The Single Vulnerability Law: Initial Input Precision)
   - Sub-step 0.2: Component-locked CAD configuration in PatternFast (Persistent Design ID)
   - Sub-step 0.3: Deep cross-examination (Piece inventory, ghost piece purge, seam symmetry)
-  - Sub-step 0.4: A4-First Fast Audit (Page 1 square, Page 2 piece inventory + zipper specs)
-  - Sub-step 0.5: Executive Pre-Production Audit Report [HARD STOP: User Approval Required]
+  - Sub-step 0.4: A4-First Fast Audit (Page 1 calibration square, Page 2 piece inventory + specs)
+  - Sub-step 0.5: Executive Pre-Production Audit Report with Visual Flat Sketch [HARD STOP: User Approval Required]
+
 Phase 1: 1:1 CAD Flat Sketch + Photorealistic Editorial Photoshoot (3 poses)
 Phase 2: PatternFast Multi-Format Batch Export (A4, Letter, A0 across all sizes)
 Phase 3: 16-Page Luxury Instruction Booklet PDF (ReportLab)
@@ -57,10 +58,10 @@ class SewLuxePipelineGuard:
     ]
 
     PHASE_DESCRIPTIONS = {
-        "PHASE_0_DNA_AND_FABRIC_FORENSICS": "Sub-Step 0.1: Visual DNA (silhouette, closure, pockets) + Fabric & Color Forensics",
+        "PHASE_0_DNA_AND_FABRIC_FORENSICS": "Sub-Step 0.1: Visual DNA (The Single Vulnerability Law) + Fabric & Color Forensics",
         "PHASE_0_CAD_CONFIG_AND_DESIGN_ID": "Sub-Step 0.2: PatternFast CAD Configuration & Persistent Design ID",
         "PHASE_0_A4_FIRST_AUDIT": "Sub-Step 0.4: A4-First Fast Audit (Page 1 square, Page 2 specs, ghost pieces)",
-        "PHASE_0_USER_APPROVAL_GATE": "Sub-Step 0.5: Executive Audit Report & Explicit User Approval (HARD STOP)",
+        "PHASE_0_USER_APPROVAL_GATE": "Sub-Step 0.5: Executive Audit Report with Visual Flat Sketch & Explicit User Approval (HARD STOP)",
         "PHASE_1_CAD_FLAT_SKETCH": "Phase 1: Native PatternFast Vector Flat Sketch (1800x1800 at 300 DPI)",
         "PHASE_1_EDITORIAL_PHOTOSHOOT": "Phase 1: 3 Photorealistic Editorial Model Photos (Front, 3/4 Side, Back)",
         "PHASE_2_BATCH_PATTERN_EXPORT": "Phase 2: Multi-format batch export across all sizes (A4, Letter, A0 ZIPs)",
