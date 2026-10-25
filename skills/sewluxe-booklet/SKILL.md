@@ -231,6 +231,12 @@ The booklet exists to prevent bad reviews: every step must be impossible to misu
       - **Procedural CAD Panel Drafting**: Call `instruction-diagram-studio\scripts\draft_missing_panel.py` to draft clean, true-to-scale vector panels with right/wrong side shading (`#E6E6E6` / `#FFFFFF`), dashed stitch lines, curved press arrows, and `#F5F2EF` Gold Standard framing.
       - **Seamless Step Insertion**: The booklet generator reads `manifest["custom_steps"]`, chronologically injects them into the instruction sequence at the exact specified position, assigns a sequential step number, maps the authentic piece citations, and updates the Page 6 "Sewing order at a glance" grid dynamically.
   - **Pages 9–15 Dynamic Architecture Rule (Chronological Sewing Instructions)**:
+    - **The Sacred First-Source Rule (Al-Masdar Al-Awwal)**:
+      - If the authentic instruction diagram already exists in Tailornova/PatternFast, **ALWAYS USE IT DIRECTLY** (cleaned, cropped, and framed into Argon Gold Standard #F5F2EF container).
+      - ONLY if a bespoke technique does NOT exist (or has a fatal model mismatch/contradiction) do you draft it procedurally via CAD!
+      - NEVER draw crude synthetic polygonal shapes in Python/Matplotlib/PIL when official vector artwork exists.
+    - **Generic Template Contradiction Hunter**:
+      - Inspect authentic Tailornova diagrams for generic template reuse bugs (e.g. using a skirt/dress center-back zipper graphic saying "pin back sections together" on a side-zip trouser). Always correct labels to reflect real garment anatomy ("pin side seam together below zipper").
     - **100% Faithful Step Extraction from Source Instructions (Zero Inventions & Zero Leftovers)**:
       - NEVER copy sewing step texts from another pattern or hardcode non-existent features (e.g. NEVER write "Sew the front pleats" when the pattern has darts; NEVER describe pocket types not in the pattern).
       - The script MUST dynamically parse the source instructions PDF/JSON by locating `Step \d+:` anchors:
