@@ -33,5 +33,11 @@ etsy_listing_extracted.json
 
 # Individual Garment Projects & Customer Packages (STRICTLY LOCAL ON PC - NEVER PUSH TO GIT)
 projects/
+softprintlab_wide_pants/
+unzipped_wide_leg/
+extracted_all_recent/
+extracted_cache_images/
+colette_pants_engine/
+*.tmp
 
 

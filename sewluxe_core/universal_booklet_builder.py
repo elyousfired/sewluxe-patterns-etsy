@@ -14,6 +14,7 @@ import fitz  # PyMuPDF
 
 from reportlab.lib.pagesizes import A4
 from reportlab.lib import colors
+from reportlab.lib.colors import HexColor
 from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph
 from reportlab.lib.styles import ParagraphStyle
@@ -112,6 +113,45 @@ class UniversalBookletBuilder:
         """
         core_dir = os.path.dirname(os.path.abspath(__file__))
         panels_dir = os.path.join(core_dir, "assets", "master_panels")
+
+        # 0. Dedicated Clean Architecture for Pocketless Pull-On Elastic Trousers (Stella & Margot)
+        if self.spec.front_pockets == "none" and self.spec.closure_type == "pull_on_elastic":
+            if step_num == 1:
+                return os.path.join(panels_dir, "step1_pullon_prep.png")
+            elif step_num == 2:
+                return os.path.join(panels_dir, "Step_2_Inseams.png")
+            elif step_num == 3:
+                return os.path.join(panels_dir, "Step_3_Crotch_Seam.png")
+            elif step_num == 4:
+                return os.path.join(panels_dir, "Step_4_Side_Seams.png")
+            elif step_num == 5:
+                return os.path.join(panels_dir, "Step_5_Waistband_Prep.png")
+            elif step_num == 6:
+                return os.path.join(panels_dir, "Step_6_Elastic_Insertion.png")
+            elif step_num == 7:
+                return os.path.join(panels_dir, "Step_7_Hem.png")
+
+        # 0.1 Dedicated Clean Architecture for Pocketless Front-Fly Trousers (Celine Archetype)
+        if self.spec.front_pockets == "none" and self.spec.closure_type in ("exterior_button", "concealed_hook_bar", "jeans_tack_button"):
+            if step_num == 1:
+                p1 = os.path.join(panels_dir, "step1_aria_front_darts.png")
+                return p1 if os.path.exists(p1) else os.path.join(panels_dir, "step1_flat_front_and_crease.png")
+            elif step_num == 2:
+                return os.path.join(panels_dir, "step3_zipper_fly.png")
+            elif step_num == 3:
+                return os.path.join(panels_dir, "step4_anatomical_back_darts.png")
+            elif step_num == 4:
+                p4 = os.path.join(panels_dir, "step2_official_inseams_panel.png")
+                return p4 if os.path.exists(p4) else os.path.join(panels_dir, "Step_2_Inseams.png")
+            elif step_num == 5:
+                p5 = os.path.join(panels_dir, "step4_official_side_seams_panel.png")
+                return p5 if os.path.exists(p5) else os.path.join(panels_dir, "Step_4_Side_Seams.png")
+            elif step_num == 6:
+                p6 = os.path.join(panels_dir, "step7_trouser_fly_and_waistband.png")
+                return p6 if os.path.exists(p6) else os.path.join(panels_dir, "step6_official_waistband_panel.png")
+            elif step_num == 7:
+                p7 = os.path.join(panels_dir, "step7_button_and_hem.png")
+                return p7 if os.path.exists(p7) else os.path.join(panels_dir, "Step_7_Hem.png")
 
         if step_num == 1:
             if self.spec.front_shaping in ("flat_front", "front_darts"):
@@ -357,10 +397,17 @@ class UniversalBookletBuilder:
 
         c.setFont("Poppins-Bold", 7.0)
         c.setFillColor(accent_color)
-        c.drawString(px + 10.0, py + 18.0, "PALAZZO SILHOUETTE")
+        sil_label = "WIDE-LEG SILHOUETTE" if self.spec.silhouette == "wide_leg" else "PALAZZO SILHOUETTE"
+        c.drawString(px + 10.0, py + 18.0, sil_label)
         c.setFont("Poppins", 6.5)
         c.setFillColor(TEXT_MUTED)
-        c.drawString(px + 10.0, py + 7.5, "Seamless Flat Front  ·  Side Invisible Zip  ·  Clean Darts")
+        if self.spec.closure_type == "pull_on_elastic":
+            pill_desc = "Elastic Waistband  ·  Pull-On Wide-Leg  ·  Zero Closures"
+        elif self.spec.closure_type == "side_invisible_zip":
+            pill_desc = "Seamless Flat Front  ·  Side Invisible Zip  ·  Clean Darts"
+        else:
+            pill_desc = "Double Pleats  ·  Concealed Hook & Bar  ·  Clean Darts"
+        c.drawString(px + 10.0, py + 7.5, pill_desc)
 
         # 4. Lower Specs Bar (Perfected Mathematical Symmetry with Hero Container)
         y_spec = hy - 16.0
@@ -372,7 +419,7 @@ class UniversalBookletBuilder:
         sizes_cover_val = "US 00 – 22 (13 sizes)" if self.spec.size_standard != "PATTERNFAST_XXS_10XL" else "XXS – 10XL (15 sizes)"
         specs_cover = [
             ("SIZES", sizes_cover_val),
-            ("LEVEL", "Confident Beginner" if self.spec.closure_type == "side_invisible_zip" else "Intermediate"),
+            ("LEVEL", "Confident Beginner" if self.spec.closure_type in ("pull_on_elastic", "side_invisible_zip") else "Intermediate"),
             ("SEAM ALLOWANCE", f"{self.spec.seam_allowance_cm:.1f} cm (3/8 in) included"),
             ("FORMATS", "A4 · US Letter · A0 · Projector"),
         ]
@@ -433,13 +480,22 @@ class UniversalBookletBuilder:
         c.setLineWidth(0.8)
         c.roundRect(M_L, y_cur - intro_h, CONTENT_W, intro_h, 8, fill=1, stroke=1)
 
-        intro_text = (
-            f"Thank you for choosing the <b>{self.spec.model_name}</b>. Designed for fluid, heavy-drape woven textiles, "
-            f"these high-waisted palazzo trousers capture the effortless sophistication of modern quiet-luxury tailoring. "
-            f"Featuring a completely seamless flat front waistband, gentle vertical waist-shaping darts, "
-            f"a discreet left-side invisible zipper (18.00 cm), and an expansive full-length leg sweep terminating in a "
-            f"luxurious {self.spec.hem_allowance_cm:.1f} cm ({self.spec.hem_allowance_cm/2.54:.1f} in) weighted hem for fluid, waterfall drape with every step."
-        )
+        if self.spec.closure_type == "pull_on_elastic":
+            intro_text = (
+                f"Thank you for choosing the <b>{self.spec.model_name}</b>. Designed for cozy comfort and fluid, heavy-drape textiles, "
+                f"these high-waisted wide-leg trousers capture the effortless sophistication of modern quiet luxury. "
+                f"Featuring a continuous elastic-casing waistband that sits comfortably at the natural waistline, an uninterrupted "
+                f"pocketless silhouette with zero bulk over the hips, zero zippers or buttons, and a sweeping wide-leg terminating in a "
+                f"luxurious {self.spec.hem_allowance_cm:.1f} cm ({cm_to_tailor_inches(self.spec.hem_allowance_cm)}) weighted hem for fluid, waterfall drape with every step."
+            )
+        else:
+            intro_text = (
+                f"Thank you for choosing the <b>{self.spec.model_name}</b>. Designed for fluid, heavy-drape woven textiles, "
+                f"these high-waisted palazzo trousers capture the effortless sophistication of modern quiet-luxury tailoring. "
+                f"Featuring a completely seamless flat front waistband, gentle vertical waist-shaping darts, "
+                f"a discreet left-side invisible zipper (18.00 cm), and an expansive full-length leg sweep terminating in a "
+                f"luxurious {self.spec.hem_allowance_cm:.1f} cm ({cm_to_tailor_inches(self.spec.hem_allowance_cm)}) weighted hem for fluid, waterfall drape with every step."
+            )
         p_intro = Paragraph(intro_text, ParagraphStyle("WelcomeNarrative", fontName="Poppins", fontSize=8.4, leading=13.0, textColor=TEXT_BODY))
         w_p, h_p = p_intro.wrap(CONTENT_W - 24, intro_h)
         p_intro.drawOn(c, M_L + 12, y_cur - 12 - h_p)
@@ -465,15 +521,29 @@ class UniversalBookletBuilder:
         c.setLineWidth(0.6)
         c.line(M_L + 14, y_cur - 26, M_L + card_w - 14, y_cur - 26)
 
-        features = [
-            ("High-Rise Fitted Waistband", "Sits comfortably at natural waistline with clean contouring."),
-            ("Seamless Flat Front", "Zero front buttons, zero fly shield, zero bulk over the tummy."),
-            ("Concealed Left Side Zipper", "18.00 cm (7 1/8 in) invisible zipper for effortless wear."),
-            ("Vertical Shaping Darts", "4 contoured darts (2 front, 2 back) shaping gently over hips."),
-            ("Sweeping Palazzo Silhouette", "Fluid wide-leg drape measuring 60.5 to 91.7 cm leg sweep."),
-            ("Deep 5.0 cm Weighted Hem", f"Generous {self.spec.hem_allowance_cm:.1f} cm double-fold hem giving graceful drape."),
-            ("Standard Seam Allowance", f"{self.spec.seam_allowance_cm:.1f} cm (3/8 in) included on all joining edges.")
-        ]
+        ute_tables = self.engine.generate_size_tables()
+        if self.spec.closure_type == "pull_on_elastic":
+            fin_sw_start = ute_tables['finished'][0]['_raw'][2]
+            fin_sw_end = ute_tables['finished'][-1]['_raw'][2]
+            features = [
+                ("High-Rise Elastic Waistband", "Full comfortable gathered elastic casing sitting at the natural waistline."),
+                ("Effortless Pull-On Design", "Zero zippers, zero buttons, zero closures for clean, easy wear."),
+                ("Clean Pocketless Silhouette", "Uninterrupted hip drape with zero bulk and zero pocket lines."),
+                ("Relaxed Tailored Fit", "Gentle gathers at natural waist cascading into straight-wide drape."),
+                ("Sweeping Wide-Leg Silhouette", f"Fluid wide-leg drape measuring {fin_sw_start:.1f} to {fin_sw_end:.1f} cm ({cm_to_tailor_inches(fin_sw_start)} to {cm_to_tailor_inches(fin_sw_end)}) leg sweep."),
+                ("Deep 5.0 cm Weighted Hem", f"Generous {self.spec.hem_allowance_cm:.1f} cm ({cm_to_tailor_inches(self.spec.hem_allowance_cm)}) double-fold hem giving graceful drape."),
+                ("Standard Seam Allowance", f"{self.spec.seam_allowance_cm:.1f} cm ({cm_to_tailor_inches(self.spec.seam_allowance_cm)}) included on all joining edges.")
+            ]
+        else:
+            features = [
+                ("High-Rise Fitted Waistband", "Sits comfortably at natural waistline with clean contouring."),
+                ("Seamless Flat Front", "Zero front buttons, zero fly shield, zero bulk over the tummy."),
+                ("Concealed Left Side Zipper", "18.00 cm (7 1/8 in) invisible zipper for effortless wear."),
+                ("Vertical Shaping Darts", "4 contoured darts (2 front, 2 back) shaping gently over hips."),
+                ("Sweeping Palazzo Silhouette", "Fluid wide-leg drape measuring 60.5 to 91.7 cm leg sweep."),
+                ("Deep 5.0 cm Weighted Hem", f"Generous {self.spec.hem_allowance_cm:.1f} cm double-fold hem giving graceful drape."),
+                ("Standard Seam Allowance", f"{self.spec.seam_allowance_cm:.1f} cm (3/8 in) included on all joining edges.")
+            ]
         cur_fy = y_cur - 40
         for title_f, desc_f in features:
             c.setFillColor(accent_color)
@@ -511,7 +581,7 @@ class UniversalBookletBuilder:
             ("Page 5", "Fabric Requirements & Recommended Textiles"),
             ("Page 6", "Pattern Pieces Inventory & Required Notions"),
             ("Page 7", "Master CAD Blueprint & Cutting Lines"),
-            ("Page 8", "Fabric Cutting Layout & Clickable Video QR Codes"),
+            ("Page 8", "Fabric Cutting Layout & Clickable Video Hub"),
             ("Pages 9–15", "Step-by-Step Illustrated Sewing Panels (Steps 1–7)"),
             ("Page 16", "360° Editorial Fit Gallery & Social Community")
         ]
@@ -578,7 +648,10 @@ class UniversalBookletBuilder:
         c.setFont("Poppins", 6.8)
         c.setFillColor(TEXT_BODY)
         c.drawString(M_L + 12, y_cur - 26, "In fluid wide-leg trouser tailoring, pressing creates 60% of the silhouette. Press each seam flat first, then open with steam.")
-        c.drawString(M_L + 12, y_cur - 36, "Use a tailor's pressing ham for curved darts and a wooden clapper on the hem to lock crisp, professional edges.")
+        if self.spec.closure_type == "pull_on_elastic":
+            c.drawString(M_L + 12, y_cur - 36, "Use a press cloth with steam and a wooden clapper on seam junctions and the 5.0 cm hem to lock crisp, professional edges.")
+        else:
+            c.drawString(M_L + 12, y_cur - 36, "Use a tailor's pressing ham for curved darts and a wooden clapper on the hem to lock crisp, professional edges.")
         c.showPage()
 
         # =====================================================================
@@ -619,7 +692,7 @@ class UniversalBookletBuilder:
         alert_desc = (
             "Never print the entire pattern batch at once! Open your pattern in Adobe Acrobat Reader and print "
             "<b>Page 1 only at 100% Actual Size</b>. Measure the test square with a hard physical ruler. "
-            "Both horizontal and vertical edges must measure exactly <b>4.00 inches (10.00 cm)</b> before printing remaining tiles."
+            'Both horizontal and vertical edges must measure exactly <b>10.00 cm x 10.00 cm (3 15/16" x 3 15/16")</b> on metric prints, or <b>4.00" x 4.00" (10.16 cm x 10.16 cm)</b> on imperial prints before cutting fabric.'
         )
         p_alert = Paragraph(alert_desc, ParagraphStyle(
             "AlertDesc", fontName="Poppins", fontSize=7.2, leading=10.8, textColor=TEXT_BODY
@@ -668,7 +741,7 @@ class UniversalBookletBuilder:
                     ("Pre-Wash & Steam Shrinkage:", "Pre-treat your suiting fabric exactly as you plan to launder the finished trousers. Fluid crepe, Tencel, and viscose blends often shrink <b>3% to 6%</b> on first steam pressing."),
                     ("True Grainline Alignment:", "The vertical grainline arrow on each pattern piece MUST lie exactly parallel to the fabric selvedge. Measure from both arrow tips to the edge to confirm."),
                     ("Prevent Twisted Legs:", "Wide-leg palazzo silhouettes require absolute grainline precision. Cutting even 2° off-grain will cause trouser legs to torque and twist inward around the calf."),
-                    (f"Built-in Seam Allowances:", f"Standard <b>{self.spec.seam_allowance_cm:.1f} cm (3/8 in)</b> seam allowance is included on all edges. Bottom hem includes a generous <b>{self.spec.hem_allowance_cm:.1f} cm ({self.spec.hem_allowance_cm/2.54:.1f} in)</b> fold-up hem.")
+                    (f"Built-in Seam Allowances:", f"Standard <b>{self.spec.seam_allowance_cm:.1f} cm ({cm_to_tailor_inches(self.spec.seam_allowance_cm)})</b> seam allowance is included on all edges. Bottom hem includes a generous <b>{self.spec.hem_allowance_cm:.1f} cm ({cm_to_tailor_inches(self.spec.hem_allowance_cm)})</b> fold-up hem.")
                 ]
             )
         ]
@@ -724,7 +797,7 @@ class UniversalBookletBuilder:
         c.setFont("Poppins", 6.8)
         c.setFillColor(TEXT_BODY)
         c.drawString(M_L + 14, y_cur - 27, "Prefer to skip taping? Take the A0 PDF file to your local copyshop or use an online blueprint printing service.")
-        c.drawString(M_L + 14, y_cur - 37, "If using a sewing projector, open the dedicated Projector file with 100% zoom and calibrate using the 1\" & 5 cm high-contrast grid.")
+        c.drawString(M_L + 14, y_cur - 37, "If using a sewing projector, open the dedicated Projector file with 100% zoom and calibrate using the 1-inch & 5 cm high-contrast grid.")
 
         c.showPage()
 
@@ -759,8 +832,12 @@ class UniversalBookletBuilder:
 
         c.setFont("Poppins", 6.8)
         c.setFillColor(TEXT_BODY)
-        c.drawString(M_L + 124, y - 12, "Waist Ease: +1.5 cm (+5/8\") for breathing comfort  |  Hip Ease: +3.0 cm (+1 1/4\") for fluid contour")
-        c.drawString(M_L + 10, y - 23, "• If between sizes, choose according to your natural waist measurement, as the wide palazzo silhouette allows generous hip ease.")
+        if self.spec.closure_type == "pull_on_elastic":
+            c.drawString(M_L + 124, y - 12, "Waistband: High-stretch elastic casing (-3.5 cm relaxed)  |  Hip Ease: +4.0 cm (+1 5/8\") for easy pull-on")
+            c.drawString(M_L + 10, y - 23, "• If between sizes, choose according to your hip measurement to ensure the pants slide smoothly over hips without a zipper.")
+        else:
+            c.drawString(M_L + 124, y - 12, "Waist Ease: +1.5 cm (+5/8\") for breathing comfort  |  Hip Ease: +3.0 cm (+1 1/4\") for fluid contour")
+            c.drawString(M_L + 10, y - 23, "• If between sizes, choose according to your natural waist measurement, as the wide palazzo silhouette allows generous hip ease.")
 
         y_cur = y - ease_bar_h - 14
 
@@ -770,13 +847,13 @@ class UniversalBookletBuilder:
         ute_tables = self.engine.generate_size_tables()
         if self.spec.size_standard == "PATTERNFAST_XXS_10XL":
             c.drawString(M_L, y_cur, "TABLE 1: BODY SIZE CHART (PATTERNFAST / EUROPEAN STANDARD)")
-            b_heads = ["SIZE", "EU CODE", "BUST (CM)", "WAIST (CM)", "HIPS (CM)", "WAIST (IN)", "HIPS (IN)"]
+            b_heads = ["SIZE", "EU CODE", "WAIST (CM)", "HIPS (CM)", "WAIST (IN)", "HIPS (IN)"]
+            b_widths = [75, 65, 95, 95, 95, 98]  # Sum = 523 pt
         else:
             c.drawString(M_L, y_cur, "TABLE 1: BODY MEASUREMENTS (ALVANON NORTH AMERICA STANDARD)")
-            b_heads = ["US SIZE", "LETTER", "BUST (CM)", "WAIST (CM)", "HIPS (CM)", "WAIST (IN)", "HIPS (IN)"]
+            b_heads = ["US SIZE", "LETTER", "WAIST (CM)", "HIPS (CM)", "WAIST (IN)", "HIPS (IN)"]
+            b_widths = [75, 65, 95, 95, 95, 98]  # Sum = 523 pt
         y_cur -= 14
-
-        b_widths = [60, 50, 70, 75, 75, 93, 100]  # Sum = 523 pt
 
         c.setFillColor(self.accent_color)
         c.roundRect(M_L, y_cur - 13.5, sum(b_widths), 13.5, 3, fill=1, stroke=0)
@@ -792,7 +869,6 @@ class UniversalBookletBuilder:
             (
                 r["size"],
                 r["alt"],
-                r["bust_cm"],
                 r["waist_cm"],
                 r["hips_cm"],
                 r["waist_in"],
@@ -826,8 +902,12 @@ class UniversalBookletBuilder:
         y_cur -= 14
 
         size_col_name = "SIZE" if self.spec.size_standard == "PATTERNFAST_XXS_10XL" else "US SIZE"
-        f_heads = [size_col_name, "FINISHED WAIST", "FINISHED HIPS*", "LEG SWEEP (CIRCUMFERENCE)", "INSEAM / OUTSEAM"]
-        f_widths = [60, 105, 105, 120, 133]  # Sum = 523 pt
+        if self.spec.closure_type == "pull_on_elastic":
+            f_heads = [size_col_name, "FINISHED WAIST (RELAXED / STRETCH)", "FINISHED HIPS*", "LEG SWEEP (CIRCUMFERENCE)", "INSEAM / OUTSEAM"]
+            f_widths = [55, 142, 95, 110, 121]  # Sum = 523 pt
+        else:
+            f_heads = [size_col_name, "FINISHED WAIST", "FINISHED HIPS*", "LEG SWEEP (CIRCUMFERENCE)", "INSEAM / OUTSEAM"]
+            f_widths = [60, 105, 105, 120, 133]  # Sum = 523 pt
 
         c.setFillColor(self.accent_color)
         c.roundRect(M_L, y_cur - 13.5, sum(f_widths), 13.5, 3, fill=1, stroke=0)
@@ -882,9 +962,16 @@ class UniversalBookletBuilder:
         c.setFillColor(self.accent_color)
         c.drawString(M_L + 12, y_cur - 14, "* MEASUREMENT NOTES & LENGTH ADJUSTMENTS:")
 
+        if self.spec.closure_type == "pull_on_elastic":
+            dim_meas_text = "• <b>Finished Dimensions:</b> Finished waist is measured with elastic relaxed (approximately 3.5 cm below body waist for a comfortable, stay-put fit), stretching to 92+ cm to slide effortlessly over hips with zero closures.<br/>"
+        elif self.spec.back_shaping == "elastic_gathered":
+            dim_meas_text = "• <b>Finished Dimensions:</b> Finished waist and hip circumferences are measured with back elastic relaxed and left invisible zipper closed.<br/>" 
+        else:
+            dim_meas_text = "• <b>Finished Dimensions:</b> Finished waist and hip circumferences are measured with the 4 vertical darts stitched and left invisible zipper closed.<br/>"
+
         note_text = (
-            "• <b>Finished Dimensions:</b> Finished waist and hip circumferences are measured with the 4 vertical darts stitched and left invisible zipper closed.<br/>"
-            "• <b>Floor-Length Inseam:</b> Standard inseam is drafted at <b>78.0 cm (30 3/4 in)</b> for a 168 cm (5'6\") height to cascade gracefully over shoes.<br/>"
+            dim_meas_text +
+            f"• <b>Floor-Length Inseam:</b> Standard inseam is drafted at <b>{self.rules['inseam_168_cm']:.1f} cm ({cm_to_tailor_inches(self.rules['inseam_168_cm'])})</b> for a 168 cm (5'6\") height to cascade gracefully over shoes.<br/>"
             "• <b>Lengthening / Shortening:</b> To alter length, cut along the printed 'Lengthen / Shorten Lines' at mid-thigh on Front and Back pieces before cutting fabric."
         )
         p_note = Paragraph(note_text, ParagraphStyle(
@@ -978,12 +1065,20 @@ class UniversalBookletBuilder:
         c.setLineWidth(0.5)
         c.line(M_L + 14, y - 22, M_L + CONTENT_W - 14, y - 22)
 
-        textile_bullets = [
-            ("Primary Quiet-Luxury Choice (Fluid Silk-Viscose or Tencel Crepe):", "Weight: 200–280 gsm. Delivers a dramatic liquid waterfall drape, soft matte luster, and fluid swing when walking. Perfect match for the Aria silhouette."),
-            ("Natural Warm-Weather Tailoring (Washed Linen-Viscose Blend):", "Weight: 190–240 gsm. Combines the breathable slub texture of pure linen with the soft, fluid drape of viscose, minimizing stiff creasing."),
-            ("Four-Season Tailored Suiting (Lightweight Wool Gabardine / Tropical Wool):", "Weight: 210–260 gsm. Provides crisp seam recovery, breathable structure, and refined drape suited for year-round capsule wardrobe styling."),
-            ("Fabrics to Avoid:", "Avoid stiff rigid cotton canvas, heavy rigid denim, and lightweight slippery lining synthetics. Stiff fabrics balloon out unflatteringly, while overly flimsy textiles cling and lack hem weight.")
-        ]
+        if "flannel" in self.spec.model_name.lower():
+            textile_bullets = [
+                ("Primary Winter Choice (Brushed Wool Flannel / Cozy Flannel):", f"Weight: 220–300 gsm. Delivers tactile softness, gentle thermal warmth, and elegant fluid drape. Perfect match for the {self.spec.model_name} silhouette."),
+                ("Quiet-Luxury Fluid Drape (Silk-Viscose Blend / Tencel Twill):", "Weight: 200–280 gsm. Delivers a dramatic liquid waterfall drape, soft matte luster, and effortless swing when walking."),
+                ("Natural Tailoring Choice (Washed Linen-Viscose Blend):", "Weight: 190–240 gsm. Combines breathable natural slub texture with soft viscose drape, minimizing stiff creasing."),
+                ("Fabrics to Avoid:", "Avoid stiff rigid cotton canvas, heavy rigid denim, and lightweight slippery lining synthetics. Stiff fabrics balloon out unflatteringly, while overly flimsy textiles cling and lack hem weight.")
+            ]
+        else:
+            textile_bullets = [
+                ("Primary Quiet-Luxury Choice (Fluid Silk-Viscose or Tencel Crepe):", f"Weight: 200–280 gsm. Delivers a dramatic liquid waterfall drape, soft matte luster, and fluid swing when walking. Perfect match for the {self.spec.model_name} silhouette."),
+                ("Natural Warm-Weather Tailoring (Washed Linen-Viscose Blend):", "Weight: 190–240 gsm. Combines the breathable slub texture of pure linen with the soft, fluid drape of viscose, minimizing stiff creasing."),
+                ("Four-Season Tailored Suiting (Lightweight Wool Gabardine / Tropical Wool):", "Weight: 210–260 gsm. Provides crisp seam recovery, breathable structure, and refined drape suited for year-round capsule wardrobe styling."),
+                ("Fabrics to Avoid:", "Avoid stiff rigid cotton canvas, heavy rigid denim, and lightweight slippery lining synthetics. Stiff fabrics balloon out unflatteringly, while overly flimsy textiles cling and lack hem weight.")
+            ]
 
         cur_ty = y - 34
         for t_head, t_body in textile_bullets:
@@ -1013,27 +1108,41 @@ class UniversalBookletBuilder:
         c.setLineWidth(0.5)
         c.line(M_L + 14, y - 22, M_L + CONTENT_W - 14, y - 22)
 
-        if self.spec.closure_type in ("exterior_button", "jeans_tack_button"):
-            closure_txt = "7–8 in (18–20 cm) trouser zipper fly + 20 mm tailored horn button & buttonhole."
-        elif self.spec.closure_type == "concealed_hook_bar":
-            closure_txt = "Concealed heavy-duty trouser hook & bar for inside extension tab + 7–8 in (18–20 cm) trouser zipper fly."
-        elif self.spec.closure_type == "side_invisible_zip":
-            closure_txt = "18.00 cm (7 1/8 in) invisible nylon zipper matching the main fabric color for the left hip seam closure."
-        elif self.spec.closure_type == "pull_on_elastic":
-            closure_txt = "Continuous elastic 3.5 cm (1.4 in) wide matching waist circumference."
+        if self.spec.closure_type == "pull_on_elastic":
+            elastic_txt = "3.8 cm (1 1/2 in) knit elastic matching natural waist circumference minus 2.5 to 5.0 cm (1 to 2 in) for comfortable, secure retention. Zero zippers, buttons, or fasteners needed."
+            interfacing_txt = "None required. The pull-on elastic waistband is cut from self-fabric without rigid interfacing to ensure maximum stretch and soft gathering."
+            pocket_lining_txt = f"None required. The {self.spec.model_name} features a sleek, pocketless silhouette for an uninterrupted, bulge-free hip contour."
+            pressing_tools_txt = "Steam iron, press cloth, and a wooden clapper to set razor-sharp hem folds."
+
+            notions_bullets = [
+                ("Waistband Elastic:", elastic_txt),
+                ("Fusible Interfacing:", interfacing_txt),
+                ("Pocket Lining:", pocket_lining_txt),
+                ("Sewing Thread:", "1 spool (250m / 274yd) quality 100% all-purpose polyester thread (Gütermann Mara 100 or Coats & Clark) matching main fabric."),
+                ("Machine Needles:", "New Microtex or Universal needle, size 70/10 to 80/12, chosen to suit your selected fabric weave."),
+                ("Couture Pressing Tools:", pressing_tools_txt)
+            ]
         else:
-            closure_txt = "Tailored horn button 20 mm + buttonhole."
+            if self.spec.closure_type in ("exterior_button", "jeans_tack_button"):
+                closure_txt = "7–8 in (18–20 cm) trouser zipper fly + 20 mm tailored horn button & buttonhole."
+            elif self.spec.closure_type == "concealed_hook_bar":
+                closure_txt = "Concealed heavy-duty trouser hook & bar for inside extension tab + 7–8 in (18–20 cm) trouser zipper fly."
+            elif self.spec.closure_type == "side_invisible_zip":
+                closure_txt = "18.00 cm (7 1/8 in) invisible nylon zipper matching the main fabric color for the left hip seam closure."
+            else:
+                closure_txt = "Tailored horn button 20 mm + buttonhole."
 
-        pocket_lining_txt = "None required. The Aria trousers feature a sleek, pocketless silhouette for an uninterrupted, bulge-free hip contour." if self.spec.front_pockets == "none" else "0.40 m lightweight cotton lawn or Bemberg lining for pocket bags."
+            pocket_lining_txt = f"None required. The {self.spec.model_name} features a sleek, pocketless silhouette for an uninterrupted, bulge-free hip contour." if self.spec.front_pockets == "none" else "0.40 m lightweight cotton lawn or Bemberg lining for pocket bags."
+            pressing_tools_txt = "Steam iron, tailor's ham, press cloth, and a wooden clapper to set razor-sharp hem folds."
 
-        notions_bullets = [
-            ("Waistband Closure:", closure_txt),
-            ("Fusible Interfacing:", "0.50 m (1/2 yard) lightweight woven or non-woven fusible interfacing (Pellon SF101 or Vlieseline G700) to stabilize the waistband."),
-            ("Pocket Lining:", pocket_lining_txt),
-            ("Sewing Thread:", "1 spool (250m / 274yd) quality 100% all-purpose polyester thread (Gütermann Mara 100 or Coats & Clark) matching main fabric."),
-            ("Machine Needles:", "New Microtex or Universal needle, size 70/10 to 80/12, chosen to suit your selected fabric weave."),
-            ("Couture Pressing Tools:", "Steam iron, tailor's ham (for pressing curved waist darts), press cloth, and a wooden clapper to set razor-sharp hem folds.")
-        ]
+            notions_bullets = [
+                ("Waistband Closure:", closure_txt),
+                ("Fusible Interfacing:", "0.50 m (1/2 yard) lightweight woven or non-woven fusible interfacing (Pellon SF101 or Vlieseline G700) to stabilize the waistband."),
+                ("Pocket Lining:", pocket_lining_txt),
+                ("Sewing Thread:", "1 spool (250m / 274yd) quality 100% all-purpose polyester thread (Gütermann Mara 100 or Coats & Clark) matching main fabric."),
+                ("Machine Needles:", "New Microtex or Universal needle, size 70/10 to 80/12, chosen to suit your selected fabric weave."),
+                ("Couture Pressing Tools:", pressing_tools_txt)
+            ]
 
         cur_ny = y - 34
         for n_head, n_body in notions_bullets:
@@ -1157,8 +1266,6 @@ class UniversalBookletBuilder:
             c.setFont("Poppins-Bold", 6.5)
             c.setFillColor(CHARCOAL)
             step_t = f"Step {s_data['step']}: {s_data['title']}"
-            if s_data['step'] == 7:
-                step_t = "Step 7: Waistband Attachment & Hem"
             c.drawString(M_L + 8, y - 9.5, step_t)
 
             c.setFont("Poppins", 6.4)
@@ -1187,7 +1294,7 @@ class UniversalBookletBuilder:
             (f"Built-in Seam Allowances ({self.spec.seam_allowance_cm:.1f} cm / 3/8 in):", f"Standard {self.spec.seam_allowance_cm:.1f} cm (3/8 in) seam allowance is already included on all pattern joining edges. Cut directly along solid pattern lines—do NOT add extra seam allowance."),
             (f"Built-in Weighted Hem ({self.spec.hem_allowance_cm:.1f} cm / {self.spec.hem_allowance_cm/2.54:.1f} in):", f"Generous {self.spec.hem_allowance_cm:.1f} cm ({self.spec.hem_allowance_cm/2.54:.1f} in) double-fold hem is included at leg bottoms. This provides authentic weight for the waterfall palazzo drape over shoes."),
             ("Strict Grainline Alignment:", "The long vertical grainline arrow on Front and Back pieces MUST lie perfectly parallel to the fabric selvedge. Measure from both arrow tips to verify exact distance."),
-            ("Transferring Technical Notches & Dart Markings:", "Snip shallow 3 mm (1/8 in) notches into the seam allowances at knee balance points, hip notches, and center seams. Mark dart apex points with tailor's chalk.")
+            ("Transferring Technical Notches & Markings:", "Snip shallow 3 mm (1/8 in) notches into the seam allowances at knee balance points, hip notches, and center seams. Mark casing foldlines with tailor's chalk.")
         ]
 
         p_style_proto = ParagraphStyle("ProtoBullet", fontName="Poppins", fontSize=6.8, leading=9.6, textColor=TEXT_BODY)
@@ -1280,12 +1387,17 @@ class UniversalBookletBuilder:
         c.setLineWidth(0.5)
         c.line(bx_l + 14, y_cur - 22, bx_l + card_w - 14, y_cur - 22)
 
+        if self.spec.closure_type == "pull_on_elastic":
+            shaping_bullet = ("Elastic Waistband Casing:", "Foldline and seam notches indicate the 3.8 cm casing channel for elastic insertion.")
+        else:
+            shaping_bullet = ("Waist Dart Contours:", "Vertical V-lines show stitching lines from waistline tapering to zero at dart apex.")
+
         markings_bullets = [
             ("Solid Outer Line (0.8pt):", "Represents the exact fabric cutting line. Do NOT add extra seam allowance."),
-            ("Dashed Inner Line (0.4pt):", f"Represents active stitching line, offset exactly by {self.spec.seam_allowance_cm:.1f} cm (and {self.spec.hem_allowance_cm:.1f} cm at leg hem)."),
+            ("Dashed Inner Line (0.4pt):", f"Represents active stitching line, offset exactly by {self.spec.seam_allowance_cm:.1f} cm ({cm_to_tailor_inches(self.spec.seam_allowance_cm)}) and {self.spec.hem_allowance_cm:.1f} cm ({cm_to_tailor_inches(self.spec.hem_allowance_cm)}) at leg hem."),
             ("Grainline Vector Arrow:", "Indicates straight of grain. Must lie strictly parallel to fabric selvedge along the entire leg."),
             ("Technical T-Notches:", "Single balance notches at knees and crotch indicate precise alignment points between pieces."),
-            ("Waist Dart Contours:", "Vertical V-lines show stitching lines from waistline tapering to zero at dart apex.")
+            shaping_bullet
         ]
 
         cur_ly = y_cur - 34
@@ -1371,55 +1483,36 @@ class UniversalBookletBuilder:
         y -= (h + 20)
 
         # Dynamic Video Selection based strictly on TrouserSpec
-        if "pleat" in self.spec.front_shaping:
-            v1_title = "Sewing Front Pleats & Center Crease"
-            v1_step = "Step 1 Technique Guide"
-            v1_url = "https://www.youtube.com/watch?v=kYJvM9x0b0Q"
-        else:
-            v1_title = "Contoured Waist Darts & Shaping"
-            v1_step = "Step 1 & 3 Technique Guide"
+        if self.spec.closure_type == "pull_on_elastic" and self.spec.front_pockets == "none":
+            v1_title = "Inner Leg Inseams Assembly"
+            v1_step = "Step 2 Technique Guide"
             v1_url = "https://www.youtube.com/watch?v=kYJvM9x0b0Q"
 
-        if self.spec.front_pockets == "slant_italian":
-            v2_title = "Sewing Slanted Trouser Pockets"
-            v2_step = "Step 2 Technique Guide"
-            v2_url = "https://www.youtube.com/watch?v=rZvkl2069sQ"
-        elif self.spec.front_pockets == "in_seam":
-            v2_title = "Sewing In-Seam Pocket Bags"
-            v2_step = "Pocket Technique Guide"
-            v2_url = "https://www.youtube.com/watch?v=rZvkl2069sQ"
-        else:
-            v2_title = "Rise Seams & Crotch Reinforcement"
-            v2_step = "Step 2 & 4 Technique Guide"
+            v2_title = "Continuous Crotch Rise Seam"
+            v2_step = "Step 3 Technique Guide"
             v2_url = "https://www.youtube.com/watch?v=Y3rAmHE7CZs"
 
-        if self.spec.closure_type in ("exterior_button", "jeans_tack_button", "concealed_hook_bar"):
-            v3_title = "Front Zipper Fly & Shield Installation"
-            v3_step = "Step 3 Technique Guide"
-            v3_url = "https://www.youtube.com/watch?v=Y3rAmHE7CZs"
-        elif self.spec.closure_type == "side_invisible_zip":
-            v3_title = "Concealed Side Invisible Zipper"
-            v3_step = "Step 6 Technique Guide"
-            v3_url = "https://www.youtube.com/watch?v=rZvkl2069sQ"
-        else:
-            v3_title = "Elastic Casing & Drawstring Assembly"
-            v3_step = "Waistband Assembly Guide"
+            v3_title = "Waistband Casing & Elastic Insertion"
+            v3_step = "Step 5 & 6 Technique Guide"
             v3_url = "https://www.youtube.com/watch?v=rZvkl2069sQ"
 
-        if self.spec.closure_type == "concealed_hook_bar":
-            v7_title = "Concealed Hook & Bar Waistband Closure"
-            v7_step = "Step 7 Technique Guide"
-            v7_url = "https://www.youtube.com/watch?v=DPpF3kAP_oo"
-        elif self.spec.closure_type == "side_invisible_zip":
-            v7_title = "Waistband Attachment & 5.0 cm Hem"
-            v7_step = "Step 7 Technique Guide"
-            v7_url = "https://www.youtube.com/watch?v=DPpF3kAP_oo"
-        elif self.spec.closure_type in ("exterior_button", "jeans_tack_button"):
-            v7_title = "Waistband Button Closure & Hemming"
+            v7_title = "Deep 5.0 cm Weighted Hemming"
             v7_step = "Step 7 Technique Guide"
             v7_url = "https://www.youtube.com/watch?v=DPpF3kAP_oo"
         else:
-            v7_title = "Waistband Construction & Hemming"
+            v1_title = "Waistline Staystitching & Inseams"
+            v1_step = "Step 1 & 2 Technique Guide"
+            v1_url = "https://www.youtube.com/watch?v=kYJvM9x0b0Q"
+
+            v2_title = "Continuous Crotch Seam"
+            v2_step = "Step 3 Technique Guide"
+            v2_url = "https://www.youtube.com/watch?v=Y3rAmHE7CZs"
+
+            v3_title = "Waistband Construction"
+            v3_step = "Step 5 Technique Guide"
+            v3_url = "https://www.youtube.com/watch?v=rZvkl2069sQ"
+
+            v7_title = "Weighted Hemming"
             v7_step = "Step 7 Technique Guide"
             v7_url = "https://www.youtube.com/watch?v=DPpF3kAP_oo"
 
@@ -1462,10 +1555,38 @@ class UniversalBookletBuilder:
             c.drawString(tx, cy - 54, "Watch Video Tutorial →")
             c.linkURL(v_url, (tx, cy - 58, tx + 110, cy - 42), relative=0)
 
-        y_foot = cy - c_h - 40
-        p_style_foot = ParagraphStyle("P8FootNote", fontName="Poppins-Italic", fontSize=7.0, leading=10.0, textColor=TEXT_MUTED)
+        # Fabric Cutting Layout Box on Page 8
+        y_box = cy - c_h - 16
+        box_h = 68.0
+        c.setFillColor(CONTAINER_BG)
+        c.setStrokeColor(BORDER_SUBTLE)
+        c.setLineWidth(0.8)
+        c.roundRect(M_L, y_box - box_h, CONTENT_W, box_h, 8, fill=1, stroke=1)
+
+        c.setFillColor(self.accent_color)
+        c.rect(M_L, y_box - box_h, 4.0, box_h, fill=1, stroke=0)
+
+        c.setFont("Poppins-Bold", 8.0)
+        c.setFillColor(self.accent_color)
+        c.drawString(M_L + 14, y_box - 15, "FABRIC CUTTING & GRAINLINE LAYOUT PROTOCOL")
+
+        c.setStrokeColor(self.accent_muted)
+        c.setLineWidth(0.5)
+        c.line(M_L + 14, y_box - 20, M_L + CONTENT_W - 14, y_box - 20)
+
+        p8_layout_text = (
+            "• <b>60\" (150 cm) Fabric:</b> Fold fabric lengthwise with selvedges aligned. Place Front and Back trouser legs parallel to grainline. Cut Waistband on crosswise grain or along straight grain on fold.<br/>"
+            "• <b>45\" (115 cm) Fabric:</b> Wide-leg pieces cannot fit side-by-side; stack Front and Back lengthwise end-to-end. Ensure directional nap is identical on brushed flannel.<br/>"
+            "• <b>Grainline Verification:</b> Measure from grainline arrow to selvedge at top, middle, and bottom before pinning and cutting."
+        )
+        p_p8_layout = Paragraph(p8_layout_text, ParagraphStyle("P8Layout", fontName="Poppins", fontSize=6.8, leading=9.8, textColor=TEXT_BODY))
+        pw_p8, ph_p8 = p_p8_layout.wrap(CONTENT_W - 24, 45)
+        p_p8_layout.drawOn(c, M_L + 14, y_box - 24 - ph_p8)
+
+        y_foot = y_box - box_h - 12
+        p_style_foot = ParagraphStyle("P8FootNote", fontName="Poppins-Italic", fontSize=6.6, leading=9.2, textColor=TEXT_MUTED)
         p_foot = Paragraph("Video tutorials are produced by independent tailoring educators. Always follow the official SewLuxe seam allowances (1.0 cm / 3/8 in) and hem allowances (5.0 cm / 2.0 in) as specified in this guide.", p_style_foot)
-        pw_f, ph_f = p_foot.wrap(CONTENT_W, 35)
+        pw_f, ph_f = p_foot.wrap(CONTENT_W, 25)
         p_foot.drawOn(c, M_L, y_foot - ph_f)
         c.showPage()
 
@@ -1507,9 +1628,18 @@ class UniversalBookletBuilder:
                 renderPDF.draw(panel_drawing, c, M_L, y - 210)
                 y -= 218
 
-            # Tailoring Secret / Pro Tip
-            self._draw_tip_box(c, y, f"Tailoring Secret: Step {s_data['step']} Integrity",
-                               "Pressing thoroughly at this step prevents bulky seams and ensures razor-sharp drape in the finished trouser.")
+            # Tailoring Secret / Pro Tip (Bespoke Couturier Advice per Step)
+            pullon_secrets = {
+                1: "Use a lightweight staystitch (stitch length 2.0 mm) exactly 6 mm from the cut edge. This stabilizes the curved waist bias and prevents stretching while handling.",
+                2: "Do not pull or stretch the inner leg seam while stitching. Let the feed dogs move the flannel naturally, and press seam allowances smoothly toward the back.",
+                3: "At the 4-way crotch junction, nest the inseam seam allowances in opposite directions to minimize bulk. The parallel reinforcement stitch 2 mm inside prevents popped seams.",
+                4: "Pin thoroughly along outer side seams matching hip and knee balance notches before stitching. Press open flat over a sleeve board using steam and press cloth.",
+                5: "Pressing a sharp center foldline with steam before attaching the casing makes it effortless to keep the 3.8 cm waistband channel completely even all around.",
+                6: "Secure the trailing end of the elastic with a large safety pin to the casing opening so you never lose it inside while threading. Stitch ends with a reinforced box-and-cross.",
+                7: "Use a tailor's wooden clapper immediately after steam pressing the 5.0 cm hem fold to set a razor-sharp, quiet-luxury weighted hemline that hangs beautifully."
+            }
+            tip_msg = pullon_secrets.get(s_data['step'], "Pressing thoroughly at this step prevents bulky seams and ensures razor-sharp drape in the finished trouser.")
+            self._draw_tip_box(c, y, f"Tailoring Secret: Step {s_data['step']} Master Tip", tip_msg)
             c.showPage()
 
         # =====================================================================
@@ -1539,9 +1669,11 @@ class UniversalBookletBuilder:
         # Try to locate editorial photos or render CAD showcases
         photos_placed = False
         if assets_dir and os.path.exists(assets_dir):
-            model_slug = self.spec.model_name.lower().split()[0]
+            model_slug = self.spec.model_name.lower().split()[0].replace('é', 'e').replace('è', 'e')
             trio_patterns = [
+                ["photo_01_front.jpg", "photo_02_side.jpg", "photo_03_back.jpg"],
                 [f"{model_slug}_photo_01_front.jpg", f"{model_slug}_photo_02_side.jpg", f"{model_slug}_photo_03_back.jpg"],
+                [f"{model_slug}_model_01_front.png", f"{model_slug}_model_02_side.png", f"{model_slug}_model_03_back.png"],
                 [f"{model_slug}_photo_01.jpg", f"{model_slug}_photo_02.jpg", f"{model_slug}_photo_03.jpg"],
                 [f"{self.spec.silhouette}_photo_01.jpg", f"{self.spec.silhouette}_photo_02.jpg", f"{self.spec.silhouette}_photo_03.jpg"],
                 ["vivienne_photo_01_front.jpg", "vivienne_photo_02_side.jpg", "vivienne_photo_03_back.jpg"],

@@ -74,7 +74,7 @@ class UniversalCADBlueprintEngine:
         is_palazzo = spec.silhouette == "palazzo"
         is_cigarette = spec.silhouette == "cigarette"
         is_barrel = spec.silhouette == "barrel_leg"
-        is_elastic_waist = spec.closure_type == "pull_on_elastic" or spec.front_shaping == "elastic_gathered"
+        is_elastic_waist = spec.closure_type == "pull_on_elastic" or spec.front_shaping == "elastic_gathered" or spec.back_shaping == "elastic_gathered"
 
         # Leg sweep width offsets
         hem_half_w = 45 if is_palazzo else (28 if is_cigarette else (36 if is_barrel else 38))
@@ -208,7 +208,7 @@ class UniversalCADBlueprintEngine:
                 g.add(Line(px, 332, px, 295, strokeColor=c_cut, strokeWidth=0.6))
         elif spec.front_shaping == "front_darts":
             g.add(Polygon([fx_center, 332, fx_center + 3, 280, fx_center + 6, 332], fillColor=None, strokeColor=c_cut, strokeWidth=0.6))
-        elif is_elastic_waist:
+        elif spec.front_shaping == "elastic_gathered":
             for wx in range(int(fx_left_knee + 15), int(fx_center + 35), 6):
                 g.add(Line(wx, 332, wx + 3, 328, strokeColor=c_seam, strokeWidth=0.5))
 
@@ -350,7 +350,7 @@ class UniversalCADBlueprintEngine:
             g.add(String(rx + 200, 224, '7', fontName='Helvetica-Bold', fontSize=11, fillColor=colors.black))
             g.add(String(rx + 188, 166, '7. FLY FACING', fontName='Helvetica-Bold', fontSize=6, fillColor=colors.HexColor('#222222')))
             g.add(String(rx + 188, 157, 'Cut 2 Interfacing', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#666666')))
-        elif spec.closure_type == "side_invisible_zip" and spec.front_pockets == "none":
+        elif (spec.closure_type in ("side_invisible_zip", "pull_on_elastic")) and spec.front_pockets == "none":
             # Clean Pocketless & Side-Zip Blueprint Legend Block
             box_x = rx + 6
             box_y = 138
@@ -361,15 +361,25 @@ class UniversalCADBlueprintEngine:
             g.add(Rect(box_x, box_y + box_h - 18, box_w, 4, fillColor=colors.HexColor('#1A4D54'), strokeColor=None))
             g.add(String(box_x + 8, box_y + box_h - 12.5, "TECHNICAL BLUEPRINT SPECIFICATIONS", fontName='Helvetica-Bold', fontSize=6.8, fillColor=colors.white))
 
+            f1_note = "Continuous Elastic Waist" if spec.front_shaping == "elastic_gathered" else ("Seamless Flat Front (Zero Darts)" if spec.front_shaping == "flat_front" else "1 Contoured Waist Dart per Leg")
+            b2_note = "Elastic Gathered Back Waist" if spec.back_shaping == "elastic_gathered" else ("4 Contoured Waist Darts" if spec.back_shaping == "4_darts" else "1 Contoured Waist Dart per Side")
+            
+            if spec.closure_type == "pull_on_elastic":
+                closure_spec = ("Waistband Closure:", "Continuous Pull-On Elastic Casing (Zero Zippers)")
+                p3_spec = ("Piece 3 (Waistband):", "Cut 1 on Fold (Self-Fabric Elastic Casing)")
+            else:
+                closure_spec = ("Left Side Seam:", "18.00 cm (7 1/8 in) Concealed Invisible Zipper Opening")
+                p3_spec = ("Piece 3 (Waistband):", "Cut 1 Main Fabric + Cut 1 Fusible Interfacing")
+
             specs_lines = [
                 ("Pattern Piece Count:", "3 Essential Garment Pieces (Clean Minimalist Silhouette)"),
-                ("Piece 1 (Pants Front):", "Cut 2 Mirrored Pair  •  1 Contoured Waist Dart per Leg"),
-                ("Piece 2 (Pants Back):", "Cut 2 Mirrored Pair  •  1 Contoured Waist Dart per Side"),
-                ("Piece 3 (Waistband):", "Cut 1 Main Fabric + Cut 1 Fusible Interfacing"),
-                ("Left Side Seam:", "18.00 cm (7 1/8 in) Concealed Invisible Zipper Opening"),
+                ("Piece 1 (Pants Front):", f"Cut 2 Mirrored Pair  •  {f1_note}"),
+                ("Piece 2 (Pants Back):", f"Cut 2 Mirrored Pair  •  {b2_note}"),
+                p3_spec,
+                closure_spec,
                 ("Front Rise Shaping:", "Continuous Flat Front  •  Zero Bulk  •  No Fly Shield"),
                 ("Seam Allowances:", f"Standard {spec.seam_allowance_cm:.1f} cm (3/8 in) included on all edges"),
-                ("Bottom Weighted Hem:", f"Deep {spec.hem_allowance_cm:.1f} cm ({spec.hem_allowance_cm/2.54:.1f} in) double-fold hem built-in"),
+                ("Bottom Weighted Hem:", f"Deep {spec.hem_allowance_cm:.1f} cm ({spec.hem_allowance_cm/2.54:.1f} in) weighted hem built-in"),
             ]
             cur_sy = box_y + box_h - 32
             for s_label, s_val in specs_lines:
@@ -399,10 +409,10 @@ class UniversalCADBlueprintEngine:
         # ---------------------------------------------------------------------
         g.add(Line(rx, 110, rx + 258, 110, strokeColor=colors.HexColor('#D5D0C8'), strokeWidth=0.5))
         g.add(String(rx, 98, f'SEWLUXE PATTERNS  •  CAD PATTERN INVENTORY', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#111111')))
-        sizes_str = "Sizes: XXS–10XL (15 Sizes)" if spec.size_standard == "PATTERNFAST_XXS_10XL" else "Sizes: US 00–22"
-        g.add(String(rx, 88, f'Model: {spec.model_name}  •  {sizes_str}', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#444444')))
-        g.add(String(rx, 78, f'Seam Allowance: {spec.seam_allowance_cm:.1f} cm Included  •  Hem: {spec.hem_allowance_cm:.1f} cm', fontName='Helvetica', fontSize=5.5, fillColor=colors.HexColor('#444444')))
-        closure_label = "Concealed Trouser Hook & Bar" if spec.closure_type == "concealed_hook_bar" else ("Pull-On Continuous Elastic" if is_elastic_waist else ("Side Invisible Zipper" if spec.closure_type == "side_invisible_zip" else "Tailored Button Closure"))
+        sizes_str = "Sizes: XXS-10XL (15 Sizes)" if spec.size_standard == "PATTERNFAST_XXS_10XL" else "Sizes: US 00-22"
+        g.add(String(rx, 88, f'Model: {spec.model_name}  ·  {sizes_str}', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
+        g.add(String(rx, 78, f'Seam Allowance: {spec.seam_allowance_cm:.1f} cm Included  ·  Hem: {spec.hem_allowance_cm:.1f} cm', fontName='Helvetica-Bold', fontSize=6.5, fillColor=colors.HexColor('#222222')))
+        closure_label = "Concealed Trouser Hook & Bar" if spec.closure_type == "concealed_hook_bar" else ("Side Invisible Zipper" if spec.closure_type == "side_invisible_zip" else ("Pull-On Continuous Elastic" if is_elastic_waist else "Tailored Button Closure"))
         back_label = "Pocketless Back" if spec.back_pockets == "none" else f"{spec.back_pockets.replace('_', ' ').title()}"
         accent_hex = spec.color_hex if hasattr(spec, 'color_hex') and spec.color_hex else '#1A4D54'
         g.add(String(rx, 68, f'{closure_label}  •  {back_label}  •  Zero AI Clutter', fontName='Helvetica-Bold', fontSize=5.5, fillColor=colors.HexColor(accent_hex)))

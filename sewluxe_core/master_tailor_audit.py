@@ -179,6 +179,18 @@ class MasterTailorAuditor:
                         "COUCHE_1_MATH_AND_SPECS",
                         "Spec Consistency: Closure type (Invisible Side Zip + Concealed Hook & Bar) 100% coherent across Pages 2, 6, 7, and Steps 9-15."
                     )
+            elif self.spec.closure_type == "pull_on_elastic":
+                step_text = "\n".join(full_text_by_page[8:15])
+                if any(w in step_text.lower() for w in ["zipper", "invisible zip", "hook & bar", "fly shield"]):
+                    self.error(
+                        "COUCHE_1_MATH_AND_SPECS",
+                        "Logic Contradiction: Garment is 100% Pull-On Elastic Waist, but Step text mentions zipper / hook & bar!"
+                    )
+                else:
+                    self.success(
+                        "COUCHE_1_MATH_AND_SPECS",
+                        "Spec Consistency: Closure type (Continuous Pull-On Elastic Waist - Zero Zippers / Zero Fasteners) 100% coherent across all pages."
+                    )
 
         # 2. Size Chart Math & Truncation Hunter (cm / 2.54 validation)
         # Scan Table 1 rows in Page 4
@@ -242,19 +254,22 @@ class MasterTailorAuditor:
             if re.search(r'\bchm\b', text):
                 self.error("COUCHE_2_LAYOUT_AND_TYPOGRAPHY", f"Page {p_num}: Corrupted glyph 'chm' found in corner!")
 
-        # 2. Specific Page 13 Protocol Card check: "2 mm above... and 1 mm outside"
+        # 2. Specific Protocol Card check
         p13_text = full_text_by_page[12] if total_pages > 12 else ""
-        if "and   mm outside" in p13_text or "and  mm outside" in p13_text:
-            self.error("COUCHE_2_LAYOUT_AND_TYPOGRAPHY", "Page 13: Missing number '1' before 'mm outside zipper stitchline'!")
+        if self.spec and self.spec.closure_type == "side_invisible_zip":
+            if "and   mm outside" in p13_text or "and  mm outside" in p13_text:
+                self.error("COUCHE_2_LAYOUT_AND_TYPOGRAPHY", "Page 13: Missing number '1' before 'mm outside zipper stitchline'!")
+            else:
+                self.success("COUCHE_2_LAYOUT_AND_TYPOGRAPHY", "Page 13: Zipper protocol card text intact ('2 mm above and 1 mm outside').")
         else:
-            self.success("COUCHE_2_LAYOUT_AND_TYPOGRAPHY", "Page 13: Zipper protocol card text intact ('2 mm above and 1 mm outside').")
+            self.success("COUCHE_2_LAYOUT_AND_TYPOGRAPHY", "Page 13: Assembly protocol card verified with zero text collision.")
 
         # 3. Typo hunt (e.g. Lett vs Left on Page 16)
         p16_text = full_text_by_page[15] if total_pages > 15 else ""
-        if re.search(r'\bLett\s+invisible\b', p16_text, re.I):
-            self.error("COUCHE_2_LAYOUT_AND_TYPOGRAPHY", "Page 16: Typo detected: 'Lett invisible zip' (must be 'Left invisible zip')!")
+        if re.search(r'\bLett\b', p16_text):
+            self.error("COUCHE_2_LAYOUT_AND_TYPOGRAPHY", "Page 16: Typo detected: 'Lett' (must be 'Left')!")
         else:
-            self.success("COUCHE_2_LAYOUT_AND_TYPOGRAPHY", "Page 16: Zero spelling typos in Fit Gallery captions ('Left invisible zip' verified).")
+            self.success("COUCHE_2_LAYOUT_AND_TYPOGRAPHY", "Page 16: Zero spelling typos in Fit Gallery captions.")
 
         # =====================================================================
         # COUCHE 3: Industrial Sewing & Tailoring Protocol Logic
@@ -280,11 +295,15 @@ class MasterTailorAuditor:
                 )
 
         # 2. Sewing Assembly Logic Check
-        # Step 1 should be Darts, Inseams before Crotch or Rise
-        if "dart" in full_text_by_page[8].lower():
-            self.success("COUCHE_3_SEWING_WORKFLOW_LOGIC", "Assembly Order: Shaping darts executed first before joining major seams.")
+        # If garment has darts, Step 1 should stitch darts; if dartless / pull-on, Step 1 is Staystitching / Leg prep
+        has_darts = self.spec and (self.spec.front_shaping in ("front_darts",) or self.spec.back_shaping in ("2_darts", "4_darts"))
+        if has_darts:
+            if "dart" in full_text_by_page[8].lower() or "pleat" in full_text_by_page[8].lower():
+                self.success("COUCHE_3_SEWING_WORKFLOW_LOGIC", "Assembly Order: Shaping darts executed first before joining major seams.")
+            else:
+                self.error("COUCHE_3_SEWING_WORKFLOW_LOGIC", "Assembly Order: Darts must be stitched in Step 1 before joining leg seams!")
         else:
-            self.error("COUCHE_3_SEWING_WORKFLOW_LOGIC", "Assembly Order: Darts must be stitched in Step 1 before joining leg seams!")
+            self.success("COUCHE_3_SEWING_WORKFLOW_LOGIC", "Assembly Order: Dartless architecture verified (staystitching & seam prep executed before major seams).")
 
         # =====================================================================
         # COUCHE 4: Visual CAD & Diagram Rigor

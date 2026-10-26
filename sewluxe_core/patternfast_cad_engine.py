@@ -224,11 +224,13 @@ class PatternFastCADEngine:
 
         # 1. Front View only
         root_front = copy.deepcopy(root)
-        for g in list(root_front):
-            if '{http://www.w3.org/2000/svg}g' in g.tag or g.tag == 'g':
-                for child in list(g):
-                    if child.attrib.get('class') == 'back-view':
-                        g.remove(child)
+        for child in list(root_front):
+            if child.attrib.get('class') == 'back-view':
+                root_front.remove(child)
+            elif '{http://www.w3.org/2000/svg}g' in child.tag or child.tag == 'g':
+                for sub in list(child):
+                    if sub.attrib.get('class') == 'back-view':
+                        child.remove(sub)
 
         doc_front = fitz.open(stream=ET.tostring(root_front, encoding='utf-8'), filetype='svg')
         pix_f = doc_front[0].get_pixmap(dpi=300)
@@ -236,13 +238,17 @@ class PatternFastCADEngine:
 
         # 2. Back View only (remove scale(0.7) and transform)
         root_back = copy.deepcopy(root)
-        for g in list(root_back):
-            if '{http://www.w3.org/2000/svg}g' in g.tag or g.tag == 'g':
-                for child in list(g):
-                    if child.attrib.get('class') == 'front-view':
-                        g.remove(child)
-                    elif child.attrib.get('class') == 'back-view':
-                        child.attrib.pop('transform', None)
+        for child in list(root_back):
+            if child.attrib.get('class') == 'front-view':
+                root_back.remove(child)
+            elif child.attrib.get('class') == 'back-view':
+                child.attrib.pop('transform', None)
+            elif '{http://www.w3.org/2000/svg}g' in child.tag or child.tag == 'g':
+                for sub in list(child):
+                    if sub.attrib.get('class') == 'front-view':
+                        child.remove(sub)
+                    elif sub.attrib.get('class') == 'back-view':
+                        sub.attrib.pop('transform', None)
 
         doc_back = fitz.open(stream=ET.tostring(root_back, encoding='utf-8'), filetype='svg')
         pix_b = doc_back[0].get_pixmap(dpi=300)

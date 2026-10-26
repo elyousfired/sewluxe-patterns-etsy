@@ -65,6 +65,8 @@ def cm_to_tailor_inches(cm_val: float, precision: int = 8) -> str:
         return f'{whole}"'
     
     frac = Fraction(steps, precision)
+    if whole == 0:
+        return f'{frac.numerator}/{frac.denominator}"'
     return f'{whole} {frac.numerator}/{frac.denominator}"'
 
 
@@ -133,8 +135,8 @@ SILHOUETTE_RULES = {
         "hip_ease_cm": 2.5,
         "base_leg_sweep_cm": 52.0,
         "sweep_grade_per_size": 2.0,
-        "inseam_168_cm": 77.0,
-        "inseam_164_cm": 74.5,
+        "inseam_168_cm": 78.0,
+        "inseam_164_cm": 75.5,
         "default_hem_cm": 4.0,
         "recommended_fabrics": "Structured or fluid suiting (200-280 gsm): Wool gabardine, cotton twill, heavy linen, crepe.",
     },
@@ -341,19 +343,28 @@ class UniversalTrouserEngine:
                 "hips_in": cm_to_tailor_inches(hips_cm),
             })
 
-            fin_waist_cm = round(waist_cm + self.rules["waist_ease_cm"], 1)
             fin_hips_cm = round(hips_cm + self.rules["hip_ease_cm"], 1)
             leg_sweep_cm = round(self.rules["base_leg_sweep_cm"] + (idx * self.rules["sweep_grade_per_size"]), 1)
             inseam_cm = round(base_inseam, 1)
             outseam_cm = round(inseam_cm + crotch_depth_cm + rise_offset + 3.5, 1)
 
+            if self.spec.closure_type == "pull_on_elastic":
+                fin_waist_relaxed = round(waist_cm - 3.5, 1)
+                fin_waist_stretched = round(hips_cm + 4.0, 1)
+                fin_waist_str = f"{fin_waist_relaxed:.1f} cm ({cm_to_tailor_inches(fin_waist_relaxed)}) / {fin_waist_stretched:.1f} cm ({cm_to_tailor_inches(fin_waist_stretched)})"
+                fin_waist_raw = fin_waist_relaxed
+            else:
+                fin_waist_cm = round(waist_cm + self.rules["waist_ease_cm"], 1)
+                fin_waist_str = f"{fin_waist_cm:.1f} cm ({cm_to_tailor_inches(fin_waist_cm)})"
+                fin_waist_raw = fin_waist_cm
+
             finished_rows.append({
                 "size": sz_code,
-                "fin_waist": f"{fin_waist_cm:.1f} cm ({cm_to_tailor_inches(fin_waist_cm)})",
+                "fin_waist": fin_waist_str,
                 "fin_hips": f"{fin_hips_cm:.1f} cm ({cm_to_tailor_inches(fin_hips_cm)})",
                 "leg_sweep": f"{leg_sweep_cm:.1f} cm ({cm_to_tailor_inches(leg_sweep_cm)})",
                 "inseam_outseam": f"{inseam_cm:.1f} / {outseam_cm:.1f} cm",
-                "_raw": (fin_waist_cm, fin_hips_cm, leg_sweep_cm, inseam_cm, outseam_cm)
+                "_raw": (fin_waist_raw, fin_hips_cm, leg_sweep_cm, inseam_cm, outseam_cm)
             })
 
         return {"body": body_rows, "finished": finished_rows}
@@ -508,6 +519,72 @@ class UniversalTrouserEngine:
     def generate_sewing_steps(self) -> List[Dict]:
         steps = []
         sa = f"{self.spec.seam_allowance_cm:.1f} cm ({cm_to_tailor_inches(self.spec.seam_allowance_cm)})"
+        hem_cm = self.spec.hem_allowance_cm
+
+        # DEDICATED BESPOKE SEQUENCE FOR FLAT-FRONT, ELASTIC-BACK, POCKETLESS TROUSER (STELLA ARCHETYPE)
+        if self.spec.closure_type == "side_invisible_zip" and self.spec.front_pockets == "none" and self.spec.back_shaping == "elastic_gathered":
+            return [
+                {
+                    "step": 1,
+                    "title": "Flat Front Waistline Preparation",
+                    "bullets": [
+                        "Flat Front Waistline Stabilization: Staystitch the curved front waistline at 6 mm (1/4 in) to stabilize the edge against stretching during handling.",
+                        "Seamless Front Contour: The front waist is completely flat and dartless with zero pleats, creating an elegant, sleek profile across the abdomen."
+                    ]
+                },
+                {
+                    "step": 2,
+                    "title": "Inner Leg Inseams Assembly",
+                    "bullets": [
+                        f"Pin Inseams: Pin Pants Front to Pants Back right sides together along inner leg seams from crotch fork to bottom hem, matching knee notches.",
+                        f"Stitch & Press: Stitch both inseams at {sa}. Finish seam allowances together with serger/overlock or zigzag, and press open over a tailor's sleeve board."
+                    ]
+                },
+                {
+                    "step": 3,
+                    "title": "Continuous Crotch Rise Seam",
+                    "bullets": [
+                        "Slide Leg into Leg: Turn one trouser leg right side out. Slip it inside the other leg (right sides facing together), matching the inseam intersection perfectly.",
+                        f"Continuous U-Crotch Stitch: Pin from Center Front waist, through the crotch curve, all the way to Center Back waist. Stitch continuous rise seam at {sa}.",
+                        "Reinforce Curve: Sew a second parallel line of stitching 2 mm inside the seam allowance around the lower crotch curve for lifetime durability. Serge and press open."
+                    ]
+                },
+                {
+                    "step": 4,
+                    "title": "Right Outer Side Seam",
+                    "bullets": [
+                        f"Pin Right Side Seam: Place Pants Front and Pants Back right sides together along the right outer edge, matching hip and knee notches.",
+                        f"Stitch Waist to Hem: Stitch continuous right side seam at {sa} from upper waist edge all the way to bottom hem. Serge and press open flat."
+                    ]
+                },
+                {
+                    "step": 5,
+                    "title": "Left Side Seam & Invisible Zipper",
+                    "bullets": [
+                        "Prepare Left Zipper Opening: Apply 18 cm lightweight fusible stay-tape along the upper left front and back seam allowances to prevent zipper ripple.",
+                        f"Lower Seam: Pin left side seam from zipper circle notch down to hem. Stitch at {sa} and press open. Leave the top 18 cm (7 in) open for the zipper.",
+                        "Invisible Zipper Installation: Open the 18 cm concealed zipper. With an invisible zipper foot, stitch coils flush to the folded left opening so teeth roll invisibly inside."
+                    ]
+                },
+                {
+                    "step": 6,
+                    "title": "Hybrid Waistband & Back Elastic Casing",
+                    "bullets": [
+                        "Fusible Interfacing: Press fusible interfacing to the front half of the waistband only. The back half remains un-interfaced for elastic gathering.",
+                        f"Attach Waistband: Pin outer waistband right sides together to trouser waistline, encasing the top zipper tape at left side. Stitch at {sa} and press seam upward.",
+                        "Thread & Anchor Back Elastic: Thread the 3.8 cm (1 1/2 in) knitted elastic through the back waistband channel only. Anchor elastic ends securely at both side seams with vertical bar tacks."
+                    ]
+                },
+                {
+                    "step": 7,
+                    "title": "Concealed Hook & Bar & Weighted Hem",
+                    "bullets": [
+                        "Finish Inner Waistband: Fold waistband facing to the inside, encasing raw waist edges. Stitch-in-the-ditch along the waistband seam on the right side.",
+                        "Concealed Hook & Bar: Sew a metal trouser hook & bar on the interior waistband facing directly above the invisible zipper teeth for secure waist closure.",
+                        f"Luxury {hem_cm:.1f} cm ({cm_to_tailor_inches(hem_cm)}) Weighted Hem: Press lower hem raw edge 1.0 cm to wrong side, then fold up deep {max(hem_cm - 1.0, 1.0):.1f} cm hem fold. Press crisp and secure with an invisible hand catch-stitch or machine blind hem."
+                    ]
+                }
+            ]
 
         # STEP 1: Front Shaping & Creases
         s1_bullets = []
@@ -524,6 +601,68 @@ class UniversalTrouserEngine:
             s1_bullets.append("Razor-Sharp Center Creases: Fold each front and back leg panel lengthwise matching inseam and side seam at knee and hem. Steam-press a crisp vertical center crease down to the hem.")
         step1_title = "Front Pleats & Center Creases" if "pleat" in self.spec.front_shaping else "Flat Front Shaping & Leg Creases"
         steps.append({"step": 1, "title": step1_title, "bullets": s1_bullets})
+
+                # 0. Dedicated Clean Architecture for Pocketless Pull-On Elastic Trousers (Stella & Margot)
+        if self.spec.front_pockets == "none" and self.spec.closure_type == "pull_on_elastic":
+            return [
+                {
+                    "step": 1,
+                    "title": "Waistline Staystitching & Fabric Preparation",
+                    "bullets": [
+                        "Staystitch Waistline: Staystitch the upper waistline curve of each Pants Front and Pants Back at 6 mm (1/4 in) from the cut edge to prevent stretching during assembly.",
+                        "Press Center Leg Creases: Fold each trouser leg lengthwise wrong sides together, matching inseams and side seams. Press a crisp vertical crease along each leg from hem to knee."
+                    ]
+                },
+                {
+                    "step": 2,
+                    "title": "Inner Leg Inseams Assembly",
+                    "bullets": [
+                        "Pin Inseams: Pin Pants Front to Pants Back right sides together along the inner leg seams from crotch fork down to hem, matching knee alignment notches.",
+                        f"Stitch & Serge: Stitch both inner leg inseams at {sa}. Finish raw seam allowances together with a serger or clean zigzag stitch, and press allowances toward the back."
+                    ]
+                },
+                {
+                    "step": 3,
+                    "title": "Continuous Crotch Rise Seam",
+                    "bullets": [
+                        "Slide Leg into Leg: Turn one trouser leg right side out. Slip it inside the second leg (right sides facing together), matching the inner leg crotch cross-seams precisely.",
+                        f"Continuous U-Crotch Stitch: Pin from Center Front waist, through the curved crotch fork, all the way to Center Back waist. Stitch continuous rise seam at {sa}.",
+                        "Reinforce Lower Curve: Sew a second parallel line of reinforcement stitching 2 mm inside the seam allowance around the deepest curve. Serge edges and press flat."
+                    ]
+                },
+                {
+                    "step": 4,
+                    "title": "Outer Side Seams Assembly",
+                    "bullets": [
+                        "Pin Both Side Seams: Lay trousers flat, matching Pants Front and Pants Back right sides together along both outer side seams from waist to hem. Align hip and knee notches.",
+                        f"Continuous Stitching: Stitch both full left and right side seams continuously from top waist edge down to bottom hem at {sa}. Serge and press toward back."
+                    ]
+                },
+                {
+                    "step": 5,
+                    "title": "Preparing Elastic Waistband Casing",
+                    "bullets": [
+                        f"Join Waistband Ring: Pin short ends of Elastic Waistband casing right sides together and stitch at {sa}, leaving a 4 cm (1 1/2 in) opening on the inside for elastic insertion. Press seam open.",
+                        "Press Center Foldline: Fold the casing strip in half lengthwise wrong sides together, matching long raw edges, and press a crisp center fold line with steam."
+                    ]
+                },
+                {
+                    "step": 6,
+                    "title": "Attaching Waistband & Inserting Elastic",
+                    "bullets": [
+                        f"Attach Casing to Trouser: Pin casing right sides together to trouser waist edge, matching side seams and center points. Stitch all around at {sa}, serge raw edges together, and press downward.",
+                        "Thread & Secure Elastic: Thread 3.8 cm (1 1/2 in) wide knit elastic through the casing opening. Overlap elastic ends by 2.5 cm (1 in), secure with a sturdy box-and-cross stitch, and stitch the casing opening closed."
+                    ]
+                },
+                {
+                    "step": 7,
+                    "title": "Deep Weighted Hem & Final Pressing",
+                    "bullets": [
+                        f"Fold Weighted Hem: Press lower hem raw edge 1.0 cm to wrong side, then fold up deep {max(hem_cm - 1.0, 1.0):.1f} cm hem fold to form the luxurious {hem_cm:.1f} cm ({cm_to_tailor_inches(hem_cm)}) weighted hem.",
+                        "Stitch & Atelier Press: Secure hem using invisible machine blind-stitch or hand catch-stitch. Give trousers a complete atelier steam press using a press cloth and wooden clapper."
+                    ]
+                }
+            ]
 
         if self.spec.front_pockets == "none" and self.spec.closure_type == "side_invisible_zip":
             # Dedicated clean steps for sleek pocketless side-zip trouser
@@ -554,6 +693,79 @@ class UniversalTrouserEngine:
                     f"Stitch Center Back: Stitch at {sa}, serge seam allowances, and press open flat over a tailor's pressing ham."
                 ]
             })
+        elif self.spec.front_pockets == "none" and self.spec.closure_type in ("exterior_button", "concealed_hook_bar", "jeans_tack_button"):
+            # DEDICATED CLEAN ARCHITECTURE FOR POCKETLESS FRONT-FLY TROUSER (CELINE ARCHETYPE)
+            # STEP 2: Center Front & Front Zipper Fly Assembly
+            steps.append({
+                "step": 2,
+                "title": "Center Front & Zipper Fly Assembly",
+                "bullets": [
+                    "Interfacing & Center Front: Fuse Fly Interfacing to both front fly extensions. Stitch center front seam from 2.5 cm above inseam up to circle stop; baste from circle to waist.",
+                    "Zipper & J-Stitch: Stitch closed zipper under folded right fly extension. Flip zipper onto left fly extension, stitch tape, remove basting, and topstitch curved J-stitch.",
+                    "Fly Shield: Fold interfaced Fly Facing Shield lengthwise, pin behind right zipper teeth, and secure with a bar tack at bottom of J-stitch."
+                ]
+            })
+
+            # STEP 3: Back Shaping & Center Back Rise
+            s3_bullets = []
+            if self.spec.back_shaping == "4_darts":
+                s3_bullets.append("Four Back Waist Darts: Fold all 4 back waist darts (2 on each Pants Back) right sides together. Stitch to a fine point, tie thread tails by hand, and press over a tailor's ham.")
+            elif self.spec.back_shaping == "2_darts":
+                s3_bullets.append("Two Back Waist Darts: Fold the 2 back waist darts (1 on each Pants Back) right sides together matching notches. Stitch toward apex, tie thread tails, and press toward center back over a tailor's ham.")
+            elif self.spec.back_shaping == "back_yoke":
+                s3_bullets.append(f"Back Yoke: Pin Back Yoke right sides together to upper edge of Pants Back, stitch at {sa}, press downward, and topstitch.")
+            s3_bullets.append("Clean Pocketless Back: No back welt pockets are used, preserving a smooth, contoured silhouette over the seat.")
+            s3_bullets.append(f"Center Back Rise: Place both Pants Backs right sides together along center back rise, stitch at {sa} down to crotch point, and press open flat.")
+            steps.append({"step": 3, "title": "Back Shaping & Center Back Rise", "bullets": s3_bullets})
+
+            # STEP 4: Inseams & Reinforced Crotch Curve
+            steps.append({
+                "step": 4,
+                "title": "Inner Leg Inseams & Crotch Curve",
+                "bullets": [
+                    f"Stitch Inseams: Pin Pants Back to Pants Front right sides together along inner leg seams from crotch to hem, matching knee notches. Stitch at {sa} and press open.",
+                    "Reinforced U-Crotch Curve: Turn one leg right side out and slide inside the other leg (right sides together). Stitch continuous crotch curve and sew a second reinforcement line 2 mm away."
+                ]
+            })
+
+            # STEP 5: Outer Side Seams Assembly
+            s5_bullets = [
+                f"Outer Side Seams: Pin Pants Front and Pants Back right sides together along outer side edges from waist edge continuously to hem. Stitch at {sa} and press open flat.",
+                "Seamless Hip Contour: The side seams flow in an uninterrupted, sculptured line from high waist to palazzo hem with zero pocket interruption."
+            ]
+            if self.spec.belt_loops_count > 0:
+                w_cm, l_cm = self.spec.cut_belt_loop_strip_cm
+                s5_bullets.append(
+                    f"Construct {self.spec.belt_loops_count} Belt Loops: Fold the {w_cm:.1f} cm x {l_cm:.0f} cm strip lengthwise, stitch at 6 mm, turn right side out, press flat ({self.spec.finished_belt_loop_width_cm:.1f} cm finished width), and cut into {self.spec.belt_loops_count} equal 8.5 cm loops."
+                )
+            steps.append({"step": 5, "title": "Outer Side Seams Assembly", "bullets": s5_bullets})
+
+            # STEP 6: Contoured Waistband & Closure
+            s6_bullets = []
+            if self.spec.closure_type == "exterior_button":
+                s6_bullets.extend([
+                    f"Attach Contoured Waistband: Stitch interfaced Waistband right sides together to trouser upper waistline at {sa}, matching notches and side seams.",
+                    "Extension Tab & Turn Ends: Fold waistband right sides together along center foldline. Stitch across short extension ends, trim corners, turn right side out, and press crisp.",
+                    "Buttonhole & Button: Stitch inside waistband edge in the ditch. Sew horizontal buttonhole on waistband right overlap and securely attach button on left extension."
+                ])
+            else:
+                s6_bullets.extend([
+                    f"Attach Tailored Waistband: Stitch interfaced Waistband to trouser waist at {sa}. Press seam toward waistband.",
+                    "Concealed Hook & Bar Closure: Install heavy-duty metal trouser hook & bar on inside extension tab: bar on left inside facing, hook on right extension tab. Zero exterior buttons visible!"
+                ])
+            steps.append({"step": 6, "title": "High-Waist Contoured Waistband & Closure", "bullets": s6_bullets})
+
+            # STEP 7: Deep Weighted Hem & Final Atelier Pressing
+            steps.append({
+                "step": 7,
+                "title": "Deep Weighted Hem & Final Pressing",
+                "bullets": [
+                    f"Fold Weighted Hem: Press lower hem raw edge 1.0 cm to wrong side, then fold up deep {max(hem_cm - 1.0, 1.0):.1f} cm hem fold to form the luxurious {hem_cm:.1f} cm ({cm_to_tailor_inches(hem_cm)}) weighted hem.",
+                    "Invisible Stitch: Secure hem using invisible machine blind-stitch or hand catch-stitch so stitches do not show on right side of fabric.",
+                    "Atelier Steam Press: Give trousers a complete atelier steam press using a damp press cloth and wooden clapper to achieve razor-sharp center creases."
+                ]
+            })
+            return steps
         else:
             # STEP 2: Front Pockets
             s2_bullets = []
@@ -608,7 +820,7 @@ class UniversalTrouserEngine:
         if self.spec.closure_type == "side_invisible_zip":
             s6_bullets.extend([
                 f"Right Side Seam: Pin Front and Back right outer edges right sides together. Stitch continuous side seam from waist to hem at {sa} and press open.",
-                f"Left Side Invisible Zipper: Insert a 20 cm (8 in) invisible zipper into the left side seam using an invisible zipper foot. Stitch remaining left side seam from zipper stop down to hem at {sa} and press open."
+                f"Left Side Invisible Zipper: Insert an 18.00 cm (7 1/8 in) invisible zipper into the left side seam using an invisible zipper foot. Stitch remaining left side seam from zipper stop down to hem at {sa} and press open."
             ])
             steps.append({"step": 6, "title": "Side Seams & Invisible Zipper Installation", "bullets": s6_bullets})
         else:

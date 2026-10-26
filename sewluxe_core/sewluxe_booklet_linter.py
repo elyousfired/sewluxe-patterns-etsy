@@ -61,7 +61,7 @@ class SewLuxeBookletLinter:
 
         # 1b. Page 4: Trouser Table Integrity Gate (No Bust Column on Pants)
         p4_text = doc[3].get_text()
-        if spec and "pants" in spec.model_name.lower() or "trouser" in spec.model_name.lower():
+        if spec and ("pants" in spec.model_name.lower() or "trouser" in spec.model_name.lower()):
             if "BUST (CM)" in p4_text or "BUST (IN)" in p4_text:
                 errors.append("Page 4: Table 1 contains BUST column for trousers/pants! Must be removed to prevent column squishing.")
             else:
