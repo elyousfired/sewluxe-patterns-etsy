@@ -166,7 +166,21 @@ class SewLuxeMasterPipeline:
         textile_card = textile_engine.format_textile_audit_card()
         fabric_spec = textile_engine.get_fabric_spec()
 
-        # 4. Compile Executive Phase 0 Report
+        # 4. Fetch official sewing instructions manifest & step vectors
+        ins_data = self.account_engine.fetch_sewing_instructions(category=category, element_ids=element_ids)
+        ins_dir = os.path.join(output_dir, "04_Instructions")
+        os.makedirs(ins_dir, exist_ok=True)
+        ins_json_path = os.path.join(ins_dir, "sewing_instructions_manifest.json")
+        with open(ins_json_path, "w", encoding="utf-8") as f_ins:
+            json.dump(ins_data, f_ins, indent=2, ensure_ascii=False)
+
+        steps_summary = []
+        for idx, item in enumerate(ins_data.get("instructions", []), 1):
+            lines = [l.strip() for l in item.get("content", "").replace("<br />", "").split("\n") if l.strip()]
+            t = lines[0] if lines else "Instruction Step"
+            steps_summary.append({"step_num": idx, "step_id": item.get("id"), "title": t, "svg_count": len(item.get("images", []))})
+
+        # 5. Compile Executive Phase 0 Report
         report = {
             "status": "AWAITING_USER_APPROVAL",
             "garment_title": garment_title,
@@ -177,6 +191,9 @@ class SewLuxeMasterPipeline:
             "element_ids": element_ids,
             "sketch_1800": sketches["sketch_1800"],
             "sketch_sidebyside": sketches["sketch_sidebyside"],
+            "sewing_steps_count": len(steps_summary),
+            "sewing_steps": steps_summary,
+            "instructions_manifest": ins_json_path,
             "fabric_spec": {
                 "name": fabric_spec.primary_name,
                 "composition": fabric_spec.composition,
@@ -195,6 +212,7 @@ class SewLuxeMasterPipeline:
         print(f"  * Live URL: {design_meta['live_designer_url']}")
         print(f"  * Flat Sketch (1800x1800): {sketches['sketch_1800']}")
         print(f"  * Flat Sketch (Side-by-Side): {sketches['sketch_sidebyside']}")
+        print(f"  * Sewing Instructions Steps Harvested: {len(steps_summary)} steps ({ins_json_path})")
         print("=" * 80)
 
         return report
@@ -220,7 +238,7 @@ class SewLuxeMasterPipeline:
 
 def main():
     parser = argparse.ArgumentParser(description="SewLuxe Master Pipeline CLI")
-    parser.add_argument("--action", choices=["phase0", "catalog", "search", "export_patterns", "textile_card"], default="catalog")
+    parser.add_argument("--action", choices=["phase0", "catalog", "search", "instructions", "export_patterns", "textile_card"], default="catalog")
     parser.add_argument("--category", default="wm_pants", help="Apparel category (wm_pants, wm_dresses, wm_jackets, etc.)")
     parser.add_argument("--silhouette", default="palazzo", help="Silhouette name for textile analysis")
     parser.add_argument("--node", default="wm_pn_silhouettes", help="Category node code for searching elements")
@@ -250,6 +268,19 @@ def main():
             output_dir=args.output,
             garment_slug=args.slug
         )
+    elif args.action == "instructions":
+        elem_list = [e.strip() for e in args.elements.split(",") if e.strip()]
+        res = pipeline.account_engine.fetch_sewing_instructions(category=args.category, element_ids=elem_list)
+        instructions = res.get("instructions", [])
+        print("=" * 80)
+        print(f"OFFICIAL SEWING INSTRUCTIONS FOR: {args.category} (Elements: {args.elements})")
+        print(f"Total Steps: {len(instructions)}")
+        print("=" * 80)
+        for idx, item in enumerate(instructions, 1):
+            lines = [l.strip() for l in item.get("content", "").replace("<br />", "").split("\n") if l.strip()]
+            t = lines[0] if lines else "Instruction Step"
+            imgs = item.get("images", [])
+            print(f"Step {idx:02d}. [ID: {item.get('id')}]: {t} ({len(imgs)} original SVGs)")
     elif args.action == "export_patterns":
         elem_list = [e.strip() for e in args.elements.split(",") if e.strip()]
         pipeline.run_phase2_pattern_export(

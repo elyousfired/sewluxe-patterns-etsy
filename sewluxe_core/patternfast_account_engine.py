@@ -268,6 +268,46 @@ class PatternFastAccountEngine:
             catalog["nodes"].append(node_info)
         return catalog
 
+    def fetch_sewing_instructions(
+        self,
+        category: str,
+        element_ids: List[str],
+        mannequin_id: Optional[str] = None,
+        fmt: str = "json"
+    ) -> Dict[str, Any]:
+        """
+        Fetches official tailored sewing instructions and original server SVG vectors
+        directly from PatternFast / Tailornova API.
+        """
+        cat_code = self.normalize_category_code(category)
+        elem_ids_str = ",".join(str(eid).strip() for eid in element_ids)
+        mid = mannequin_id or self.mannequins_map.get("8", "5073b293-257d-4cce-994b-91791d38bd2a")
+
+        qs = urllib.parse.urlencode({
+            "elementIds": elem_ids_str,
+            "mannequinId": mid,
+            "categoryCode": cat_code,
+            "format": fmt,
+            "orientation": "portrait",
+            "seamAllowance": "1",
+            "fabricType": "1",
+            "fit": "2"
+        })
+        url = f"{self.BASE_API}/api/sewing-instructions?{qs}"
+        req = urllib.request.Request(
+            url,
+            data=json.dumps({"sketchFront": "<svg></svg>", "sketchBack": "<svg></svg>", "name": "Garment Instructions"}).encode("utf-8"),
+            headers=self._get_headers()
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=25) as resp:
+                if fmt == "json":
+                    return json.loads(resp.read().decode("utf-8"))
+                return {"raw_bytes": resp.read()}
+        except Exception as e:
+            print(f"[ERROR] Failed to fetch sewing instructions for {elem_ids_str}: {e}")
+            return {"instructions": [], "error": str(e)}
+
     def create_in_account_design(
         self,
         design_name: str,
