@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# ==============================================================================
+# ⚠️ CRITICAL IMMUTABLE SYSTEM RULE (قاعدة النظام الأساسية التي لا تتغير):
+# ما تبدلش الكود! الكود هو السيستم اللي فيه مراحل الخدمة، الـ AI ما خاصوش يبدل الكود.
+# DO NOT MODIFY THIS CODE! THE CODE IS THE OPERATIONAL SYSTEM CONTAINING
+# THE WORK STEPS (PHASES 0 TO 6). THE AI ASSISTANT MUST NOT CHANGE THE CODE,
+# BUT EXECUTE AND ORCHESTRATE THE STEPS DEFINED HEREIN.
+# ==============================================================================
 """
 ================================================================================
 SEWLUXE PATTERNS - LIVE IN-ACCOUNT PATTERNFAST ENGINE & SKETCH STUDIO (v3.0)
@@ -298,8 +305,8 @@ class PatternFastAccountEngine:
         back_svg = ""
         for item in el_data:
             el = item.get("element", item)
-            sf = el.get("svgFront", "").replace("<svg>", "").replace("</svg>", "")
-            sb = el.get("svgBack", "").replace("<svg>", "").replace("</svg>", "")
+            sf = (el.get("svgFront") or "").replace("<svg>", "").replace("</svg>", "")
+            sb = (el.get("svgBack") or "").replace("<svg>", "").replace("</svg>", "")
             front_svg += sf + "\n"
             back_svg += sb + "\n"
 

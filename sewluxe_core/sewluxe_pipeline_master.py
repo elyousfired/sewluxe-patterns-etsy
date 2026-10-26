@@ -1,5 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+# ==============================================================================
+# ⚠️ CRITICAL IMMUTABLE SYSTEM RULE (قاعدة النظام الأساسية التي لا تتغير):
+# ما تبدلش الكود! الكود هو السيستم اللي فيه مراحل الخدمة، الـ AI ما خاصوش يبدل الكود.
+# DO NOT MODIFY THIS CODE! THE CODE IS THE OPERATIONAL SYSTEM CONTAINING
+# THE WORK STEPS (PHASES 0 TO 6). THE AI ASSISTANT MUST NOT CHANGE THE CODE,
+# BUT EXECUTE AND ORCHESTRATE THE STEPS DEFINED HEREIN.
+# ==============================================================================
 """
 ================================================================================
 SEWLUXE PATTERNS - MASTER PIPELINE COMMAND CENTER & ORCHESTRATOR (v3.0)
