@@ -56,6 +56,7 @@ for p in [SCRIPT_DIR, PARENT_DIR]:
 
 from sewluxe_core.patternfast_account_engine import PatternFastAccountEngine
 from sewluxe_core.sewluxe_textile_engine import SewLuxeTextileEngine, UNIVERSAL_TEXTILE_DATABASE
+from sewluxe_core.sewluxe_tailoring_library import SewLuxeTailoringLibrary
 
 
 class SewLuxeMasterPipeline:
@@ -168,6 +169,23 @@ class SewLuxeMasterPipeline:
 
         # 4. Fetch official sewing instructions manifest & step vectors
         ins_data = self.account_engine.fetch_sewing_instructions(category=category, element_ids=element_ids)
+
+        # 4.1 Master Tailor Forensic Audit & In-House Terminology Upgrade (Phase 0.3 Gate)
+        garment_dna = {
+            "silhouette": silhouette,
+            "category": category,
+            "closure": "Concealed Trouser Hook & Bar" if any(x in str(element_ids) for x in ["4367", "85721"]) else "Standard",
+            "pockets": "Slanted" if any(x in str(element_ids) for x in ["79107", "4367"]) else "None",
+            "hem": "deep_5cm_weighted" if any(k in silhouette.lower() for k in ["palazzo", "wide"]) else "standard"
+        }
+        raw_steps = ins_data.get("instructions", [])
+        refined_steps, tailor_audit = SewLuxeTailoringLibrary.audit_and_refine_instructions(
+            raw_instructions=raw_steps,
+            garment_dna=garment_dna
+        )
+        ins_data["instructions"] = refined_steps
+        ins_data["master_tailor_audit"] = tailor_audit
+
         ins_dir = os.path.join(output_dir, "04_Instructions")
         os.makedirs(ins_dir, exist_ok=True)
         ins_json_path = os.path.join(ins_dir, "sewing_instructions_manifest.json")
@@ -175,7 +193,7 @@ class SewLuxeMasterPipeline:
             json.dump(ins_data, f_ins, indent=2, ensure_ascii=False)
 
         steps_summary = []
-        for idx, item in enumerate(ins_data.get("instructions", []), 1):
+        for idx, item in enumerate(refined_steps, 1):
             lines = [l.strip() for l in item.get("content", "").replace("<br />", "").split("\n") if l.strip()]
             t = lines[0] if lines else "Instruction Step"
             steps_summary.append({"step_num": idx, "step_id": item.get("id"), "title": t, "svg_count": len(item.get("images", []))})
@@ -193,6 +211,7 @@ class SewLuxeMasterPipeline:
             "sketch_sidebyside": sketches["sketch_sidebyside"],
             "sewing_steps_count": len(steps_summary),
             "sewing_steps": steps_summary,
+            "master_tailor_audit": tailor_audit,
             "instructions_manifest": ins_json_path,
             "fabric_spec": {
                 "name": fabric_spec.primary_name,
