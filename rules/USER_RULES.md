@@ -59,6 +59,25 @@ Whenever building a sewing pattern product package for Etsy:
 - All sizes (00-24 / 32-56) across 3 formats (A4, US Letter, A0).
 - White-label to `SewLuxePatterns` with strict 4x4 in (10x10 cm) calibration test square.
 
+### Phase 2.5: The Pre-PDF Master Text Blueprint, Dynamic Page Planning & Tailor Self-Audit Gate (بوابة المسودة النصية وتخطيط الصفحات المرن)
+- **MANDATORY HARD STOP & PRE-PDF TEXT BLUEPRINT LAW (قاعدة المسودة النصية قبل الـ PDF)**:
+  Before generating or compiling any binary PDF via ReportLab, the agent MUST draft the complete booklet content as a structured Text/Markdown Blueprint and present it to the user.
+  1. **Dynamic Content-Driven Page Allocation Plan (تخطيط الصفحات المرن حسب طبيعة الموديل)**:
+     - The instruction pages (Pages 9–15 or 9–N) are NEVER static copy-pasted templates.
+     - The agent, adopting the Master Tailor persona, inspects the active garment's real data (piece count, closure type, pocket architecture, step complexity):
+       * Complex assemblies (e.g. Slanted Italian Pocket, Waistband & Concealed Hook/Bar) get dedicated full pages with 4-panel step breakdowns (`1.`, `2.`, `3.`, `4.`).
+       * Simple connected seams (e.g. Inseams and continuous crotch) are paired harmoniously on a single well-balanced page.
+       * The allocation plan is explicitly listed in text (e.g. Page 9: Pleats & Creases, Page 10: Slant Pockets...).
+  2. **Complete Text & Tables Draft**:
+     - Page 4: Body Size Chart (US 00–22, Bust/Waist/Hips in cm & inches).
+     - Page 5: Finished Garment Measurements Table with wearing ease sanity check and exact fractions ($cm / 2.54 \rightarrow$ nearest 1/8").
+     - Page 6: Cutting Layout & Piece Inventory (Piece numbers, Cut quantities, Grainline rules).
+     - Pages 9–N: Full step-by-step sewing instructions with Haute-Couture terminology from `SewLuxeTailoringLibrary`.
+  3. **The Master Tailor Self-Audit (المعلم الخياط كيسول راسو)**:
+     - The agent formally asks itself the 5 Sacred Tailor Questions: Are measurements mathematically coherent? Does Body + Ease == Finished Garment? Are fractions accurate? Is the sewing sequence physically executable in an atelier?
+  4. **MANDATORY HARD STOP FOR USER APPROVAL ("OK")**:
+     - The agent MUST STOP and WAIT for the user's explicit confirmation ("OK") on the Text Blueprint and Page Allocation Plan before writing or compiling the binary PDF!
+
 ### Phase 3: 16-page Luxury Booklet PDF & Mandatory Page-by-Page Interactive Verification Gate
 - Compiled via ReportLab (`Lora` + `Poppins`, real size tables, fabric nesting, clickable QR video links on page 8, step panels 9–15, 360° Fit Gallery on page 16).
 - **Mandatory Page-by-Page Interactive Verification Gate (قاعدة التدقيق والموافقة التفاعلية صفحة بصفحة)**:
